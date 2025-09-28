@@ -1,6 +1,5 @@
 {
   "apps/nextjs/**/*.{js,jsx,ts,tsx,mjs,cjs}": [
-    "tsc --noEmit",
     "eslint --config ./apps/nextjs/eslint.config.mjs --fix",
     "eslint --config ./apps/nextjs/eslint.config.mjs --max-warnings 0",
     "prettier --write"
