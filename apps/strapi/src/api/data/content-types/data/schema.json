@@ -1,0 +1,49 @@
+{
+  "kind": "collectionType",
+  "collectionName": "datas",
+  "info": {
+    "singularName": "data",
+    "pluralName": "datas",
+    "displayName": "Data"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "default": "User Account",
+      "required": true
+    },
+    "phoneNumber": {
+      "type": "string",
+      "default": "0000000000",
+      "required": true
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "role": {
+      "type": "enumeration",
+      "required": true,
+      "default": "user",
+      "enum": [
+        "demo",
+        "user",
+        "admin",
+        "superadmin"
+      ]
+    },
+    "relation_user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "relation_data"
+    }
+  }
+}
