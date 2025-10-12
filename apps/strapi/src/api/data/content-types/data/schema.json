@@ -24,20 +24,13 @@
     "image": {
       "type": "media",
       "multiple": false,
-      "allowedTypes": [
-        "images"
-      ]
+      "allowedTypes": ["images"]
     },
     "role": {
       "type": "enumeration",
       "required": true,
       "default": "user",
-      "enum": [
-        "demo",
-        "user",
-        "admin",
-        "superadmin"
-      ]
+      "enum": ["demo", "user", "admin", "superadmin"]
     },
     "relation_user": {
       "type": "relation",

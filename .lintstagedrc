@@ -1,7 +1,7 @@
 {
   "apps/nextjs/**/*.{js,jsx,ts,tsx,mjs,cjs}": [
-    "eslint --config ./apps/nextjs/eslint.config.mjs --fix",
-    "eslint --config ./apps/nextjs/eslint.config.mjs --max-warnings 0",
+    "bash -c 'cd apps/nextjs && eslint --fix'",
+    "bash -c 'cd apps/nextjs && eslint --no-warn-ignored --max-warnings 0'",
     "prettier --write"
   ],
   "*.{js,jsx,ts,tsx,mjs,cjs,json,css}": ["prettier --write"]
