@@ -11,7 +11,13 @@ export const Main: FC = async (): Promise<ReactElement> => {
 
   return (
     <main>
-      <FormContainer className={{ innerContainer: "max-w-[400px] flex-col items-center gap-3" }} href="" label="">
+      <FormContainer
+        className={{
+          innerContainer: "max-w-[400px] flex-col items-center gap-3",
+        }}
+        href=""
+        label=""
+      >
         <header>
           <h1 className="text-center text-2xl font-semibold text-blue-500">Home Page</h1>
           <p className="text-center text-sm tracking-wide">This is the home page of the application</p>
@@ -22,7 +28,15 @@ export const Main: FC = async (): Promise<ReactElement> => {
             <div className="flex flex-wrap justify-center gap-3">
               <ChangeThemeButton className="min-w-16" color="blue" cookie={themeCookie?.value ?? ""} size="sm" variant="outline" />
 
-              <Link className={ExampleATWM({ className: "min-w-16", color: "black", size: "sm", variant: "solid" })} href={"/profile"}>
+              <Link
+                className={ExampleATWM({
+                  className: "min-w-16",
+                  color: "black",
+                  size: "sm",
+                  variant: "solid",
+                })}
+                href={"/profile"}
+              >
                 <FaUserAlt size={17} />
               </Link>
 
@@ -34,16 +48,40 @@ export const Main: FC = async (): Promise<ReactElement> => {
 
           {session ? (
             <div className="flex flex-wrap gap-3">
-              <Link className={ExampleATWM({ className: "grow", color: "black", size: "sm", variant: "solid" })} href={"/user-example"}>
+              <Link
+                className={ExampleATWM({
+                  className: "grow",
+                  color: "black",
+                  size: "sm",
+                  variant: "solid",
+                })}
+                href={"/user-example"}
+              >
                 USER
               </Link>
 
-              <Link className={ExampleATWM({ className: "grow", color: "gray", size: "sm", variant: "solid" })} href={"/admin-example"}>
+              <Link
+                className={ExampleATWM({
+                  className: "grow",
+                  color: "gray",
+                  size: "sm",
+                  variant: "solid",
+                })}
+                href={"/admin-example"}
+              >
                 ADMIN
               </Link>
             </div>
           ) : (
-            <Link className={ExampleATWM({ className: "w-full", color: "black", size: "sm", variant: "solid" })} href={"/authentication/login"}>
+            <Link
+              className={ExampleATWM({
+                className: "w-full",
+                color: "black",
+                size: "sm",
+                variant: "solid",
+              })}
+              href={"/authentication/login"}
+            >
               LOGIN
             </Link>
           )}

@@ -63,7 +63,13 @@ describe("ExampleC Component Testing", () => {
     });
 
     it("Should have an icon", () => {
-      const { getByTestId } = render(inputComponent({ defaultValue: "Example", icon: <FaEye data-testid="example-input-icon" />, type: "password" }));
+      const { getByTestId } = render(
+        inputComponent({
+          defaultValue: "Example",
+          icon: <FaEye data-testid="example-input-icon" />,
+          type: "password",
+        }),
+      );
       expect(getByTestId("example-input-icon")).toBeDefined();
     });
 
