@@ -41,6 +41,8 @@ export interface IErrorResponse {
   };
 }
 
+// ----------------------------
+
 export interface IRegisterPayload {
   username: string;
   email: string;

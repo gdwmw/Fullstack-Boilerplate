@@ -109,13 +109,7 @@ export const Content: FC = (): ReactElement => {
           <div className="mx-auto text-center">
             <span className="text-xs">Don&apos;t have an account yet? </span>
             <Link
-              className={ExampleATWM({
-                className: "inline text-xs",
-                color: "blue",
-                disabled: loading,
-                size: "sm",
-                variant: "ghost",
-              })}
+              className={ExampleATWM({ className: "inline text-xs", color: "blue", disabled: loading, size: "sm", variant: "ghost" })}
               href={"/authentication/register"}
               onClick={(e) => {
                 if (loading) {
