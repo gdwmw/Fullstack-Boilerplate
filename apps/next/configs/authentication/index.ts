@@ -46,10 +46,7 @@ export const options: NextAuthOptions = {
             const res = await POSTLogin({ identifier, password });
 
             if (!res.confirmed || res.blocked) {
-              await setCookie({
-                name: "report",
-                value: JSON.stringify([res.confirmed, res.blocked]),
-              });
+              await setCookie({ name: "report", value: JSON.stringify([res.confirmed, res.blocked]) });
               return null;
             }
 
