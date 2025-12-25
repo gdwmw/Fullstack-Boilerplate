@@ -1,7 +1,7 @@
 {
-  "apps/nextjs/**/*.{js,jsx,ts,tsx,mjs,cjs}": [
-    "bash -c 'cd apps/nextjs && eslint --fix'",
-    "bash -c 'cd apps/nextjs && eslint --no-warn-ignored --max-warnings 0'",
+  "apps/next/**/*.{js,jsx,ts,tsx,mjs,cjs}": [
+    "bash -c 'cd apps/next && eslint --fix'",
+    "bash -c 'cd apps/next && eslint --no-warn-ignored --max-warnings 0'",
     "prettier --write"
   ],
   "*.{js,jsx,ts,tsx,mjs,cjs,json,css}": ["prettier --write"]

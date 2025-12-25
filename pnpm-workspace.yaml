@@ -3,7 +3,7 @@ packages:
   - packages/*
 
 onlyBuiltDependencies:
-  - "@swc/core"
+  - '@swc/core'
   - better-sqlite3
   - core-js-pure
   - esbuild
