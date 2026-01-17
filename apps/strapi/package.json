@@ -21,11 +21,11 @@
     "better-sqlite3": "11.3.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.30.2",
-    "styled-components": "^6.1.19"
+    "react-router-dom": "^6.30.3",
+    "styled-components": "^6.3.8"
   },
   "devDependencies": {
-    "@types/node": "^20.19.26",
+    "@types/node": "^20.19.30",
     "@types/react": "^18.3.27",
     "@types/react-dom": "^18.3.7",
     "typescript": "^5.9.3"
