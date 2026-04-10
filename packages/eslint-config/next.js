@@ -5,6 +5,7 @@ import nextTs from "eslint-config-next/typescript";
 import eslintPluginBetterTailwindcss from "eslint-plugin-better-tailwindcss";
 import jest from "eslint-plugin-jest";
 import perfectionist from "eslint-plugin-perfectionist";
+import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
 import reactPlugin from "eslint-plugin-react";
 import storybook from "eslint-plugin-storybook";
 import { defineConfig, globalIgnores } from "eslint/config";
@@ -115,6 +116,12 @@ export const eslintConfig = defineConfig([
         entryPoint: "src/app/global.css",
         variables: [".*TWM"],
       },
+    },
+  },
+  eslintPluginPrettierRecommended,
+  {
+    rules: {
+      "prettier/prettier": "warn",
     },
   },
 ]);
