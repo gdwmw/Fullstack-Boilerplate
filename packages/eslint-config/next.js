@@ -23,6 +23,7 @@ export const eslintConfig = defineConfig([
   ...pluginQuery.configs["flat/recommended"],
   ...storybook.configs["flat/recommended"],
   jest.configs["flat/recommended"],
+  eslintPluginPrettierRecommended,
   globalIgnores([
     ".next/**",
     "out/**",
@@ -35,6 +36,11 @@ export const eslintConfig = defineConfig([
     "coverage/**",
     "dist/**",
   ]),
+  {
+    rules: {
+      "prettier/prettier": "warn",
+    },
+  },
   {
     files: ["src/types/**/*"],
     rules: {
@@ -116,12 +122,6 @@ export const eslintConfig = defineConfig([
         entryPoint: "src/app/global.css",
         variables: [".*TWM"],
       },
-    },
-  },
-  eslintPluginPrettierRecommended,
-  {
-    rules: {
-      "prettier/prettier": "warn",
     },
   },
 ]);
