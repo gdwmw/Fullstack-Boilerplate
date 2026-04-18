@@ -3,11 +3,8 @@ import type { NextAuthOptions, Session, User } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-import { DUMMY_ACCOUNT_DATA } from "@/src/constants";
-// import { deleteCookie, setCookie } from "@/src/utils";
-// import { DEMO_ACCOUNT_DATA } from "@/src/libs";
-import { ILoginPayload } from "@/src/utils";
-// import { POSTLogin } from "@/src/utils";
+import { DEMO_ACCOUNT_DATA } from "@/src/constants";
+import { deleteCookie, ILoginPayload, POSTLogin, setCookie } from "@/src/utils";
 
 export const options: NextAuthOptions = {
   callbacks: {
@@ -41,31 +38,23 @@ export const options: NextAuthOptions = {
 
         const { identifier, password } = credentials as ILoginPayload;
 
-        // if ((identifier === "demo" || identifier === "demo@demo.com") && password === "demo") {
-        //   return DEMO_ACCOUNT_DATA;
-        // } else {
-        //   try {
-        //     const res = await POSTLogin({ identifier, password });
+        if ((identifier === "demo" || identifier === "demo@demo.com") && password === "demo") {
+          return DEMO_ACCOUNT_DATA;
+        } else {
+          try {
+            const res = await POSTLogin({ identifier, password });
 
-        //     if (!res.confirmed || res.blocked) {
-        //       await setCookie({ name: "report", value: JSON.stringify([res.confirmed, res.blocked]) });
-        //       return null;
-        //     }
+            if (!res.confirmed || res.blocked) {
+              await setCookie({ name: "report", value: JSON.stringify([res.confirmed, res.blocked]) });
+              return null;
+            }
 
-        //     return res;
-        //   } catch {
-        //     await deleteCookie("report");
-        //     return null;
-        //   }
-        // }
-
-        const res = DUMMY_ACCOUNT_DATA.find((user) => (user.username === identifier || user.email === identifier) && user.password === password);
-
-        if (!res) {
-          return null;
+            return res;
+          } catch {
+            await deleteCookie("report");
+            return null;
+          }
         }
-
-        return res.response;
       },
       credentials: {},
       name: "Credentials",
