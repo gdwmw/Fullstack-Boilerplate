@@ -10,7 +10,7 @@
   "devDependencies": {
     "@eslint/js": "^9.39.4",
     "@next/eslint-plugin-next": "^16.2.4",
-    "@tanstack/eslint-plugin-query": "^5.100.1",
+    "@tanstack/eslint-plugin-query": "^5.100.3",
     "eslint-config-next": "^16.2.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-better-tailwindcss": "^4.4.1",
