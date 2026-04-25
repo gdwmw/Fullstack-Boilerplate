@@ -1,5 +1,7 @@
 {
   "name": "turborepo",
+  "version": "0.1.0",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "dev": "turbo run dev",
