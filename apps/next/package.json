@@ -10,7 +10,7 @@
     "clean": "rimraf .next",
     "storybook": "storybook dev -p 6006 --ci",
     "storybook:build": "storybook build",
-    "storybook:start": "bunx http-server storybook-static",
+    "storybook:start": "pnpm dlx http-server storybook-static",
     "jest:watch": "jest --watch",
     "jest:test": "jest",
     "lint": "eslint --max-warnings 0",
