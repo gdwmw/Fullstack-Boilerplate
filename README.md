@@ -1,9 +1,9 @@
 ![Next.js - Home](public/project/1.png)
 ![Next.js - Login](public/project/2.png)
 ![Next.js - Register](public/project/3.png)
-![ElysiaJS - Swagger](public/project/4.png)
-![ElysiaJS - Swagger Auth](public/project/5.png)
-![ElysiaJS - Swagger Test](public/project/6.png)
+![ElysiaJS - Home](public/project/4.png)
+![ElysiaJS - Register](public/project/5.png)
+![ElysiaJS - Response](public/project/6.png)
 
 # Turborepo + Next.js + ElysiaJS Boilerplate
 
