@@ -1,17 +1,23 @@
 ![Next.js - Home](public/project/1.png)
 ![Next.js - Login](public/project/2.png)
 ![Next.js - Register](public/project/3.png)
-![Strapi - Home](public/project/4.png)
-![Strapi - Login](public/project/5.png)
-![Strapi - Register](public/project/6.png)
+![ElysiaJS - Swagger](public/project/4.png)
+![ElysiaJS - Swagger Auth](public/project/5.png)
+![ElysiaJS - Swagger Test](public/project/6.png)
 
-# Turborepo + Next.js + Strapi Boilerplate
+# Turborepo + Next.js + ElysiaJS Boilerplate
 
 Boilerplate By [Gede Dewo Wahyu M.W](https://github.com/gdwmw) ❤️
 
 ## Boilerplate Description 📖
 
-This monorepo is a full‑stack boilerplate built with Turborepo, featuring a Next.js application and a Strapi CMS. It includes authentication, theme management, state management, form validation, and Storybook, and it follows Atomic Design principles for component organization.
+This monorepo is a full‑stack boilerplate built with Turborepo, featuring a Next.js application and an ElysiaJS REST API. It includes JWT authentication, theme management, state management, form validation, file upload, and Storybook, and it follows Atomic Design principles for component organization.
+
+## Tech Stack 🛠️
+
+- **Monorepo**: Turborepo + pnpm
+- **Frontend**: Next.js, TailwindCSS, Zustand, React Hook Form, Zod
+- **Backend**: ElysiaJS, Prisma, PostgreSQL, JWT
 
 ## Installation 🚀
 
@@ -33,33 +39,27 @@ To get started, follow these steps:
 3. **Set up environment variables**
 
    ```bash
-   cp apps/nextjs/.env.example apps/nextjs/.env.local
-   cp apps/strapi/.env.example apps/strapi/.env
+   cp apps/next/.env.example apps/next/.env
+   cp apps/elysia/.env.example apps/elysia/.env
    ```
 
-4. **Start development (via Turborepo)**
+4. **Run database migrations**
+
+   ```bash
+   cd apps/elysia && bun generate
+   ```
+
+5. **Start development (via Turborepo)**
 
    ```bash
    pnpm dev
    ```
 
-5. **Access the applications**
+6. **Access the applications**
 
-   - Next.js application: [http://localhost:3000](http://localhost:3000)
-   - Strapi Admin/API: [http://localhost:1337](http://localhost:1337)
-
-6. **API Access Settings**
-
-   #### `Authenticated`
-
-   - Data: `find`, `findOne`, `update`
-   - Media Library: `all`
-   - Users-permissions: `me`, `update`
-
-   #### `Public`
-
-   - Data: `find`, `findOne`, `create`
-   - Users-permissions: `findOne`, `update`
+   - Next.js App: [http://localhost:3000](http://localhost:3000)
+   - ElysiaJS API: [http://localhost:1337](http://localhost:1337)
+   - Swagger UI: [http://localhost:1337/swagger](http://localhost:1337/swagger)
 
 ## Commit Guidelines 📝
 

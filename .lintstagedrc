@@ -4,5 +4,10 @@
     "bash -c 'cd apps/next && eslint --no-warn-ignored --max-warnings 0'",
     "prettier --write"
   ],
+  "apps/elysia/**/*.{js,ts,mjs,cjs}": [
+    "bash -c 'cd apps/elysia && eslint --fix'",
+    "bash -c 'cd apps/elysia && eslint --no-warn-ignored --max-warnings 0'",
+    "prettier --write"
+  ],
   "*.{js,jsx,ts,tsx,mjs,cjs,json,css}": ["prettier --write"]
 }

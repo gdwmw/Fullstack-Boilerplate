@@ -1,0 +1,18 @@
+model Files {
+  id                Int      @id @default(autoincrement())
+  filename          String
+  originalFilename  String
+  mimetype          String
+  size              Int
+  path              String
+  width             Int?
+  height            Int?
+  dominantColor     String?  @map("dominant_color")
+  placeholder       String?
+  formats           Json?
+  user              Users?
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("files")
+}
