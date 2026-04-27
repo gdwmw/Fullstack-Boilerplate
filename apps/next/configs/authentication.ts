@@ -3,8 +3,8 @@ import type { NextAuthOptions, Session, User } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-import { DEMO_ACCOUNT_DATA } from "@/src/constants";
-import { deleteCookie, ILoginPayload, POSTLogin, setCookie } from "@/src/utils";
+import { DUMMY_ACCOUNT_DATA } from "@/src/constants";
+import { ILoginPayload, IUploadResponse, POSTLogin } from "@/src/utils";
 
 export const options: NextAuthOptions = {
   callbacks: {
@@ -12,7 +12,22 @@ export const options: NextAuthOptions = {
       if (trigger === "update" && session?.user) {
         return { ...token, ...session.user };
       }
-      return { ...token, ...user };
+
+      if (user) {
+        token.id = parseInt(user.id);
+        token.email = user.email;
+        token.name = user.name;
+        token.username = user.username;
+        token.phone = user.phone;
+        token.role = user.role;
+        token.accessToken = user.accessToken;
+        token.refreshToken = user.refreshToken;
+        token.image = user.image as IUploadResponse | null;
+        token.imageId = user.imageId;
+        token.status = user.status;
+      }
+
+      return token;
     },
 
     async redirect({ baseUrl }) {
@@ -20,7 +35,19 @@ export const options: NextAuthOptions = {
     },
 
     async session({ session, token }: { session: Session; token: JWT }) {
-      session.user = { ...session.user, ...token };
+      session.user = {
+        accessToken: token.accessToken as string | undefined,
+        email: token.email as null | string | undefined,
+        id: token.id as number | undefined,
+        image: token.image as IUploadResponse | null | undefined,
+        imageId: token.imageId as null | number | undefined,
+        name: token.name as null | string | undefined,
+        phone: token.phone as string | undefined,
+        refreshToken: token.refreshToken as string | undefined,
+        role: token.role as "admin" | "user" | undefined,
+        status: token.status as string | undefined,
+        username: token.username as string | undefined,
+      };
       return session;
     },
   },
@@ -36,24 +63,24 @@ export const options: NextAuthOptions = {
           return null;
         }
 
-        const { identifier, password } = credentials as ILoginPayload;
+        const { identifier, method, password } = credentials as ILoginPayload;
 
-        if ((identifier === "demo" || identifier === "demo@demo.com") && password === "demo") {
-          return DEMO_ACCOUNT_DATA;
-        } else {
-          try {
-            const res = await POSTLogin({ identifier, password });
+        const dummyUser = DUMMY_ACCOUNT_DATA.find(
+          (user) => (user.username === identifier || user.email === identifier) && user.password === password,
+        );
 
-            if (!res.confirmed || res.blocked) {
-              await setCookie({ name: "report", value: JSON.stringify([res.confirmed, res.blocked]) });
-              return null;
-            }
+        if (dummyUser) {
+          // eslint-disable-next-line
+          return dummyUser.response as any;
+        }
 
-            return res;
-          } catch {
-            await deleteCookie("report");
-            return null;
-          }
+        try {
+          const res = await POSTLogin({ identifier, method: method === "email" ? "email" : "username", password });
+          // eslint-disable-next-line
+          return res.data as any;
+        } catch (error) {
+          console.error("Login error:", error);
+          return null;
         }
       },
       credentials: {},
