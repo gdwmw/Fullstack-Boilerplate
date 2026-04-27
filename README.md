@@ -1,23 +1,23 @@
 ![Next.js - Home](public/project/1.png)
 ![Next.js - Login](public/project/2.png)
 ![Next.js - Register](public/project/3.png)
-![ElysiaJS - Home](public/project/4.png)
-![ElysiaJS - Register](public/project/5.png)
-![ElysiaJS - Response](public/project/6.png)
+![Elysia.js - Home](public/project/4.png)
+![Elysia.js - Register](public/project/5.png)
+![Elysia.js - Response](public/project/6.png)
 
-# Turborepo + Next.js + ElysiaJS Boilerplate
+# Turborepo + Next.js + Elysia.js Boilerplate
 
 Boilerplate By [Gede Dewo Wahyu M.W](https://github.com/gdwmw) ❤️
 
 ## Boilerplate Description 📖
 
-This monorepo is a full‑stack boilerplate built with Turborepo, featuring a Next.js application and an ElysiaJS REST API. It includes JWT authentication, theme management, state management, form validation, file upload, and Storybook, and it follows Atomic Design principles for component organization.
+This monorepo is a full‑stack boilerplate built with Turborepo, featuring a Next.js application and an Elysia.js REST API. It includes JWT authentication, theme management, state management, form validation, file upload, and Storybook, and it follows Atomic Design principles for component organization.
 
 ## Tech Stack 🛠️
 
 - **Monorepo**: Turborepo + pnpm
 - **Frontend**: Next.js, TailwindCSS, Zustand, React Hook Form, Zod
-- **Backend**: ElysiaJS, Prisma, PostgreSQL, JWT
+- **Backend**: Elysia.js, Prisma, PostgreSQL, JWT
 
 ## Installation 🚀
 
@@ -58,7 +58,7 @@ To get started, follow these steps:
 6. **Access the applications**
 
    - Next.js App: [http://localhost:3000](http://localhost:3000)
-   - ElysiaJS API: [http://localhost:1337](http://localhost:1337)
+   - Elysia.js API: [http://localhost:1337](http://localhost:1337)
    - Swagger UI: [http://localhost:1337/swagger](http://localhost:1337/swagger)
 
 ## Commit Guidelines 📝
