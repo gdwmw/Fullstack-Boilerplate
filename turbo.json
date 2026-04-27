@@ -1,7 +1,18 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
-  "globalEnv": ["NODE_ENV"],
+  "globalEnv": [
+    "NODE_ENV",
+    "NEXT_PUBLIC_BASE_API_URL",
+    "NEXT_PUBLIC_DEBUG_MODE",
+    "DATABASE_URL",
+    "ELYSIA_PORT",
+    "JWT_ACCESS_SECRET",
+    "JWT_REFRESH_SECRET",
+    "JWT_ACCESS_EXPIRES_IN",
+    "JWT_REFRESH_EXPIRES_IN",
+    "CORS_ORIGINS"
+  ],
   "tasks": {
     "dev": {
       "cache": false,
@@ -33,6 +44,9 @@
     },
     "check-types": {
       "dependsOn": ["^check-types"]
+    },
+    "cpenv": {
+      "dependsOn": ["^cpenv"]
     }
   }
 }

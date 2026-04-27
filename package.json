@@ -13,6 +13,7 @@
     "lint:fix": "turbo run lint:fix",
     "prettier": "turbo run prettier",
     "check-types": "turbo run check-types",
+    "cpenv": "turbo run cpenv",
     "commit": "git-cz",
     "prepare": "husky"
   },
