@@ -3,12 +3,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AxiosError } from "axios";
 import { Eye, EyeOff } from "lucide-react";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { FC, HTMLInputTypeAttribute, ReactElement, useState, useTransition } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 
 import { ExampleInput, FormContainer, SubmitButton } from "@/src/components";
-import { IErrorResponse, POSTChangePassword } from "@/src/utils";
+import { IErrorResponse, POSTChangePassword, POSTLogout } from "@/src/utils";
 
 import { ChangePasswordSchema, TChangePasswordSchema } from "./schema";
 
@@ -39,6 +39,7 @@ const FORM_FIELDS_DATA: IFormField[] = [
 ];
 
 export const Main: FC = (): ReactElement => {
+  const session = useSession();
   const [passwordVisibility, setPasswordVisibility] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>("");
   const [loading, setTransition] = useTransition();
@@ -62,6 +63,9 @@ export const Main: FC = (): ReactElement => {
           const { confirmPassword: _confirmPassword, ...changePasswordPayload } = dt;
           await POSTChangePassword(changePasswordPayload);
           console.info("Change password success!");
+          if (session.data?.user?.refreshToken !== "ADmiNrEfReSHTOkeN" && session.data?.user?.refreshToken !== "uSErrEfReSHTOkeN") {
+            await POSTLogout({ refreshToken: session.data?.user?.refreshToken || "" });
+          }
           signOut();
           reset();
         } catch (error) {
