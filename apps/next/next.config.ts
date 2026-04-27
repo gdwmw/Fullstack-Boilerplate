@@ -13,7 +13,7 @@ const nextConfig: NextConfig = {
         search: "",
       },
       {
-        hostname: "sztraa.zettara.com",
+        hostname: "elysia.zettara.com",
         pathname: "/**",
         port: "",
         protocol: "https",
