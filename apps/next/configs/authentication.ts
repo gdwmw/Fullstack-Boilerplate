@@ -3,9 +3,8 @@ import type { NextAuthOptions, Session, User } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-import { ILoginPayload, IUploadResponse, POSTLogin } from "@/src/utils";
+import { ILoginPayload, IUploadResponse, POSTLogin, POSTRefresh } from "@/src/utils";
 
-const API_URL = process.env.NEXT_PUBLIC_BASE_API_URL || "";
 const ACCESS_TOKEN_EXPIRES_IN = process.env.JWT_ACCESS_EXPIRES_IN || "30m";
 const SESSION_EXPIRES_IN = process.env.NEXTAUTH_SESSION_EXPIRES_IN || "7d";
 const REFRESH_ACCESS_TOKEN_ERROR = "refresh-access-token-error";
@@ -66,24 +65,7 @@ const refreshAccessToken = async (token: JWT): Promise<JWT> => {
   }
 
   try {
-    const res = await fetch(`${API_URL}/auth/refresh`, {
-      body: JSON.stringify({ refreshToken: token.refreshToken }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-    });
-
-    if (!res.ok) {
-      throw new Error(`Refresh token failed with status ${res.status}`);
-    }
-
-    const parsed = (await res.json()) as {
-      data?: {
-        accessToken?: string;
-        refreshToken?: string;
-      };
-    };
+    const parsed = await POSTRefresh({ refreshToken: token.refreshToken as string });
 
     if (!parsed?.data?.accessToken || !parsed?.data?.refreshToken) {
       throw new Error("Invalid refresh response payload");
