@@ -28,11 +28,12 @@ interface I {
 }
 
 export const apiRequest = async <T>({ auth = true, ...props }: I): Promise<ISuccessResponse<T>> => {
-  const fetchToken = async () => await getSession("accessToken");
+  const fetchToken = async (): Promise<string | undefined> => {
+    const token = await getSession("accessToken");
+    return typeof token === "string" ? token : undefined;
+  };
 
-  try {
-    const accessToken = auth && (await fetchToken());
-
+  const sendRequest = async (accessToken?: string): Promise<ISuccessResponse<T>> => {
     const config: AxiosRequestConfig = {
       data: props.data,
       headers: {
@@ -45,20 +46,39 @@ export const apiRequest = async <T>({ auth = true, ...props }: I): Promise<ISucc
     };
 
     const res: AxiosResponse<ISuccessResponse<T>> = await axios(config);
-
     return res.data;
+  };
+
+  try {
+    const accessToken = auth ? await fetchToken() : undefined;
+    return await sendRequest(accessToken);
   } catch (error) {
+    let handledError: unknown = error;
     let statusCode: number | undefined;
     let errorMessage = "Unknown error occurred";
 
-    if (axios.isAxiosError<IErrorResponse>(error)) {
-      if (process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_DEBUG_MODE === "true") {
-        console.error("Axios error response:", error.response);
+    if (axios.isAxiosError<IErrorResponse>(handledError)) {
+      if (auth && handledError.response?.status === 401) {
+        const latestAccessToken = await fetchToken();
+
+        if (latestAccessToken) {
+          try {
+            return await sendRequest(latestAccessToken);
+          } catch (retryError) {
+            handledError = retryError;
+          }
+        }
       }
-      statusCode = error.response?.status;
-      errorMessage = error.response?.data?.message ?? error.message;
-    } else if (error instanceof Error) {
-      errorMessage = error.message;
+
+      if (axios.isAxiosError<IErrorResponse>(handledError)) {
+        if (process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_DEBUG_MODE === "true") {
+          console.error("Axios error response:", handledError.response);
+        }
+        statusCode = handledError.response?.status;
+        errorMessage = handledError.response?.data?.message ?? handledError.message;
+      }
+    } else if (handledError instanceof Error) {
+      errorMessage = handledError.message;
     }
 
     console.error(
@@ -66,7 +86,7 @@ export const apiRequest = async <T>({ auth = true, ...props }: I): Promise<ISucc
       `An error occurred while processing ${props.method} request for ${props.label} || Status Code: ${statusCode} || Message: ${errorMessage}`,
     );
 
-    throw error;
+    throw handledError;
   }
 };
 

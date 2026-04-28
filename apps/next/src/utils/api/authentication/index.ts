@@ -1,12 +1,5 @@
 import { IUploadResponse } from "../upload";
 
-export interface IDummyAccount {
-  email: string;
-  password: string;
-  response: IAuthResponse;
-  username: string;
-}
-
 export interface IAuthResponse {
   accessToken: string;
   email: string;
@@ -23,7 +16,9 @@ export interface IAuthResponse {
 
 export interface INextAuthResponse {
   accessToken?: string;
+  accessTokenExpiresAt?: number;
   email?: null | string;
+  error?: string;
   id?: number;
   image?: IUploadResponse | null;
   imageId?: null | number;
