@@ -63,8 +63,11 @@ export const Main: FC = (): ReactElement => {
           const { confirmPassword: _confirmPassword, ...changePasswordPayload } = dt;
           await POSTChangePassword(changePasswordPayload);
           console.info("Change password success!");
-          await POSTLogout({ refreshToken: session.data?.user?.refreshToken || "" });
-          signOut();
+          try {
+            await POSTLogout({ refreshToken: session.data?.user?.refreshToken || "" });
+          } finally {
+            signOut();
+          }
           reset();
         } catch (error) {
           const axiosError = error as AxiosError<IErrorResponse>;

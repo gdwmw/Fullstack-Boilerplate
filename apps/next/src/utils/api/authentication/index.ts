@@ -26,6 +26,8 @@ export interface INextAuthResponse {
   phone?: string;
   refreshToken?: string;
   role?: "admin" | "user";
+  sessionExpiresAt?: number;
+  sessionStartedAt?: number;
   status?: string;
   username?: string;
 }

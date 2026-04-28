@@ -27,8 +27,6 @@ CREATE TABLE "users" (
     "phone" TEXT NOT NULL,
     "role" TEXT NOT NULL DEFAULT 'user',
     "password" TEXT,
-    "refresh_token" TEXT,
-    "refresh_token_expires_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 

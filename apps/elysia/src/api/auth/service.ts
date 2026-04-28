@@ -1,48 +1,20 @@
 import { AUTH_OMIT_FIELDS } from "@/src/constants";
-import { prisma } from "@/src/libs";
+import { prisma, redis } from "@/src/libs";
 
 import type { TChangePasswordSchema, TLoginSchema, TRegisterSchema } from "./type";
 
 const ACCESS_TOKEN_EXPIRES_IN = process.env.JWT_ACCESS_EXPIRES_IN || "30m";
-const REFRESH_TOKEN_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || "7d";
-
-const parseDurationToMs = (value: string) => {
-  const parsed = /^([0-9]+)(ms|s|m|h|d)$/i.exec(value.trim());
-
-  if (!parsed) {
-    throw new Error("Invalid token expiration format. Use: 15m, 7d, 3600s");
-  }
-
-  const amount = Number(parsed[1]);
-  const unit = parsed[2].toLowerCase();
-
-  const multiplierByUnit: Record<string, number> = {
-    d: 24 * 60 * 60 * 1000,
-    h: 60 * 60 * 1000,
-    m: 60 * 1000,
-    ms: 1,
-    s: 1000,
-  };
-
-  return amount * multiplierByUnit[unit];
-};
-
-const refreshTokenExpiresAt = () => {
-  const durationInMs = parseDurationToMs(REFRESH_TOKEN_EXPIRES_IN);
-  return new Date(Date.now() + durationInMs);
-};
-
-const sanitize = (user: { email: string; id: number; name: string; phone: string; role: string; username: string }) => ({
-  id: user.id,
-  email: user.email,
-  name: user.name,
-  phone: user.phone,
-  role: user.role,
-  username: user.username,
-});
 
 export const service = {
   ACCESS_TOKEN_EXPIRES_IN,
+
+  async addToBlocklist(jti: string, expiresAt: Date) {
+    const ttlSeconds = Math.floor((expiresAt.getTime() - Date.now()) / 1000);
+    if (ttlSeconds > 0) {
+      await redis.set(`blocklist:${jti}`, "1", "EX", ttlSeconds);
+    }
+  },
+
   async changePassword(id: number, data: TChangePasswordSchema) {
     const res = await prisma.users.findUnique({
       where: { id },
@@ -72,6 +44,11 @@ export const service = {
     });
   },
 
+  async isBlocklisted(jti: string) {
+    const exists = await redis.exists(`blocklist:${jti}`);
+    return exists === 1;
+  },
+
   async login(data: TLoginSchema) {
     const res = await prisma.users.findUnique({
       include: { image: true },
@@ -83,13 +60,10 @@ export const service = {
     const isValidPassword = await Bun.password.verify(data.password, res.password);
     if (!isValidPassword) return null;
 
-    const { password: _password, refreshToken: _refreshToken, refreshTokenExpiresAt: _refreshTokenExpiresAt, ...user } = res;
+    const { password: _password, ...user } = res;
 
     return user;
   },
-
-  REFRESH_TOKEN_EXPIRES_IN,
-
   async register(data: TRegisterSchema) {
     const hashedPassword = await Bun.password.hash(data.password);
 
@@ -104,42 +78,5 @@ export const service = {
       },
       omit: { ...AUTH_OMIT_FIELDS, imageId: true },
     });
-  },
-
-  async revokeRefreshToken(userId: number) {
-    await prisma.users.update({
-      data: {
-        refreshToken: null,
-        refreshTokenExpiresAt: null,
-      },
-      where: { id: userId },
-    });
-  },
-
-  async saveRefreshToken(userId: number, refreshToken: string) {
-    const hashedRefreshToken = await Bun.password.hash(refreshToken);
-
-    await prisma.users.update({
-      data: {
-        refreshToken: hashedRefreshToken,
-        refreshTokenExpiresAt: refreshTokenExpiresAt(),
-      },
-      where: { id: userId },
-    });
-
-    return hashedRefreshToken;
-  },
-
-  async validateRefreshToken(refreshToken: string) {
-    const res = await prisma.users.findFirst({
-      where: {
-        refreshToken,
-      },
-    });
-
-    if (!res || !res.refreshToken || !res.refreshTokenExpiresAt) return null;
-    if (res.refreshTokenExpiresAt.getTime() < Date.now()) return null;
-
-    return sanitize(res);
   },
 };

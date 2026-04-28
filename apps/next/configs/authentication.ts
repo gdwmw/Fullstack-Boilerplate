@@ -8,6 +8,7 @@ import { ILoginPayload, IUploadResponse, POSTLogin, POSTRefresh } from "@/src/ut
 const ACCESS_TOKEN_EXPIRES_IN = process.env.JWT_ACCESS_EXPIRES_IN || "30m";
 const SESSION_EXPIRES_IN = process.env.NEXTAUTH_SESSION_EXPIRES_IN || "7d";
 const REFRESH_ACCESS_TOKEN_ERROR = "refresh-access-token-error";
+const SESSION_EXPIRED_ERROR = "session-expired-error";
 
 const parseDurationToMs = (value: string) => {
   const parsed = /^([0-9]+)(ms|s|m|h|d)$/i.exec(value.trim());
@@ -55,6 +56,15 @@ const getAccessTokenExpiresAt = (accessToken?: string) => {
 };
 
 const getFallbackAccessTokenExpiry = () => Date.now() + parseDurationToMs(ACCESS_TOKEN_EXPIRES_IN);
+const getSessionExpiry = (startedAt: number) => startedAt + parseDurationToMs(SESSION_EXPIRES_IN);
+
+const expireSession = (token: JWT): JWT => ({
+  ...token,
+  accessToken: undefined,
+  accessTokenExpiresAt: undefined,
+  error: SESSION_EXPIRED_ERROR,
+  refreshToken: undefined,
+});
 
 const refreshAccessToken = async (token: JWT): Promise<JWT> => {
   if (!token.refreshToken) {
@@ -96,10 +106,14 @@ export const options: NextAuthOptions = {
           ...token,
           ...session.user,
           accessTokenExpiresAt: getAccessTokenExpiresAt(session.user.accessToken) || token.accessTokenExpiresAt,
+          sessionExpiresAt: token.sessionExpiresAt,
+          sessionStartedAt: token.sessionStartedAt,
         };
       }
 
       if (user) {
+        const sessionStartedAt = Date.now();
+
         token.id = parseInt(user.id);
         token.email = user.email;
         token.name = user.name;
@@ -111,14 +125,29 @@ export const options: NextAuthOptions = {
         token.refreshToken = user.refreshToken;
         token.image = user.image as IUploadResponse | null;
         token.imageId = user.imageId;
+        token.sessionExpiresAt = getSessionExpiry(sessionStartedAt);
+        token.sessionStartedAt = sessionStartedAt;
         token.status = user.status;
 
         return token;
       }
 
+      if (!token.sessionStartedAt || !token.sessionExpiresAt) {
+        const sessionStartedAt = Date.now();
+        token.sessionStartedAt = sessionStartedAt;
+        token.sessionExpiresAt = getSessionExpiry(sessionStartedAt);
+      }
+
+      if (Date.now() >= (token.sessionExpiresAt as number)) {
+        return expireSession(token);
+      }
+
       const expiresAt = token.accessTokenExpiresAt as number | undefined;
       if (token.accessToken && expiresAt && Date.now() < expiresAt - 5_000) {
-        return token;
+        return {
+          ...token,
+          error: undefined,
+        };
       }
 
       return await refreshAccessToken(token);
@@ -141,6 +170,8 @@ export const options: NextAuthOptions = {
         phone: token.phone as string | undefined,
         refreshToken: token.refreshToken as string | undefined,
         role: token.role as "admin" | "user" | undefined,
+        sessionExpiresAt: token.sessionExpiresAt as number | undefined,
+        sessionStartedAt: token.sessionStartedAt as number | undefined,
         status: token.status as string | undefined,
         username: token.username as string | undefined,
       };
