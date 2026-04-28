@@ -1,5 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-
+import { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Crown } from "lucide-react";
 import { fn } from "storybook/test";
 

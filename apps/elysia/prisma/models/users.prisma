@@ -7,6 +7,7 @@ model Users {
   phone     String   @unique
   role      String   @default("user")
   image     Files?   @relation(fields: [imageId], references: [id], onDelete: SetNull)
+  sessions  session[]
   password  String?
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

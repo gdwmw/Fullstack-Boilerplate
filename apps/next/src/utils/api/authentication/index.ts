@@ -8,23 +8,20 @@ export interface IAuthResponse {
   imageId?: null | number;
   name: string;
   phone: string;
-  refreshToken: string;
   role: "admin" | "user";
   status: string;
   username: string;
 }
 
 export interface INextAuthResponse {
-  accessToken?: string;
+  accessToken?: null | string;
   accessTokenExpiresAt?: number;
   email?: null | string;
-  error?: string;
   id?: number;
   image?: IUploadResponse | null;
   imageId?: null | number;
   name?: null | string;
   phone?: string;
-  refreshToken?: string;
   role?: "admin" | "user";
   sessionExpiresAt?: number;
   sessionStartedAt?: number;

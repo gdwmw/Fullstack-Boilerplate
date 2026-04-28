@@ -1,15 +1,86 @@
 import { DocumentDecoration } from "elysia";
 
+const successResponseSchema = {
+  properties: {
+    data: {},
+    message: { example: "Upload data retrieved successfully", nullable: true, type: "string" },
+    success: { example: true, type: "boolean" },
+  },
+  type: "object",
+} as const;
+
+const errorResponseSchema = {
+  properties: {
+    code: { example: "P2025", nullable: true, type: "string" },
+    error: { example: null, nullable: true },
+    message: { example: "Upload not found", nullable: true, type: "string" },
+    success: { example: false, type: "boolean" },
+    token: {
+      nullable: true,
+      properties: {
+        access: { type: "boolean" },
+        refresh: { type: "boolean" },
+      },
+      type: "object",
+    },
+  },
+  type: "object",
+} as const;
+
 export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "upload", DocumentDecoration> => ({
   delete: {
     description: "Delete an uploaded file",
     parameters: [{ in: "path", name: "id", required: true, schema: { example: 1, type: "integer" } }],
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            schema: successResponseSchema,
+          },
+        },
+        description: "File deleted successfully",
+      },
+      401: {
+        content: {
+          "application/json": {
+            schema: errorResponseSchema,
+          },
+        },
+        description: "Unauthorized",
+      },
+      404: {
+        content: {
+          "application/json": {
+            schema: errorResponseSchema,
+          },
+        },
+        description: "File not found",
+      },
+    },
     security: [{ bearerAuth: [] }],
     summary: "Delete File",
     tags: [label],
   },
   getAll: {
     description: "Get all uploaded files",
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            schema: successResponseSchema,
+          },
+        },
+        description: "Files retrieved successfully",
+      },
+      401: {
+        content: {
+          "application/json": {
+            schema: errorResponseSchema,
+          },
+        },
+        description: "Unauthorized",
+      },
+    },
     security: [{ bearerAuth: [] }],
     summary: "Get All Files",
     tags: [label],
@@ -17,6 +88,32 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
   getById: {
     description: "Get a file by ID",
     parameters: [{ in: "path", name: "id", required: true, schema: { example: 1, type: "integer" } }],
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            schema: successResponseSchema,
+          },
+        },
+        description: "File retrieved successfully",
+      },
+      401: {
+        content: {
+          "application/json": {
+            schema: errorResponseSchema,
+          },
+        },
+        description: "Unauthorized",
+      },
+      404: {
+        content: {
+          "application/json": {
+            schema: errorResponseSchema,
+          },
+        },
+        description: "File not found",
+      },
+    },
     security: [{ bearerAuth: [] }],
     summary: "Get File by ID",
     tags: [label],
@@ -39,6 +136,32 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
         },
       },
       required: true,
+    },
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            schema: successResponseSchema,
+          },
+        },
+        description: "File uploaded successfully",
+      },
+      400: {
+        content: {
+          "application/json": {
+            schema: errorResponseSchema,
+          },
+        },
+        description: "Invalid request payload",
+      },
+      401: {
+        content: {
+          "application/json": {
+            schema: errorResponseSchema,
+          },
+        },
+        description: "Unauthorized",
+      },
     },
     security: [{ bearerAuth: [] }],
     summary: "Upload File",

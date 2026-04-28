@@ -6,7 +6,12 @@ import sharp from "sharp";
 
 import { prisma } from "@/src/libs";
 
-import type { ImageFormat, UploadResponse } from "./type";
+import { ImageFormat, UploadResponse } from "./type";
+
+// ---------------------------------------------------------------------------
+// [1] Constants & Helpers
+// Konstanta, format, dan helper utama untuk upload
+// ---------------------------------------------------------------------------
 
 const UPLOAD_DIR = join(process.cwd(), "uploads");
 
@@ -19,23 +24,19 @@ const IMAGE_FORMATS: { name: string; width: number }[] = [
 
 const IMAGE_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif", "image/tiff"];
 
+// [1.1] Helper untuk proses resize dan simpan multi-format
 async function processImage(buffer: Buffer, mimeType: string, originalWidth: number): Promise<Record<string, ImageFormat>> {
   const formats: Record<string, ImageFormat> = {};
-
   for (const format of IMAGE_FORMATS) {
     if (originalWidth <= format.width) continue;
-
     const filename = `${randomUUID()}.webp`;
     const filePath = join(UPLOAD_DIR, filename);
     const relativePath = `uploads/${filename}`;
-
     const { data, info } = await sharp(buffer)
       .resize({ width: format.width, withoutEnlargement: true })
       .webp({ quality: 80 })
       .toBuffer({ resolveWithObject: true });
-
     await writeFile(filePath, data);
-
     formats[format.name] = {
       filename,
       height: info.height,
@@ -46,65 +47,60 @@ async function processImage(buffer: Buffer, mimeType: string, originalWidth: num
       width: info.width,
     };
   }
-
   return formats;
 }
 
-export const service = {
-  async delete(fileId: number) {
-    const fileRecord = await prisma.files.findUnique({
-      where: { id: fileId },
-    });
+// ---------------------------------------------------------------------------
+// [2] Service utama upload
+// Semua logic utama upload CRUD
+// ---------------------------------------------------------------------------
 
+export const service = {
+  // [2.1] Hapus file
+  async delete(fileId: number) {
+    const fileRecord = await prisma.files.findUnique({ where: { id: fileId } });
     if (!fileRecord) {
       throw new Error("File not found");
     }
-
-    await prisma.files.delete({
-      where: { id: fileId },
-    });
-
+    await prisma.files.delete({ where: { id: fileId } });
+    // [2.1.1] Hapus file utama
     const deleteFile = async (filename: string) => {
       try {
         await unlink(join(UPLOAD_DIR, filename));
       } catch {
-        // File may already be missing from disk; ignore
+        // File mungkin sudah tidak ada di disk
       }
     };
-
     await deleteFile(fileRecord.filename);
-
+    // [2.1.2] Hapus semua format turunan jika ada
     if (fileRecord.formats) {
       const formats = fileRecord.formats as unknown as Record<string, ImageFormat>;
       await Promise.all(Object.values(formats).map((f) => deleteFile(f.filename)));
     }
-
     return fileRecord;
   },
 
+  // [2.2] Ambil semua file
   async getAll() {
-    return await prisma.files.findMany({
-      orderBy: { createdAt: "desc" },
-    });
+    return await prisma.files.findMany({ orderBy: { createdAt: "desc" } });
   },
 
+  // [2.3] Ambil file by id
   async getById(fileId: number) {
-    return await prisma.files.findUnique({
-      where: { id: fileId },
-    });
+    return await prisma.files.findUnique({ where: { id: fileId } });
   },
 
+  // [2.4] Upload file baru
   async upload(file: File): Promise<UploadResponse> {
     // eslint-disable-next-line no-useless-catch
     try {
       await mkdir(UPLOAD_DIR, { recursive: true });
-
+      // [2.4.1] Simpan file original
       const originalFilename = file.name;
       const extension = extname(originalFilename);
       const filename = `${randomUUID()}${extension}`;
       const filePath = join(UPLOAD_DIR, filename);
       const relativePath = `uploads/${filename}`;
-
       const buffer = Buffer.from(await file.arrayBuffer());
       await writeFile(filePath, buffer);
 
@@ -114,11 +110,11 @@ export const service = {
       let placeholder: null | string = null;
       let formats: null | Record<string, ImageFormat> = null;
 
+      // [2.4.2] Proses metadata dan multi-format jika image
       if (IMAGE_MIME_TYPES.includes(file.type)) {
         const metadata = await sharp(buffer).metadata();
         width = metadata.width ?? null;
         height = metadata.height ?? null;
-
         if (width && height) {
           const [{ base64, color }, processedFormats] = await Promise.all([
             getPlaiceholder(buffer, { size: 32 }),
@@ -130,6 +126,7 @@ export const service = {
         }
       }
 
+      // [2.4.3] Simpan metadata ke DB
       const fileRecord = await prisma.files.create({
         data: {
           dominantColor,

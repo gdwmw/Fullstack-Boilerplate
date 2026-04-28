@@ -6,24 +6,39 @@ import { redis } from "@/src/libs";
 
 export const getBearerToken = (authorization?: string) => (authorization?.startsWith("Bearer ") ? authorization.slice(7) : null);
 
-export const verifyResponse = async ({ authorization, jwt }: { authorization?: string; jwt: { verify(token: string): Promise<unknown> } }) => {
+export const verifyResponse = async ({
+  accessJwt,
+  authorization,
+}: {
+  accessJwt: { verify(token: string): Promise<unknown> };
+  authorization?: string;
+}) => {
   const res = getBearerToken(authorization);
 
   if (!res) {
-    return ERROR_RESPONSE(null, responseMessage("Access token").required);
+    return ERROR_RESPONSE({
+      message: responseMessage("Access token").required,
+      token: { access: false },
+    });
   }
 
-  const decoded = await jwt.verify(res);
+  const decoded = await accessJwt.verify(res);
 
   if (!decoded || typeof decoded !== "object") {
-    return ERROR_RESPONSE(null, responseMessage("Access token").invalid);
+    return ERROR_RESPONSE({
+      message: responseMessage("Access token").invalid,
+      token: { access: false },
+    });
   }
 
   const jti = (decoded as Record<string, unknown>).jti;
   if (typeof jti === "string") {
     const blocked = await redis.exists(`blocklist:${jti}`);
     if (blocked === 1) {
-      return ERROR_RESPONSE(null, responseMessage("Access token").invalid);
+      return ERROR_RESPONSE({
+        message: responseMessage("Access token").invalid,
+        token: { access: false },
+      });
     }
   }
 
@@ -31,12 +46,12 @@ export const verifyResponse = async ({ authorization, jwt }: { authorization?: s
 };
 
 export const verifyAccessToken = async ({
+  accessJwt,
   headers,
-  jwt,
   set,
 }: {
+  accessJwt: { verify(token: string): Promise<unknown> };
   headers: { authorization?: string };
-  jwt: { verify(token: string): Promise<unknown> };
   set: {
     cookie?: Record<string, ElysiaCookie>;
     headers: HTTPHeaders;
@@ -45,8 +60,8 @@ export const verifyAccessToken = async ({
   };
 }) => {
   const res = await verifyResponse({
+    accessJwt,
     authorization: headers.authorization,
-    jwt,
   });
 
   if (res) {

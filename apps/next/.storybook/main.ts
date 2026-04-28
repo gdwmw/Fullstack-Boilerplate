@@ -1,4 +1,4 @@
-import type { StorybookConfig } from "@storybook/nextjs-vite";
+import { StorybookConfig } from "@storybook/nextjs-vite";
 
 const config: StorybookConfig = {
   addons: ["@storybook/addon-themes"],

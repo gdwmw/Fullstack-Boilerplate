@@ -1,14 +1,11 @@
-import type { NextAuthOptions, Session, User } from "next-auth";
-
+import { NextAuthOptions, Session, User } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-import { ILoginPayload, IUploadResponse, POSTLogin, POSTRefresh } from "@/src/utils";
+import { ILoginPayload, IUploadResponse, POSTLogin } from "@/src/utils";
 
-const ACCESS_TOKEN_EXPIRES_IN = process.env.JWT_ACCESS_EXPIRES_IN || "30m";
 const SESSION_EXPIRES_IN = process.env.NEXTAUTH_SESSION_EXPIRES_IN || "7d";
-const REFRESH_ACCESS_TOKEN_ERROR = "refresh-access-token-error";
-const SESSION_EXPIRED_ERROR = "session-expired-error";
+const ACCESS_TOKEN_EXPIRES_IN = process.env.NEXT_PUBLIC_ACCESS_TOKEN_EXPIRES_IN || "15m";
 
 const parseDurationToMs = (value: string) => {
   const parsed = /^([0-9]+)(ms|s|m|h|d)$/i.exec(value.trim());
@@ -32,71 +29,7 @@ const parseDurationToMs = (value: string) => {
 };
 
 const parseDurationToSeconds = (value: string) => Math.floor(parseDurationToMs(value) / 1000);
-
-const getAccessTokenExpiresAt = (accessToken?: string) => {
-  if (!accessToken) {
-    return null;
-  }
-
-  try {
-    const payload = accessToken.split(".")[1];
-    if (!payload) {
-      return null;
-    }
-
-    const decoded = JSON.parse(Buffer.from(payload, "base64url").toString("utf-8")) as { exp?: number };
-    if (!decoded.exp) {
-      return null;
-    }
-
-    return decoded.exp * 1000;
-  } catch {
-    return null;
-  }
-};
-
-const getFallbackAccessTokenExpiry = () => Date.now() + parseDurationToMs(ACCESS_TOKEN_EXPIRES_IN);
 const getSessionExpiry = (startedAt: number) => startedAt + parseDurationToMs(SESSION_EXPIRES_IN);
-
-const expireSession = (token: JWT): JWT => ({
-  ...token,
-  accessToken: undefined,
-  accessTokenExpiresAt: undefined,
-  error: SESSION_EXPIRED_ERROR,
-  refreshToken: undefined,
-});
-
-const refreshAccessToken = async (token: JWT): Promise<JWT> => {
-  if (!token.refreshToken) {
-    return {
-      ...token,
-      error: REFRESH_ACCESS_TOKEN_ERROR,
-    };
-  }
-
-  try {
-    const parsed = await POSTRefresh({ refreshToken: token.refreshToken as string });
-
-    if (!parsed?.data?.accessToken || !parsed?.data?.refreshToken) {
-      throw new Error("Invalid refresh response payload");
-    }
-
-    const accessTokenExpiresAt = getAccessTokenExpiresAt(parsed.data.accessToken) || getFallbackAccessTokenExpiry();
-
-    return {
-      ...token,
-      accessToken: parsed.data.accessToken,
-      accessTokenExpiresAt,
-      error: undefined,
-      refreshToken: parsed.data.refreshToken,
-    };
-  } catch {
-    return {
-      ...token,
-      error: REFRESH_ACCESS_TOKEN_ERROR,
-    };
-  }
-};
 
 export const options: NextAuthOptions = {
   callbacks: {
@@ -105,7 +38,6 @@ export const options: NextAuthOptions = {
         return {
           ...token,
           ...session.user,
-          accessTokenExpiresAt: getAccessTokenExpiresAt(session.user.accessToken) || token.accessTokenExpiresAt,
           sessionExpiresAt: token.sessionExpiresAt,
           sessionStartedAt: token.sessionStartedAt,
         };
@@ -121,8 +53,7 @@ export const options: NextAuthOptions = {
         token.phone = user.phone;
         token.role = user.role;
         token.accessToken = user.accessToken;
-        token.accessTokenExpiresAt = getAccessTokenExpiresAt(user.accessToken) || getFallbackAccessTokenExpiry();
-        token.refreshToken = user.refreshToken;
+        token.accessTokenExpiresAt = sessionStartedAt + parseDurationToMs(ACCESS_TOKEN_EXPIRES_IN);
         token.image = user.image as IUploadResponse | null;
         token.imageId = user.imageId;
         token.sessionExpiresAt = getSessionExpiry(sessionStartedAt);
@@ -132,25 +63,7 @@ export const options: NextAuthOptions = {
         return token;
       }
 
-      if (!token.sessionStartedAt || !token.sessionExpiresAt) {
-        const sessionStartedAt = Date.now();
-        token.sessionStartedAt = sessionStartedAt;
-        token.sessionExpiresAt = getSessionExpiry(sessionStartedAt);
-      }
-
-      if (Date.now() >= (token.sessionExpiresAt as number)) {
-        return expireSession(token);
-      }
-
-      const expiresAt = token.accessTokenExpiresAt as number | undefined;
-      if (token.accessToken && expiresAt && Date.now() < expiresAt - 5_000) {
-        return {
-          ...token,
-          error: undefined,
-        };
-      }
-
-      return await refreshAccessToken(token);
+      return token;
     },
 
     async redirect({ baseUrl }) {
@@ -159,16 +72,14 @@ export const options: NextAuthOptions = {
 
     async session({ session, token }: { session: Session; token: JWT }) {
       session.user = {
-        accessToken: token.accessToken as string | undefined,
+        accessToken: token.accessToken as null | string | undefined,
         accessTokenExpiresAt: token.accessTokenExpiresAt as number | undefined,
         email: token.email as null | string | undefined,
-        error: token.error as string | undefined,
         id: token.id as number | undefined,
         image: token.image as IUploadResponse | null | undefined,
         imageId: token.imageId as null | number | undefined,
         name: token.name as null | string | undefined,
         phone: token.phone as string | undefined,
-        refreshToken: token.refreshToken as string | undefined,
         role: token.role as "admin" | "user" | undefined,
         sessionExpiresAt: token.sessionExpiresAt as number | undefined,
         sessionStartedAt: token.sessionStartedAt as number | undefined,

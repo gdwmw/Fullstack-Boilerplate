@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AxiosError } from "axios";
 import { Eye, EyeOff } from "lucide-react";
-import { signOut, useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import { FC, HTMLInputTypeAttribute, ReactElement, useState, useTransition } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 
@@ -39,7 +39,6 @@ const FORM_FIELDS_DATA: IFormField[] = [
 ];
 
 export const Main: FC = (): ReactElement => {
-  const session = useSession();
   const [passwordVisibility, setPasswordVisibility] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>("");
   const [loading, setTransition] = useTransition();
@@ -63,11 +62,8 @@ export const Main: FC = (): ReactElement => {
           const { confirmPassword: _confirmPassword, ...changePasswordPayload } = dt;
           await POSTChangePassword(changePasswordPayload);
           console.info("Change password success!");
-          try {
-            await POSTLogout({ refreshToken: session.data?.user?.refreshToken || "" });
-          } finally {
-            signOut();
-          }
+          await POSTLogout();
+          signOut();
           reset();
         } catch (error) {
           const axiosError = error as AxiosError<IErrorResponse>;

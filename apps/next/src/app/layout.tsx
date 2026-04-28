@@ -1,5 +1,4 @@
-import type { Metadata } from "next";
-
+import { Metadata } from "next";
 import { FC, PropsWithChildren, ReactElement } from "react";
 
 import { APIConnectionChecker } from "../components";
@@ -18,6 +17,26 @@ export const metadata: Metadata = {
     template: "Next.js | %s",
   },
 };
+
+if (!process.env.NEXTAUTH_URL) {
+  throw new Error("Please check your environment variables. NEXTAUTH_URL is not defined.");
+}
+
+if (!process.env.NEXTAUTH_SECRET) {
+  throw new Error("Please check your environment variables. NEXTAUTH_SECRET is not defined.");
+}
+
+if (!process.env.NEXTAUTH_SESSION_EXPIRES_IN) {
+  throw new Error("Please check your environment variables. NEXTAUTH_SESSION_EXPIRES_IN is not defined.");
+}
+
+if (!process.env.NEXT_PUBLIC_REFRESH_BUFFER_MS) {
+  throw new Error("Please check your environment variables. NEXT_PUBLIC_REFRESH_BUFFER_MS is not defined.");
+}
+
+if (!process.env.NEXT_PUBLIC_ACCESS_TOKEN_EXPIRES_IN) {
+  throw new Error("Please check your environment variables. NEXT_PUBLIC_ACCESS_TOKEN_EXPIRES_IN is not defined.");
+}
 
 if (!process.env.NEXT_PUBLIC_BASE_API_URL) {
   throw new Error("Please check your environment variables. NEXT_PUBLIC_BASE_API_URL is not defined.");

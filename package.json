@@ -7,6 +7,9 @@
     "dev": "turbo run dev",
     "build": "turbo run build",
     "start": "turbo run start",
+    "generate": "turbo run generate",
+    "migrate": "turbo run migrate",
+    "reset": "turbo run reset",
     "storybook:build": "turbo run storybook:build",
     "jest:test": "turbo run jest:test",
     "lint": "turbo run lint",
@@ -31,7 +34,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "prettier": "^3.8.3",
-    "prettier-plugin-tailwindcss": "^0.7.3",
+    "prettier-plugin-tailwindcss": "^0.7.4",
     "turbo": "^2.9.6",
     "typescript": "5.9.3"
   },

@@ -26,6 +26,7 @@ export interface IUploadResponse {
   path: string;
   placeholder: null | string;
   size: number;
+  updatedAt: Date;
   url: string;
   width: null | number;
 }

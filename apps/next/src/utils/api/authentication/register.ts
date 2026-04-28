@@ -15,7 +15,6 @@ interface IElysiaRegisterData {
   id: number;
   name: string;
   phone: string;
-  refreshToken: string;
   role: "admin" | "user";
   username: string;
 }

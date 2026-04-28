@@ -18,12 +18,12 @@ export interface IImageFile {
 }
 
 export interface IUserPayload {
-  email?: string;
+  email: string;
   imageId?: null | number;
-  name?: string;
-  phone?: string;
+  name: string;
+  phone: string;
   role?: "admin" | "user";
-  username?: string;
+  username: string;
 }
 
 export interface IUserResponse {

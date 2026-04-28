@@ -30,13 +30,6 @@ export const loginSchema = (method: string) =>
     password: z.string().min(1, { message: schemaMessage.string.required("Password") }),
   });
 
-export const refreshSchema = z.object({
-  refreshToken: z
-    .string()
-    .trim()
-    .min(1, { message: schemaMessage.string.required("Refresh token") }),
-});
-
 export const changePasswordSchema = z.object({
   newPassword: z
     .string()

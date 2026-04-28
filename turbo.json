@@ -9,10 +9,16 @@
     "JWT_REFRESH_SECRET",
     "JWT_ACCESS_EXPIRES_IN",
     "JWT_REFRESH_EXPIRES_IN",
+    "JWT_REFRESH_COOKIE_NAME",
+    "JWT_REFRESH_COOKIE_PATH",
+    "JWT_REFRESH_COOKIE_SAME_SITE",
+    "JWT_REFRESH_COOKIE_SECURE",
     "CORS_ORIGINS",
     "REDIS_URL",
     "NEXTAUTH_URL",
     "NEXTAUTH_SECRET",
+    "NEXT_PUBLIC_REFRESH_BUFFER_MS",
+    "NEXT_PUBLIC_ACCESS_TOKEN_EXPIRES_IN",
     "NEXTAUTH_SESSION_EXPIRES_IN",
     "NEXT_PUBLIC_BASE_API_URL",
     "NEXT_PUBLIC_DEBUG_MODE"
@@ -29,6 +35,15 @@
     },
     "start": {
       "dependsOn": ["^start"]
+    },
+    "generate": {
+      "dependsOn": ["^generate"]
+    },
+    "migrate": {
+      "dependsOn": ["^migrate"]
+    },
+    "reset": {
+      "dependsOn": ["^reset"]
     },
     "storybook:build": {
       "dependsOn": ["^jest:test"],

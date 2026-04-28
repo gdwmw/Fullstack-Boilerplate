@@ -15,7 +15,6 @@ interface IElysiaLoginData {
   imageId: null | number;
   name: string;
   phone: string;
-  refreshToken: string;
   role: "admin" | "user";
   username: string;
 }

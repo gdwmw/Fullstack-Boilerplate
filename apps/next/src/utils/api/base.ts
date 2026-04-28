@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig, AxiosRequestHeaders, AxiosResponse, Method } from "axios";
+import axios, { AxiosRequestHeaders, AxiosResponse, Method } from "axios";
 
 import { getSession } from "@/src/utils";
 
@@ -14,6 +14,7 @@ export interface IErrorResponse {
   code: null | string;
   message: null | string;
   success: false;
+  token: { access: boolean; refresh: boolean } | null;
 }
 
 interface I {
@@ -28,13 +29,10 @@ interface I {
 }
 
 export const apiRequest = async <T>({ auth = true, ...props }: I): Promise<ISuccessResponse<T>> => {
-  const fetchToken = async (): Promise<string | undefined> => {
-    const token = await getSession("accessToken");
-    return typeof token === "string" ? token : undefined;
-  };
+  const accessToken = auth ? await getSession("accessToken") : undefined;
 
-  const sendRequest = async (accessToken?: string): Promise<ISuccessResponse<T>> => {
-    const config: AxiosRequestConfig = {
+  try {
+    const res: AxiosResponse<ISuccessResponse<T>> = await axios({
       data: props.data,
       headers: {
         ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
@@ -43,42 +41,22 @@ export const apiRequest = async <T>({ auth = true, ...props }: I): Promise<ISucc
       method: props.method,
       params: props.params,
       url: `${API_URL}${props.endpoint}`,
-    };
+      withCredentials: true,
+    });
 
-    const res: AxiosResponse<ISuccessResponse<T>> = await axios(config);
     return res.data;
-  };
-
-  try {
-    const accessToken = auth ? await fetchToken() : undefined;
-    return await sendRequest(accessToken);
   } catch (error) {
-    let handledError: unknown = error;
     let statusCode: number | undefined;
     let errorMessage = "Unknown error occurred";
 
-    if (axios.isAxiosError<IErrorResponse>(handledError)) {
-      if (auth && handledError.response?.status === 401) {
-        const latestAccessToken = await fetchToken();
-
-        if (latestAccessToken) {
-          try {
-            return await sendRequest(latestAccessToken);
-          } catch (retryError) {
-            handledError = retryError;
-          }
-        }
+    if (axios.isAxiosError<IErrorResponse>(error)) {
+      if (process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_DEBUG_MODE === "true") {
+        console.error("Axios error response:", error.response);
       }
-
-      if (axios.isAxiosError<IErrorResponse>(handledError)) {
-        if (process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_DEBUG_MODE === "true") {
-          console.error("Axios error response:", handledError.response);
-        }
-        statusCode = handledError.response?.status;
-        errorMessage = handledError.response?.data?.message ?? handledError.message;
-      }
-    } else if (handledError instanceof Error) {
-      errorMessage = handledError.message;
+      statusCode = error.response?.status;
+      errorMessage = error.response?.data?.message ?? error.message;
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
     }
 
     console.error(
@@ -86,7 +64,7 @@ export const apiRequest = async <T>({ auth = true, ...props }: I): Promise<ISucc
       `An error occurred while processing ${props.method} request for ${props.label} || Status Code: ${statusCode} || Message: ${errorMessage}`,
     );
 
-    throw handledError;
+    throw error;
   }
 };
 
