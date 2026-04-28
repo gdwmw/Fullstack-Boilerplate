@@ -18,14 +18,14 @@ const AdminPage: FC = async (): Promise<ReactElement> => {
 
   return (
     <main>
-      <FormContainer className={{ innerContainer: "size-fit max-h-[639px] max-w-[435px] flex-col items-center gap-3" }} href="/" label="Home">
+      <FormContainer className={{ innerContainer: "h-159.75 w-full max-w-108.75 flex-col items-center gap-3" }} href="/" label="Home">
         <header>
           <h1 className="text-center text-2xl font-semibold text-blue-500">Admin Page</h1>
           <p className="text-center text-sm tracking-wide">This is the admin page of the application</p>
         </header>
-        <div className="max-h-full max-w-full overflow-hidden rounded-lg border border-blue-500">
+        <div className="min-h-0 w-full flex-1 overflow-hidden rounded-lg border border-blue-500">
           <div className="size-full overflow-auto p-2">
-            <pre className="w-fit text-sm">session: {JSON.stringify(session, null, 2)}</pre>
+            <pre className="min-w-max text-sm">session: {JSON.stringify(session, null, 2)}</pre>
           </div>
         </div>
       </FormContainer>

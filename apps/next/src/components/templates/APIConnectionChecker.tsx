@@ -72,7 +72,7 @@ export const APIConnectionChecker: FC = (): ReactElement => {
               </div>
               <div className="overflow-hidden">
                 <h2 className="text-sm font-semibold sm:text-base dark:text-white">Connected</h2>
-                <span className="block max-w-[200px] truncate text-xs text-gray-600 sm:max-w-xs dark:text-gray-300">NEXT_PUBLIC_EXAMPLE_URL</span>
+                <span className="block max-w-50 truncate text-xs text-gray-600 sm:max-w-xs dark:text-gray-300">NEXT_PUBLIC_EXAMPLE_URL</span>
               </div>
             </div>
 
@@ -88,7 +88,7 @@ export const APIConnectionChecker: FC = (): ReactElement => {
                 </div>
                 <div className="overflow-hidden">
                   <h2 className="text-sm font-semibold sm:text-base dark:text-white">{connection[i] ? "Connected" : "Disconnected"}</h2>
-                  <span className="block max-w-[200px] truncate text-xs text-gray-600 sm:max-w-xs dark:text-gray-300">{dt}</span>
+                  <span className="block max-w-50 truncate text-xs text-gray-600 sm:max-w-xs dark:text-gray-300">{dt}</span>
                 </div>
               </div>
             ))}

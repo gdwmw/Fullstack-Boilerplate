@@ -79,7 +79,7 @@ export const Main: FC = (): ReactElement => {
 
   return (
     <main>
-      <FormContainer className={{ innerContainer: "max-w-[350px]" }} href={"/profile"} label={"Back"}>
+      <FormContainer className={{ innerContainer: "max-w-87.5" }} href={"/profile"} label={"Back"}>
         <form className="flex w-full flex-col gap-3 overflow-y-auto" onSubmit={handleSubmit(onSubmit)}>
           {FORM_FIELDS_DATA.map((dt, i) => (
             <ExampleInput
