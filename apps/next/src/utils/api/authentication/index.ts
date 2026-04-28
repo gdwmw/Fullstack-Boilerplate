@@ -32,6 +32,7 @@ export interface INextAuthResponse {
 
 export * from "./login";
 export * from "./logout";
+export * from "./me";
 export * from "./password";
 export * from "./refresh";
 export * from "./register";

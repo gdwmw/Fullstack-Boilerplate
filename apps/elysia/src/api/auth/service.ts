@@ -66,7 +66,8 @@ export const service = {
 
   async getUserById(id: number) {
     return await prisma.users.findUnique({
-      omit: { ...AUTH_OMIT_FIELDS, imageId: true },
+      include: { image: true },
+      omit: { ...AUTH_OMIT_FIELDS },
       where: { id },
     });
   },

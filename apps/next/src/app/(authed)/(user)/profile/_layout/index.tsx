@@ -1,13 +1,20 @@
 import { FC, ReactElement } from "react";
 
-import { getAllSession } from "@/src/utils";
+import { GETMe, IMeResponse } from "@/src/utils";
 
 import { Main } from "./modules";
 
 const ProfileLayout: FC = async (): Promise<ReactElement> => {
-  const session = await getAllSession();
+  let user: IMeResponse | null = null;
 
-  return <Main session={session} />;
+  try {
+    const res = await GETMe();
+    user = res.data;
+  } catch {
+    user = null;
+  }
+
+  return <Main user={user} />;
 };
 
 export default ProfileLayout;

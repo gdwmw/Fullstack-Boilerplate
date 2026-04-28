@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AxiosError } from "axios";
-import { Session } from "next-auth";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -10,7 +9,7 @@ import { FC, HTMLInputTypeAttribute, KeyboardEvent, ReactElement, useEffect, use
 import { SubmitHandler, useForm } from "react-hook-form";
 
 import { Avatar, ExampleATWM, ExampleInput, FormContainer, SubmitButton } from "@/src/components";
-import { DELETEUpload, IErrorResponse, inputValidations, POSTUpload, PUTUsers } from "@/src/utils";
+import { DELETEUpload, IErrorResponse, IMeResponse, inputValidations, POSTUpload, PUTUsers } from "@/src/utils";
 
 import { ProfileSchema, TProfileSchema } from "./schema";
 
@@ -59,7 +58,7 @@ const FORM_FIELDS_DATA: IFormField[] = [
 ];
 
 interface I {
-  session: null | Session;
+  user: IMeResponse | null;
 }
 
 export const Main: FC<I> = (props): ReactElement => {
@@ -76,10 +75,10 @@ export const Main: FC<I> = (props): ReactElement => {
     watch,
   } = useForm<TProfileSchema>({
     defaultValues: {
-      email: props.session?.user?.email ?? undefined,
-      name: props.session?.user?.name ?? undefined,
-      phone: props.session?.user?.phone,
-      username: props.session?.user?.username,
+      email: props.user?.email,
+      name: props.user?.name,
+      phone: props.user?.phone,
+      username: props.user?.username,
     },
     resolver: zodResolver(ProfileSchema),
   });
@@ -101,11 +100,11 @@ export const Main: FC<I> = (props): ReactElement => {
   const onSubmit: SubmitHandler<TProfileSchema> = (dt) => {
     setTransition(async () => {
       try {
-        let imageId: null | number | undefined = props.session?.user?.imageId;
+        let imageId: null | number | undefined = props.user?.imageId;
 
         if (dt.image && dt.image.length > 0) {
-          if (props.session?.user?.imageId) {
-            await DELETEUpload(props.session?.user?.imageId);
+          if (props.user?.imageId) {
+            await DELETEUpload(props.user.imageId);
           }
 
           const uploadResponse = await POSTUpload({
@@ -115,7 +114,7 @@ export const Main: FC<I> = (props): ReactElement => {
           imageId = uploadResponse.data.id;
         }
 
-        const userResponse = await PUTUsers(props.session?.user?.id ?? 0, {
+        const userResponse = await PUTUsers(props.user?.id ?? 0, {
           email: dt.email,
           imageId: imageId,
           name: dt.name,
@@ -147,13 +146,13 @@ export const Main: FC<I> = (props): ReactElement => {
 
   return (
     <main>
-      <FormContainer className={{ innerContainer: "max-w-[450px]" }} href={"/"} label={"Home"}>
+      <FormContainer className={{ innerContainer: "max-w-112.5" }} href={"/"} label={"Home"}>
         <form className="flex w-full flex-col gap-3 overflow-y-auto" onSubmit={handleSubmit(onSubmit)}>
           <Avatar
             className="mx-auto min-h-32 min-w-32"
             iconSize={64}
-            placeholder={previewImage ? null : props.session?.user?.image?.placeholder}
-            src={previewImage ? previewImage : props.session?.user?.image ? `${API_URL}${props.session?.user?.image?.formats?.thumbnail?.url}` : ""}
+            placeholder={previewImage ? null : props.user?.image?.placeholder}
+            src={previewImage ? previewImage : props.user?.image ? `${API_URL}${props.user?.image?.formats?.thumbnail?.url}` : ""}
           />
 
           {FORM_FIELDS_DATA.map((dt, i) => (
