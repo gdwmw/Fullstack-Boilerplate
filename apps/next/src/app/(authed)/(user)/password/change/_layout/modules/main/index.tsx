@@ -63,9 +63,7 @@ export const Main: FC = (): ReactElement => {
           const { confirmPassword: _confirmPassword, ...changePasswordPayload } = dt;
           await POSTChangePassword(changePasswordPayload);
           console.info("Change password success!");
-          if (session.data?.user?.refreshToken !== "ADmiNrEfReSHTOkeN" && session.data?.user?.refreshToken !== "uSErrEfReSHTOkeN") {
-            await POSTLogout({ refreshToken: session.data?.user?.refreshToken || "" });
-          }
+          await POSTLogout({ refreshToken: session.data?.user?.refreshToken || "" });
           signOut();
           reset();
         } catch (error) {

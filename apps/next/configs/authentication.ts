@@ -3,15 +3,12 @@ import type { NextAuthOptions, Session, User } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-import { DUMMY_ACCOUNT_DATA } from "@/src/constants";
 import { ILoginPayload, IUploadResponse, POSTLogin } from "@/src/utils";
 
 const API_URL = process.env.NEXT_PUBLIC_BASE_API_URL || "";
 const ACCESS_TOKEN_EXPIRES_IN = process.env.JWT_ACCESS_EXPIRES_IN || "30m";
 const SESSION_EXPIRES_IN = process.env.NEXTAUTH_SESSION_EXPIRES_IN || "7d";
 const REFRESH_ACCESS_TOKEN_ERROR = "refresh-access-token-error";
-
-const DUMMY_REFRESH_TOKENS = ["ADmiNrEfReSHTOkeN", "dEmOrEfReSHTOkeN", "uSErrEfReSHTOkeN"];
 
 const parseDurationToMs = (value: string) => {
   const parsed = /^([0-9]+)(ms|s|m|h|d)$/i.exec(value.trim());
@@ -66,10 +63,6 @@ const refreshAccessToken = async (token: JWT): Promise<JWT> => {
       ...token,
       error: REFRESH_ACCESS_TOKEN_ERROR,
     };
-  }
-
-  if (DUMMY_REFRESH_TOKENS.includes(token.refreshToken as string) || !API_URL) {
-    return token;
   }
 
   try {
@@ -185,15 +178,6 @@ export const options: NextAuthOptions = {
         }
 
         const { identifier, method, password } = credentials as ILoginPayload;
-
-        const dummyUser = DUMMY_ACCOUNT_DATA.find(
-          (user) => (user.username === identifier || user.email === identifier) && user.password === password,
-        );
-
-        if (dummyUser) {
-          // eslint-disable-next-line
-          return dummyUser.response as any;
-        }
 
         try {
           const res = await POSTLogin({ identifier, method: method === "email" ? "email" : "username", password });

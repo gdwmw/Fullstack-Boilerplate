@@ -10,7 +10,6 @@ import { FC, ReactElement, useState, useTransition } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 
 import { ExampleATWM, ExampleInput, FormContainer, SubmitButton } from "@/src/components";
-import { DUMMY_ACCOUNT_DATA } from "@/src/constants";
 import { IErrorResponse, POSTLogin } from "@/src/utils";
 
 import { LoginSchema, TLoginSchema } from "./schema";
@@ -36,17 +35,9 @@ export const Main: FC = (): ReactElement => {
       setErrorMessage("");
 
       try {
-        const isMatched = DUMMY_ACCOUNT_DATA.find(
-          (user) => (user.username === dt.identifier || user.email === dt.identifier) && user.password === dt.password,
-        );
+        const method = loginWithEmail ? "email" : "username";
+        await POSTLogin({ identifier: dt.identifier, method, password: dt.password });
 
-        if (!isMatched) {
-          // Validate with backend first to get actual error message
-          const method = loginWithEmail ? "email" : "username";
-          await POSTLogin({ identifier: dt.identifier, method, password: dt.password });
-        }
-
-        // If validation passes, use NextAuth to complete authentication
         const res = await signIn("credentials", {
           identifier: dt.identifier,
           method: loginWithEmail ? "email" : "username",
