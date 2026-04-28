@@ -20,7 +20,7 @@ export const handlePrismaError = (
 
   const splitedRawMessage = error.message.split("\n");
   const lastLine = splitedRawMessage[splitedRawMessage.length - 1];
-  console.error(`ERROR : (${error.code}) - ${lastLine}`);
+  console.error(`ERROR : (${error.code}) - ${lastLine.toLowerCase()}`);
 
   switch (error.code) {
     case "P2000":

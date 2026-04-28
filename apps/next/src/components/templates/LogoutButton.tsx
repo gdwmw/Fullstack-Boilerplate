@@ -12,8 +12,11 @@ export const LogoutButton: FC<IExampleA> = ({ ...props }): ReactElement => {
   const session = useSession();
 
   const handleLogout = async () => {
-    await POSTLogout({ refreshToken: session.data?.user?.refreshToken || "" });
-    signOut();
+    try {
+      await POSTLogout({ refreshToken: session.data?.user?.refreshToken || "" });
+    } finally {
+      signOut();
+    }
   };
 
   return (

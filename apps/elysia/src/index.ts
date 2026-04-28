@@ -19,6 +19,10 @@ if (!process.env.JWT_REFRESH_SECRET) {
   throw new Error("Please check your environment variables. JWT_REFRESH_SECRET is not defined.");
 }
 
+if (!process.env.REDIS_URL) {
+  throw new Error("Please check your environment variables. REDIS_URL is not defined.");
+}
+
 const ALLOWED_ORIGINS = [
   "http://localhost:3000",
   "http://127.0.0.1:3000",

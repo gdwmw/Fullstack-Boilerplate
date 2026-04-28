@@ -24,6 +24,7 @@
     "@prisma/client": "^7.8.0",
     "dotenv": "^17.4.2",
     "elysia": "latest",
+    "ioredis": "^5.10.1",
     "plaiceholder": "^3.0.0",
     "prisma": "^7.8.0",
     "sharp": "^0.34.5",

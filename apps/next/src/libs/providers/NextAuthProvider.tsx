@@ -5,6 +5,8 @@ import { FC, PropsWithChildren, ReactElement, useEffect } from "react";
 
 type T = Readonly<PropsWithChildren>;
 
+const SESSION_ERRORS = new Set(["refresh-access-token-error", "session-expired-error"]);
+
 const RefreshSessionGuard: FC = (): null | ReactElement => {
   const session = useSession();
 
@@ -13,10 +15,30 @@ const RefreshSessionGuard: FC = (): null | ReactElement => {
       return;
     }
 
-    if (session.data?.user?.error === "refresh-access-token-error") {
+    if (session.data?.user?.error && SESSION_ERRORS.has(session.data.user.error)) {
       signOut();
+      return;
     }
-  }, [session.data?.user?.error, session.status]);
+
+    const sessionExpiresAt = session.data?.user?.sessionExpiresAt;
+
+    if (!sessionExpiresAt) {
+      return;
+    }
+
+    if (Date.now() >= sessionExpiresAt) {
+      signOut();
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      signOut();
+    }, sessionExpiresAt - Date.now());
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [session.data?.user?.error, session.data?.user?.sessionExpiresAt, session.status]);
 
   return null;
 };
