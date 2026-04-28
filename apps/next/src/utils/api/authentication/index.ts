@@ -23,7 +23,9 @@ export interface IAuthResponse {
 
 export interface INextAuthResponse {
   accessToken?: string;
+  accessTokenExpiresAt?: number;
   email?: null | string;
+  error?: string;
   id?: number;
   image?: IUploadResponse | null;
   imageId?: null | number;

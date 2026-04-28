@@ -6,11 +6,122 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { DUMMY_ACCOUNT_DATA } from "@/src/constants";
 import { ILoginPayload, IUploadResponse, POSTLogin } from "@/src/utils";
 
+const API_URL = process.env.NEXT_PUBLIC_BASE_API_URL || "";
+const ACCESS_TOKEN_EXPIRES_IN = process.env.JWT_ACCESS_EXPIRES_IN || "30m";
+const SESSION_EXPIRES_IN = process.env.NEXTAUTH_SESSION_EXPIRES_IN || "7d";
+const REFRESH_ACCESS_TOKEN_ERROR = "refresh-access-token-error";
+
+const DUMMY_REFRESH_TOKENS = ["ADmiNrEfReSHTOkeN", "dEmOrEfReSHTOkeN", "uSErrEfReSHTOkeN"];
+
+const parseDurationToMs = (value: string) => {
+  const parsed = /^([0-9]+)(ms|s|m|h|d)$/i.exec(value.trim());
+
+  if (!parsed) {
+    throw new Error("Invalid duration format. Use: 15m, 7d, 3600s");
+  }
+
+  const amount = Number(parsed[1]);
+  const unit = parsed[2].toLowerCase();
+
+  const multiplierByUnit: Record<string, number> = {
+    d: 24 * 60 * 60 * 1000,
+    h: 60 * 60 * 1000,
+    m: 60 * 1000,
+    ms: 1,
+    s: 1000,
+  };
+
+  return amount * multiplierByUnit[unit];
+};
+
+const parseDurationToSeconds = (value: string) => Math.floor(parseDurationToMs(value) / 1000);
+
+const getAccessTokenExpiresAt = (accessToken?: string) => {
+  if (!accessToken) {
+    return null;
+  }
+
+  try {
+    const payload = accessToken.split(".")[1];
+    if (!payload) {
+      return null;
+    }
+
+    const decoded = JSON.parse(Buffer.from(payload, "base64url").toString("utf-8")) as { exp?: number };
+    if (!decoded.exp) {
+      return null;
+    }
+
+    return decoded.exp * 1000;
+  } catch {
+    return null;
+  }
+};
+
+const getFallbackAccessTokenExpiry = () => Date.now() + parseDurationToMs(ACCESS_TOKEN_EXPIRES_IN);
+
+const refreshAccessToken = async (token: JWT): Promise<JWT> => {
+  if (!token.refreshToken) {
+    return {
+      ...token,
+      error: REFRESH_ACCESS_TOKEN_ERROR,
+    };
+  }
+
+  if (DUMMY_REFRESH_TOKENS.includes(token.refreshToken as string) || !API_URL) {
+    return token;
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/auth/refresh`, {
+      body: JSON.stringify({ refreshToken: token.refreshToken }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    });
+
+    if (!res.ok) {
+      throw new Error(`Refresh token failed with status ${res.status}`);
+    }
+
+    const parsed = (await res.json()) as {
+      data?: {
+        accessToken?: string;
+        refreshToken?: string;
+      };
+    };
+
+    if (!parsed?.data?.accessToken || !parsed?.data?.refreshToken) {
+      throw new Error("Invalid refresh response payload");
+    }
+
+    const accessTokenExpiresAt = getAccessTokenExpiresAt(parsed.data.accessToken) || getFallbackAccessTokenExpiry();
+
+    return {
+      ...token,
+      accessToken: parsed.data.accessToken,
+      accessTokenExpiresAt,
+      error: undefined,
+      refreshToken: parsed.data.refreshToken,
+    };
+  } catch {
+    return {
+      ...token,
+      error: REFRESH_ACCESS_TOKEN_ERROR,
+    };
+  }
+};
+
 export const options: NextAuthOptions = {
   callbacks: {
-    async jwt({ session, token, trigger, user }: { session?: Session; token: JWT; trigger?: "signIn" | "signUp" | "update"; user: User }) {
+    async jwt({ session, token, trigger, user }: { session?: Session; token: JWT; trigger?: "signIn" | "signUp" | "update"; user?: User }) {
       if (trigger === "update" && session?.user) {
-        return { ...token, ...session.user };
+        return {
+          ...token,
+          ...session.user,
+          accessTokenExpiresAt: getAccessTokenExpiresAt(session.user.accessToken) || token.accessTokenExpiresAt,
+        };
       }
 
       if (user) {
@@ -21,13 +132,21 @@ export const options: NextAuthOptions = {
         token.phone = user.phone;
         token.role = user.role;
         token.accessToken = user.accessToken;
+        token.accessTokenExpiresAt = getAccessTokenExpiresAt(user.accessToken) || getFallbackAccessTokenExpiry();
         token.refreshToken = user.refreshToken;
         token.image = user.image as IUploadResponse | null;
         token.imageId = user.imageId;
         token.status = user.status;
+
+        return token;
       }
 
-      return token;
+      const expiresAt = token.accessTokenExpiresAt as number | undefined;
+      if (token.accessToken && expiresAt && Date.now() < expiresAt - 5_000) {
+        return token;
+      }
+
+      return await refreshAccessToken(token);
     },
 
     async redirect({ baseUrl }) {
@@ -37,7 +156,9 @@ export const options: NextAuthOptions = {
     async session({ session, token }: { session: Session; token: JWT }) {
       session.user = {
         accessToken: token.accessToken as string | undefined,
+        accessTokenExpiresAt: token.accessTokenExpiresAt as number | undefined,
         email: token.email as null | string | undefined,
+        error: token.error as string | undefined,
         id: token.id as number | undefined,
         image: token.image as IUploadResponse | null | undefined,
         imageId: token.imageId as null | number | undefined,
@@ -78,8 +199,7 @@ export const options: NextAuthOptions = {
           const res = await POSTLogin({ identifier, method: method === "email" ? "email" : "username", password });
           // eslint-disable-next-line
           return res.data as any;
-        } catch (error) {
-          console.error("Login error:", error);
+        } catch {
           return null;
         }
       },
@@ -89,7 +209,7 @@ export const options: NextAuthOptions = {
   ],
 
   session: {
-    maxAge: 60 * 60 * 24,
+    maxAge: parseDurationToSeconds(SESSION_EXPIRES_IN),
     strategy: "jwt",
   },
 };

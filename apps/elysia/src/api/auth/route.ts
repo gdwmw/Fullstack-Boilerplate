@@ -20,7 +20,7 @@ const parseSubjectToUserId = (sub: unknown) => {
 export const AuthRoutes = new Elysia({ prefix: "/auth" })
   .use(
     jwt({
-      exp: process.env.JWT_ACCESS_EXPIRES_IN || "15m",
+      exp: process.env.JWT_ACCESS_EXPIRES_IN || "30m",
       name: "jwt",
       secret: process.env.JWT_ACCESS_SECRET || "",
     }),
