@@ -46,11 +46,11 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         sub: String(res.id),
       });
 
-      const refreshToken = await refreshJwt.sign({
+      const rawRefreshToken = await refreshJwt.sign({
         sub: String(res.id),
       });
 
-      await service.saveRefreshToken(res.id, refreshToken);
+      const refreshToken = await service.saveRefreshToken(res.id, rawRefreshToken);
 
       set.status = 201;
 
@@ -78,11 +78,11 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         sub: String(res.id),
       });
 
-      const refreshToken = await refreshJwt.sign({
+      const rawRefreshToken = await refreshJwt.sign({
         sub: String(res.id),
       });
 
-      await service.saveRefreshToken(res.id, refreshToken);
+      const refreshToken = await service.saveRefreshToken(res.id, rawRefreshToken);
 
       return SUCCESS_RESPONSE({ ...res, accessToken, refreshToken }, responseMessage("Login").success);
     },
@@ -94,15 +94,7 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
     "/refresh",
     async ({ body, jwt, refreshJwt, set }) => {
       const payload = refreshSchema.parse(body);
-      const decoded = await refreshJwt.verify(payload.refreshToken);
-      const userId = parseSubjectToUserId(decoded?.sub);
-
-      if (!decoded || !userId) {
-        set.status = 401;
-        return ERROR_RESPONSE(null, responseMessage("Refresh token").invalid);
-      }
-
-      const res = await service.validateRefreshToken(userId, payload.refreshToken);
+      const res = await service.validateRefreshToken(payload.refreshToken);
 
       if (!res) {
         set.status = 401;
@@ -117,9 +109,9 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         sub: String(res.id),
       });
 
-      await service.saveRefreshToken(res.id, newRefreshToken);
+      const hashedRefreshToken = await service.saveRefreshToken(res.id, newRefreshToken);
 
-      return SUCCESS_RESPONSE({ accessToken, refreshToken: newRefreshToken }, responseMessage("Token").updated);
+      return SUCCESS_RESPONSE({ accessToken, refreshToken: hashedRefreshToken }, responseMessage("Token").updated);
     },
 
     { detail: docs(LABEL).refresh },
@@ -127,17 +119,9 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
 
   .post(
     "/logout",
-    async ({ body, refreshJwt, set }) => {
+    async ({ body, set }) => {
       const payload = refreshSchema.parse(body);
-      const decoded = await refreshJwt.verify(payload.refreshToken);
-      const userId = parseSubjectToUserId(decoded?.sub);
-
-      if (!decoded || !userId) {
-        set.status = 401;
-        return ERROR_RESPONSE(null, responseMessage("Refresh token").invalid);
-      }
-
-      const res = await service.validateRefreshToken(userId, payload.refreshToken);
+      const res = await service.validateRefreshToken(payload.refreshToken);
 
       if (!res) {
         set.status = 401;
