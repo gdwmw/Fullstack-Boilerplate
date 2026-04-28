@@ -125,19 +125,19 @@ export const service = {
       },
       where: { id: userId },
     });
+
+    return hashedRefreshToken;
   },
 
-  async validateRefreshToken(userId: number, refreshToken: string) {
-    const res = await prisma.users.findUnique({
-      where: { id: userId },
+  async validateRefreshToken(refreshToken: string) {
+    const res = await prisma.users.findFirst({
+      where: {
+        refreshToken,
+      },
     });
 
     if (!res || !res.refreshToken || !res.refreshTokenExpiresAt) return null;
     if (res.refreshTokenExpiresAt.getTime() < Date.now()) return null;
-
-    const isValidRefreshToken = await Bun.password.verify(refreshToken, res.refreshToken);
-
-    if (!isValidRefreshToken) return null;
 
     return sanitize(res);
   },

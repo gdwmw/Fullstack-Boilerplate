@@ -47,7 +47,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
         "application/json": {
           schema: {
             properties: {
-              refreshToken: { example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...", type: "string" },
+              refreshToken: { example: "$argon2id$v=19$m=65536,t=2,p=1$...", type: "string" },
             },
             required: ["refreshToken"],
             type: "object",
@@ -70,7 +70,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
         "application/json": {
           schema: {
             properties: {
-              refreshToken: { example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...", type: "string" },
+              refreshToken: { example: "$argon2id$v=19$m=65536,t=2,p=1$...", type: "string" },
             },
             required: ["refreshToken"],
             type: "object",
