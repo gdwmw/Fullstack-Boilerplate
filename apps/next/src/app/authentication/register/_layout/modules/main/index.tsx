@@ -12,7 +12,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { ExampleATWM, ExampleInput, FormContainer, SubmitButton } from "@/src/components";
 import { IErrorResponse, inputValidations, POSTRegister } from "@/src/utils";
 
-import { RegisterSchema, TRegisterSchema } from "./schema";
+import { registerSchema, TRegisterSchema } from "./schema";
 
 interface IFormField {
   isPassword?: boolean;
@@ -78,7 +78,7 @@ export const Main: FC = (): ReactElement => {
     register,
     reset,
   } = useForm<TRegisterSchema>({
-    resolver: zodResolver(RegisterSchema),
+    resolver: zodResolver(registerSchema),
   });
 
   const onSubmit: SubmitHandler<TRegisterSchema> = (dt) => {

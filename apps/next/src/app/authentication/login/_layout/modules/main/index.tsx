@@ -13,7 +13,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { ExampleATWM, ExampleInput, FormContainer, SubmitButton } from "@/src/components";
 import { IErrorResponse, POSTLogin } from "@/src/utils";
 
-import { LoginSchema, TLoginSchema } from "./schema";
+import { loginSchema, TLoginSchema } from "./schema";
 
 export const Main: FC = (): ReactElement => {
   const router = useRouter();
@@ -28,7 +28,7 @@ export const Main: FC = (): ReactElement => {
     register,
     reset,
   } = useForm<TLoginSchema>({
-    resolver: zodResolver(LoginSchema(loginWithEmail ? "Email" : "Username")),
+    resolver: zodResolver(loginSchema(loginWithEmail ? "Email" : "Username")),
   });
 
   const onSubmit: SubmitHandler<TLoginSchema> = (dt) => {
@@ -65,7 +65,7 @@ export const Main: FC = (): ReactElement => {
 
   return (
     <main>
-      <FormContainer className={{ innerContainer: "max-w-[300px]" }} href={"/"} label={"Home"}>
+      <FormContainer className={{ innerContainer: "max-w-75" }} href={"/"} label={"Home"}>
         <form className="flex w-full flex-col gap-3 overflow-y-auto" onSubmit={handleSubmit(onSubmit)}>
           <ExampleInput
             color="default"

@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { schemaMessage } from "@/src/constants";
 
-export const ChangePasswordSchema = z.object({
+export const changePasswordSchema = z.object({
   confirmPassword: z.string().min(1, { message: schemaMessage.string.required("Confirm password") }),
   newPassword: z
     .string()
@@ -14,4 +14,4 @@ export const ChangePasswordSchema = z.object({
   oldPassword: z.string().min(1, { message: schemaMessage.string.required("Current password") }),
 });
 
-export type TChangePasswordSchema = z.infer<typeof ChangePasswordSchema>;
+export type TChangePasswordSchema = z.infer<typeof changePasswordSchema>;

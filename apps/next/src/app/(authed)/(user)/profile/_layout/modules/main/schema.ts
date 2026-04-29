@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { schemaMessage } from "@/src/constants";
 
-export const ProfileSchema = z.object({
+export const profileSchema = z.object({
   email: z.email({ message: schemaMessage.string.email("Email") }),
   image: z
     .any()
@@ -15,4 +15,4 @@ export const ProfileSchema = z.object({
   username: z.string().min(4, { message: schemaMessage.string.min("Username", 4) }),
 });
 
-export type TProfileSchema = z.infer<typeof ProfileSchema>;
+export type TProfileSchema = z.infer<typeof profileSchema>;

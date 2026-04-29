@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { schemaMessage } from "@/src/constants";
 
-export const LoginSchema = (label: string) =>
+export const loginSchema = (label: string) =>
   z.object({
     identifier:
       label === "Email"
@@ -11,4 +11,4 @@ export const LoginSchema = (label: string) =>
     password: z.string().min(1, { message: schemaMessage.string.required("Password") }),
   });
 
-export type TLoginSchema = z.infer<ReturnType<typeof LoginSchema>>;
+export type TLoginSchema = z.infer<ReturnType<typeof loginSchema>>;

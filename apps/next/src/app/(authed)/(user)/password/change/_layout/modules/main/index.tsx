@@ -11,7 +11,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { ExampleInput, FormContainer, SubmitButton } from "@/src/components";
 import { IErrorResponse, POSTChangePassword, POSTLogout } from "@/src/utils";
 
-import { ChangePasswordSchema, TChangePasswordSchema } from "./schema";
+import { changePasswordSchema, TChangePasswordSchema } from "./schema";
 
 interface IFormField {
   label: string;
@@ -51,7 +51,7 @@ export const Main: FC = (): ReactElement => {
     register,
     reset,
   } = useForm<TChangePasswordSchema>({
-    resolver: zodResolver(ChangePasswordSchema),
+    resolver: zodResolver(changePasswordSchema),
   });
 
   const onSubmit: SubmitHandler<TChangePasswordSchema> = (dt) => {

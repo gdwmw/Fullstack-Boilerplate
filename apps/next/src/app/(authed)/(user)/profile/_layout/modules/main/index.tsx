@@ -12,7 +12,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { Avatar, ExampleATWM, ExampleInput, FormContainer, SubmitButton } from "@/src/components";
 import { DELETEUpload, IErrorResponse, IMeResponse, inputValidations, POSTUpload, PUTUsers } from "@/src/utils";
 
-import { ProfileSchema, TProfileSchema } from "./schema";
+import { profileSchema, TProfileSchema } from "./schema";
 
 const API_URL = process.env.NEXT_PUBLIC_BASE_API_URL;
 
@@ -81,7 +81,7 @@ export const Main: FC<I> = (props): ReactElement => {
       phone: props.user?.phone,
       username: props.user?.username,
     },
-    resolver: zodResolver(ProfileSchema),
+    resolver: zodResolver(profileSchema),
   });
 
   useEffect(() => {
