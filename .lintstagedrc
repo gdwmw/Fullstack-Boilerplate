@@ -9,5 +9,10 @@
     "bash -c 'cd apps/elysia && eslint --no-warn-ignored --max-warnings 0'",
     "prettier --write"
   ],
+  "packages/utils/**/*.{js,jsx,ts,tsx,mjs,cjs}": [
+    "bash -c 'cd packages/utils && eslint --fix'",
+    "bash -c 'cd packages/utils && eslint --no-warn-ignored --max-warnings 0'",
+    "prettier --write"
+  ],
   "*.{js,jsx,ts,tsx,mjs,cjs,json,css}": ["prettier --write"]
 }

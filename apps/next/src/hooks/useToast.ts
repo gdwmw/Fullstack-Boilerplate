@@ -34,8 +34,8 @@ export const useToast = (): IUseToastReturn => {
       const id = Math.random().toString(36).substring(2, 11);
       const newToast: IToast = {
         ...toast,
-        duration: toast.duration || 5000,
         id,
+        duration: toast.duration || 5000,
       };
 
       setToasts((prev) => [...prev, newToast]);

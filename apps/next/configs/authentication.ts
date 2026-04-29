@@ -72,10 +72,10 @@ export const options: NextAuthOptions = {
 
     async session({ session, token }: { session: Session; token: JWT }) {
       session.user = {
+        id: token.id as number | undefined,
         accessToken: token.accessToken as null | string | undefined,
         accessTokenExpiresAt: token.accessTokenExpiresAt as number | undefined,
         email: token.email as null | string | undefined,
-        id: token.id as number | undefined,
         image: token.image as IUploadResponse | null | undefined,
         imageId: token.imageId as null | number | undefined,
         name: token.name as null | string | undefined,

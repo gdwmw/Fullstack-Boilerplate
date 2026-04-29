@@ -3,10 +3,17 @@
   "version": "0.1.0",
   "type": "module",
   "private": true,
+  "scripts": {
+    "lint": "eslint --max-warnings 0",
+    "lint:fix": "eslint --fix",
+    "prettier": "prettier --write .",
+    "check-types": "tsc --noEmit"
+  },
   "exports": {
     ".": "./src/index.ts"
   },
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "@repo/eslint-config": "workspace:*",
+    "typescript": "5.9.3"
   }
 }

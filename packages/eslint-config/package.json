@@ -6,7 +6,8 @@
   "exports": {
     "./base": "./base.js",
     "./elysia": "./elysia.js",
-    "./next": "./next.js"
+    "./next": "./next.js",
+    "./utils": "./utils.js"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
