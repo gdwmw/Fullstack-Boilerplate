@@ -29,6 +29,7 @@
     "axios": "^1.15.2",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "jotai": "^2.19.1",
     "lucide-react": "^1.14.0",
     "next": "^16.2.4",
     "next-auth": "^4.24.14",
@@ -42,14 +43,13 @@
     "react-intersection-observer": "^10.0.3",
     "sharp": "^0.34.5",
     "tailwind-merge": "^3.5.0",
-    "zod": "^4.3.6",
-    "zustand": "^5.0.12"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/utils": "workspace:*",
-    "@storybook/addon-themes": "^10.3.5",
-    "@storybook/nextjs-vite": "^10.3.5",
+    "@storybook/addon-themes": "^10.3.6",
+    "@storybook/nextjs-vite": "^10.3.6",
     "@tailwindcss/postcss": "^4.2.4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -60,7 +60,7 @@
     "jest": "^30.3.0",
     "jest-environment-jsdom": "^30.3.0",
     "postcss": "^8.5.12",
-    "storybook": "^10.3.5",
+    "storybook": "^10.3.6",
     "tailwindcss": "^4.2.4",
     "ts-node": "^10.9.2",
     "vite": "^8.0.10"
