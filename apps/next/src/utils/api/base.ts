@@ -30,7 +30,7 @@ interface I {
 }
 
 export const apiRequest = async <T>({ auth = true, ...props }: I): Promise<ISuccessResponse<T>> => {
-  const accessToken = auth ? await getSession("accessToken") : undefined;
+  const accessToken = auth ? await getSession("accessToken") : null;
 
   try {
     const res: AxiosResponse<ISuccessResponse<T>> = await axios({
