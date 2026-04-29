@@ -4,170 +4,169 @@
 ![Elysia.js - Register](public/project/4.png)
 ![Elysia.js - Response](public/project/5.png)
 
-# Turborepo + Next.js + Elysia.js Boilerplate
+# 🚀 Fullstack Boilerplate (Turborepo + Next.js + Elysia.js)
 
-Boilerplate By [Gede Dewo Wahyu M.W](https://github.com/gdwmw) ❤️
+Boilerplate by [Gede Dewo Wahyu M.W](https://github.com/gdwmw)
 
-## Boilerplate Description 📖
+![Turborepo](https://img.shields.io/badge/Monorepo-Turborepo-blue)
+![Next.js](https://img.shields.io/badge/Frontend-Next.js-black)
+![Elysia.js](https://img.shields.io/badge/Backend-Elysia.js-purple)
+![Prisma](https://img.shields.io/badge/ORM-Prisma-2D3748)
+![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-blue)
+![Redis](https://img.shields.io/badge/Cache-Redis-red)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-This monorepo is a full‑stack boilerplate built with Turborepo, featuring a Next.js application and an Elysia.js REST API. It includes JWT authentication, theme management, state management, form validation, file upload, and Storybook, and it follows Atomic Design principles for component organization.
+---
 
-## Tech Stack 🛠️
+## 📖 Description
 
-- **Monorepo**: Turborepo + pnpm
-- **Frontend**: Next.js, TailwindCSS, Zustand, React Hook Form, Zod
-- **Backend**: Elysia.js, Prisma, PostgreSQL, JWT
+This monorepo is a fullstack starter kit based on Turborepo, consisting of:
 
-## Installation 🚀
+* 🖥️ `apps/next`: frontend application using Next.js
+* ⚙️ `apps/elysia`: REST API using Elysia.js + Prisma
 
-To get started, follow these steps:
+This boilerplate provides common foundations often needed in production projects such as JWT authentication, form validation, state management, theme management, file uploads, and Storybook for UI development.
 
-1. **Clone the repository**
+---
 
-   ```bash
-   git clone https://github.com/your-username/Fullstack-Boilerplate.git
-   cd Fullstack-Boilerplate
-   ```
+## ✨ Main Features
 
-2. **Install dependencies (root)**
+* 🏗️ Monorepo architecture with Turborepo + pnpm workspace
+* 🎨 Frontend with Next.js + Tailwind CSS
+* 🔧 Backend with Elysia.js + Prisma + PostgreSQL
+* ⚡ Redis for token blocklist/session support
+* 🔐 JWT authentication
+* 📝 Form handling (`react-hook-form` + `zod`)
+* 📚 Storybook for UI components
+* 🧹 Linting, formatting, and type-checking
 
-   ```bash
-   pnpm install
-   ```
+---
 
-3. **Set up environment variables**
+## 🧰 Tech Stack
 
-   ```bash
-   cp apps/next/.env.example apps/next/.env
-   cp apps/elysia/.env.example apps/elysia/.env
-   ```
+* **Monorepo**: Turborepo, pnpm
+* **Frontend**: Next.js, Tailwind CSS, Zustand, React Hook Form, Zod
+* **Backend**: Elysia.js, Prisma, PostgreSQL, JWT
+* **Tooling**: ESLint, Prettier, Husky, Commitizen
 
-4. **Run database migrations**
+---
 
-   ```bash
-   cd apps/elysia && bun generate
-   ```
+## ⚙️ Prerequisites
 
-5. **Start development (via Turborepo)**
+Make sure the following are installed:
 
-   ```bash
-   pnpm dev
-   ```
+* 🟢 Node.js `>= 18`
+* 📦 pnpm `>= 10`
+* ⚡ Bun (for running the Elysia API)
+* 🐘 PostgreSQL
+* 🔴 Redis
 
-6. **Access the applications**
+---
 
-   - Next.js App: [http://localhost:3000](http://localhost:3000)
-   - Elysia.js API: [http://localhost:1337](http://localhost:1337)
-   - Swagger UI: [http://localhost:1337/swagger](http://localhost:1337/swagger)
+## 🚀 Quick Start
 
-## Commit Guidelines 📝
+1. **Clone repository**
 
-When committing changes with `pnpm commit`, follow these steps:
+```bash
+git clone https://github.com/gdwmw/Fullstack-Boilerplate.git
+cd Fullstack-Boilerplate
+```
 
-1. **Prepare your changes**  
-   Ensure your code is tested and complies with the project's coding standards.
+1. **Install dependencies**
 
-2. **Stage your changes**  
-   Stage all relevant files:
+```bash
+pnpm install
+```
 
-   ```bash
-   git add .
-   ```
+1. **Setup environment variables**
 
-3. **Run the commit command**  
-   Execute:
+```bash
+pnpm cpenv
+```
 
-   ```bash
-   pnpm commit
-   ```
+1. **Configure `.env`**
 
-4. **Follow the interactive prompt**  
-   Select the appropriate change type (e.g., feature, fix, docs) when prompted.
+Update at least:
 
-5. **Optionally provide a scope**  
-   If relevant, specify the scope (e.g., a specific module or feature).
+* `apps/elysia/.env`: database connection, JWT secret, and API configuration
+* `apps/next/.env`: API/backend URL and other frontend configurations
 
-6. **Write a concise subject**  
-   Use the imperative mood and keep it short and clear.
+1. **Ensure services are running**
 
-7. **Optionally add a detailed body**  
-   Include motivation, context, and implementation details if helpful.
+* 🐘 PostgreSQL must be active (`DATABASE_URL`)
+* 🔴 Redis must be active (`REDIS_URL`)
 
-8. **Document breaking changes (if any)**  
-   Clearly list any breaking changes in the designated section.
+1. **Generate Prisma Client and run migrations**
 
-9. **Confirm your commit**  
-   Review the message and confirm when prompted.
+```bash
+pnpm generate
+pnpm migrate
+```
 
-Following these guidelines ensures commit messages are informative and consistent with the project's standards.
+1. **Run development mode**
 
-## Contribution 🤝
+```bash
+pnpm dev
+```
 
-If you would like to contribute, follow these steps:
+1. **Access the application**
 
-1. **Fork the repository**  
-   Click the "Fork" button at the top right of the repository page.
+* 🌐 Frontend: [http://localhost:3000](http://localhost:3000)
+* 🔗 API: [http://localhost:1337](http://localhost:1337)
+* 📄 Swagger: [http://localhost:1337/swagger](http://localhost:1337/swagger)
 
-2. **Clone your fork**  
-   Clone your forked repository to your local machine:
+---
 
-   ```bash
-   git clone https://github.com/your-username/Fullstack-Boilerplate.git
-   cd Fullstack-Boilerplate
-   ```
+## 📁 Folder Structure
 
-3. **Create a new branch**  
-   Create a branch for your feature or bug fix:
+```text
+.
+├── apps
+│   ├── next        # Next.js frontend
+│   └── elysia      # Elysia.js backend + Prisma
+├── packages        # Shared packages/config across apps
+└── turbo.json      # Turborepo configuration
+```
 
-   ```bash
-   git checkout -b your-feature-branch
-   ```
+---
 
-4. **Make your changes**  
-   Implement your changes and ensure they follow the project's standards.
+## 📜 Important Scripts
 
-5. **Commit your changes**  
-   Commit with a descriptive message:
+* ▶️ `pnpm dev` - run all apps in development mode
+* 🏗️ `pnpm build` - build all apps/packages
+* 🧹 `pnpm lint` - lint the entire workspace
+* 🔍 `pnpm check-types` - TypeScript type-check
+* ⚙️ `pnpm generate` - generate Prisma client
+* 🗄️ `pnpm migrate` - run Prisma migrations
+* 🎨 `pnpm prettier` - format codebase
 
-   ```bash
-   pnpm commit
-   ```
+---
 
-6. **Push to your fork**  
-   Push your branch to your forked repository:
+## 🧾 Commit Guideline
 
-   ```bash
-   git push origin your-feature-branch
-   ```
+This project uses Commitizen (`pnpm commit`).
 
-7. **Open a pull request**  
-   In the original repository, click "New Pull Request", select your branch, and submit with a clear description.
+---
 
-Thank you for contributing!
+## 🤝 Contribution
 
-## MIT License ⚖️
+1. Fork repository
+2. Create branch (`feat/your-feature`)
+3. Run checks
+4. Commit & PR
 
-This project is licensed under the MIT License. See the `LICENSE` file for details.
+---
 
-## How to Ask Questions ❓
+## ❓ Q&A / Help
 
-If you have questions about the boilerplate or how to use it, follow these guidelines:
+Include:
 
-1. **Be clear and concise**  
-   Clearly state your question or issue and provide enough context.
+* Context
+* Error message
+* Reproduction steps
 
-2. **Include relevant details**  
-   Share specific errors, code snippets, or configurations that are relevant.
+---
 
-3. **Search before asking**  
-   Review the documentation and existing issues to avoid duplicates.
+## ⚖️ License
 
-4. **Use proper formatting**  
-   Use code blocks when sharing code or error messages for readability.
-
-5. **Be respectful**  
-   Be polite and respectful in all communication.
-
-Following these guidelines helps ensure your questions are understood and answered promptly.
-
-This documentation provides an overview of the boilerplate, installation steps, commit guidelines, and contribution process. If you have further questions, feel free to ask!
+MIT License
