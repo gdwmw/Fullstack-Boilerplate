@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { templateLog } from "@repo/utils";
 import { AxiosError } from "axios";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
@@ -88,13 +89,13 @@ export const Main: FC = (): ReactElement => {
         try {
           const { confirmPassword: _confirmPassword, ...registerPayload } = dt;
           await POSTRegister(registerPayload);
-          console.info("Register success!");
+          templateLog.SUCCESS("Register success!", "auth/register");
           router.push("/authentication/login");
           reset();
         } catch (error) {
           const axiosError = error as AxiosError<IErrorResponse>;
           setErrorMessage(axiosError.response?.data?.message ?? "Registration failed. Please try again.");
-          console.warn("Register failed!");
+          templateLog.WARN("Register failed!", "auth/register");
         }
       } else {
         setErrorMessage("Confirm password does not match password");

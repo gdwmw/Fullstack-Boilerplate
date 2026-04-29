@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { templateLog } from "@repo/utils";
 import { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -134,12 +135,12 @@ export const Main: FC<I> = (props): ReactElement => {
           },
         });
 
-        console.info("Profile success!");
+        templateLog.SUCCESS("Profile success!", "auth/profile");
         router.refresh();
       } catch (error) {
         const axiosError = error as AxiosError<IErrorResponse>;
         setErrorMessage(axiosError.response?.data?.message ?? "Failed to update profile");
-        console.warn("Profile failed!");
+        templateLog.WARN("Profile failed!", "auth/profile");
       }
     });
   };

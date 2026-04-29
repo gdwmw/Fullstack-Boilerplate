@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { templateLog } from "@repo/utils";
 import { AxiosError } from "axios";
 import { Eye, EyeOff } from "lucide-react";
 import { signOut } from "next-auth/react";
@@ -61,14 +62,14 @@ export const Main: FC = (): ReactElement => {
         try {
           const { confirmPassword: _confirmPassword, ...changePasswordPayload } = dt;
           await POSTChangePassword(changePasswordPayload);
-          console.info("Change password success!");
+          templateLog.SUCCESS("Change password success!", "auth/change-password");
           await POSTLogout();
           signOut();
           reset();
         } catch (error) {
           const axiosError = error as AxiosError<IErrorResponse>;
           setErrorMessage(axiosError.response?.data?.message ?? "Failed to change password");
-          console.warn("Change password failed!");
+          templateLog.WARN("Change password failed!", "auth/change-password");
         }
       } else {
         setErrorMessage("Confirm password does not match new password");

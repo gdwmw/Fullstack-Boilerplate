@@ -1,5 +1,6 @@
 "use server";
 
+import { templateLog } from "@repo/utils";
 import { getPlaiceholder } from "plaiceholder";
 
 // https://www.youtube.com/watch?v=Bz3No1RFXWY&t=18s
@@ -21,7 +22,7 @@ export const getImageBase64 = async (imageUrl: string) => {
     return base64;
   } catch (e) {
     if (e instanceof Error) {
-      console.log(e.stack);
+      templateLog.ERROR(String(e.stack || e.message), "getImageBase64");
     }
   }
 };

@@ -1,5 +1,6 @@
 import { cors } from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
+import { templateLog } from "@repo/utils";
 import { Elysia } from "elysia";
 import { join } from "path";
 
@@ -76,9 +77,6 @@ const app = new Elysia()
   .get("/uploads/*", ({ params }) => Bun.file(join(process.cwd(), "uploads", params["*"])))
   .listen(ELYSIA_PORT || 1337);
 
-const BLUE = "\x1b[34m";
-const RESET = "\x1b[0m";
-
-console.log(
-  `🦊 Elysia is running at ${BLUE}http://${app.server?.hostname}:${app.server?.port}${RESET} and Swagger is available at ${BLUE}http://${app.server?.hostname}:${app.server?.port}/swagger${RESET}`,
+templateLog.INFO(
+  `Elysia running at http://${app.server?.hostname}:${app.server?.port} and Swagger at http://${app.server?.hostname}:${app.server?.port}/swagger`,
 );

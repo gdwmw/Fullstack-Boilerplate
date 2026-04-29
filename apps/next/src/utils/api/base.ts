@@ -1,3 +1,4 @@
+import { templateLog } from "@repo/utils";
 import axios, { AxiosRequestHeaders, AxiosResponse, Method } from "axios";
 
 import { getSession } from "@/src/utils";
@@ -51,7 +52,7 @@ export const apiRequest = async <T>({ auth = true, ...props }: I): Promise<ISucc
 
     if (axios.isAxiosError<IErrorResponse>(error)) {
       if (process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_DEBUG_MODE === "true") {
-        console.error("Axios error response:", error.response);
+        templateLog.ERROR(String(error.response), "axios");
       }
       statusCode = error.response?.status;
       errorMessage = error.response?.data?.message ?? error.message;
@@ -59,9 +60,9 @@ export const apiRequest = async <T>({ auth = true, ...props }: I): Promise<ISucc
       errorMessage = error.message;
     }
 
-    console.error(
-      "--- API Request Error ---",
+    templateLog.ERROR(
       `An error occurred while processing ${props.method} request for ${props.label} || Status Code: ${statusCode} || Message: ${errorMessage}`,
+      "apiRequest",
     );
 
     throw error;

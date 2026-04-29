@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { templateLog } from "@repo/utils";
 import { AxiosError } from "axios";
 import { ArrowLeftRight, Eye, EyeOff } from "lucide-react";
 import { signIn } from "next-auth/react";
@@ -50,14 +51,14 @@ export const Main: FC = (): ReactElement => {
           throw new Error("Authentication failed. Please try again.");
         }
 
-        console.info("Login success!");
+        templateLog.SUCCESS("Login success!", "auth/login");
         router.push("/");
         router.refresh();
         reset();
       } catch (error) {
         const axiosError = error as AxiosError<IErrorResponse>;
         setErrorMessage(axiosError.response?.data?.message ?? "Login failed. Please try again.");
-        console.warn("Login failed!");
+        templateLog.WARN("Login failed!", "auth/login");
       }
     });
   };
