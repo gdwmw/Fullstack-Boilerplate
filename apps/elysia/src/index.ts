@@ -1,10 +1,10 @@
 import { cors } from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
-import { templateLog } from "@repo/utils";
 import { Elysia } from "elysia";
 import { join } from "path";
 
 import { AuthRoutes, UploadRoutes, UsersRoutes } from "./api";
+import { logger } from "./libs";
 
 const ELYSIA_PORT = process.env.ELYSIA_PORT;
 
@@ -32,7 +32,75 @@ const ALLOWED_ORIGINS = [
     .filter(Boolean) ?? []),
 ];
 
+const requestStartTimes = new WeakMap<Request, number>();
+
+const getStatusCode = (status: number | string | undefined, fallback = 200) => {
+  if (typeof status === "number") {
+    return status;
+  }
+
+  if (typeof status === "string") {
+    const parsedStatus = Number(status);
+
+    if (!Number.isNaN(parsedStatus)) {
+      return parsedStatus;
+    }
+  }
+
+  return fallback;
+};
+
+const getRequestLogger = (request: Request) => {
+  const pathname = new URL(request.url).pathname;
+
+  return logger.child({
+    method: request.method,
+    path: pathname,
+  });
+};
+
+const getErrorMessage = (error: unknown) => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return String(error);
+};
+
 const app = new Elysia()
+  .onRequest(({ request }) => {
+    const requestLog = getRequestLogger(request);
+
+    requestStartTimes.set(request, performance.now());
+    requestLog.info("incoming request");
+  })
+
+  .onAfterHandle(({ request, set }) => {
+    const requestLog = getRequestLogger(request);
+    const startedAt = requestStartTimes.get(request) ?? performance.now();
+    const durationMs = Math.round(performance.now() - startedAt);
+    const statusCode = getStatusCode(set.status);
+
+    requestLog.info({ durationMs, statusCode }, "request completed");
+  })
+
+  .onError(({ code, error, request, set }) => {
+    const requestLog = getRequestLogger(request);
+    const startedAt = requestStartTimes.get(request) ?? performance.now();
+    const durationMs = Math.round(performance.now() - startedAt);
+    const statusCode = getStatusCode(set.status, 500);
+
+    requestLog.error(
+      {
+        code,
+        durationMs,
+        error: getErrorMessage(error),
+        statusCode,
+      },
+      "request failed",
+    );
+  })
+
   .use(
     cors({
       allowedHeaders: ["Content-Type", "Authorization"],
@@ -49,6 +117,7 @@ const app = new Elysia()
       },
     }),
   )
+
   .use(
     swagger({
       documentation: {
@@ -69,7 +138,9 @@ const app = new Elysia()
       },
     }),
   )
+
   .get("/", () => "Hello Elysia")
+
   .use(AuthRoutes)
   .use(UploadRoutes)
   .use(UsersRoutes)
@@ -77,6 +148,10 @@ const app = new Elysia()
   .get("/uploads/*", ({ params }) => Bun.file(join(process.cwd(), "uploads", params["*"])))
   .listen(ELYSIA_PORT || 1337);
 
-templateLog.INFO(
-  `Elysia running at http://${app.server?.hostname}:${app.server?.port} and Swagger at http://${app.server?.hostname}:${app.server?.port}/swagger`,
+logger.info(
+  {
+    serverUrl: `http://${app.server?.hostname}:${app.server?.port}`,
+    swaggerUrl: `http://${app.server?.hostname}:${app.server?.port}/swagger`,
+  },
+  "elysia server started",
 );
