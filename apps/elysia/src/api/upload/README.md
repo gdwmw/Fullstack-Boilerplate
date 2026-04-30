@@ -1,27 +1,27 @@
 # Upload Module Documentation
 
-Dokumen ini menjelaskan alur dan logika modul upload di folder ini.
+This document explains the flow and logic of the upload module in this folder.
 
-## Cara Baca Dokumen Ini
+## How to Read This Document
 
-README ini disinkronkan dengan komentar bernomor di [route.ts](./route.ts) dan [service.ts](./service.ts).
+This README is kept in sync with the numbered comments in [route.ts](./route.ts) and [service.ts](./service.ts).
 
-Artinya:
+Meaning:
 
-- saat melihat angka seperti `[2.4.2]` di dokumen ini, cari komentar dengan angka yang sama di source
-- angka utama menunjukkan area besar modul
-- angka turunan menunjukkan langkah detail di dalam flow
+- when you see a number like `[2.4.2]` in this document, find the comment with the same number in the source
+- the main number indicates a larger module area/section
+- the sub-number indicates detailed steps inside a flow
 
-Contoh cepat:
+Quick examples:
 
-- `[1]` berarti constants dan helper upload
-- `[2.1]` berarti flow hapus file di service
-- `[2.6]` berarti endpoint `POST /upload` di route
-- `[2.4.2]` berarti proses metadata image dan resize multi-format
+- `[1]` means constants and upload helpers
+- `[2.1]` means the delete-file flow in the service
+- `[2.6]` means the `POST /upload` endpoint in the route
+- `[2.4.2]` means the image metadata + multi-format resize process
 
-## Peta Nomor Di Source
+## Source Numbering Map
 
-Nomor utama yang dipakai di source:
+Main numbers used in the source:
 
 1. `[1]` Constants & helpers
 2. `[2]` Service utama upload
@@ -36,107 +36,107 @@ Nomor utama yang dipakai di source:
 11. `[2.5]` `GET /upload/:id`
 12. `[2.6]` `POST /upload`
 
-## Tujuan Modul
+## Module Responsibilities
 
-Modul upload bertanggung jawab untuk:
+The upload module is responsible for:
 
-- menyimpan file ke disk
-- menyimpan metadata file ke database
-- memproses file gambar menjadi beberapa ukuran turunan
-- menyediakan endpoint baca, detail, dan hapus file
-- memastikan semua endpoint hanya bisa diakses user yang terautentikasi
+- saving files to disk
+- storing file metadata in the database
+- processing image files into multiple derived sizes
+- providing list, detail, and delete endpoints
+- ensuring all endpoints are accessible only to authenticated users
 
-## Komponen Yang Terlibat
+## Components
 
 ### Route layer
 
-File [route.ts](./route.ts) menangani:
+The file [route.ts](./route.ts) handles:
 
-- auth guard dengan verifikasi access token
-- validasi request param dan body
-- pemanggilan service upload
-- pembentukan response sukses/error
+- auth guard via access token verification
+- request param and body validation
+- calling the upload service
+- shaping success/error responses
 
 ### Service layer
 
-File [service.ts](./service.ts) menangani:
+The file [service.ts](./service.ts) handles:
 
-- operasi database tabel `files`
-- operasi filesystem (simpan dan hapus file)
-- ekstraksi metadata gambar
-- pembuatan format turunan image (`thumbnail`, `small`, `medium`, `large`)
+- database operations for the `files` table
+- filesystem operations (save/delete files)
+- extracting image metadata
+- generating derived image formats (`thumbnail`, `small`, `medium`, `large`)
 
 ### Schema layer
 
-File [schema.ts](./schema.ts) menangani validasi input untuk:
+The file [schema.ts](./schema.ts) validates inputs for:
 
-- id param endpoint detail/delete
-- payload upload multipart
+- id params for detail/delete endpoints
+- multipart upload payloads
 
-## Gambaran Besar Upload Strategy
+## High-Level Upload Strategy
 
-Strategi upload yang dipakai:
+Upload strategy:
 
-- file original selalu disimpan ke direktori `uploads`
-- jika MIME type termasuk image, sistem akan membuat metadata visual tambahan
-- image yang lebih besar dari batas ukuran tertentu di-resize ke beberapa format webp
-- metadata lengkap (path, ukuran, dimensi, placeholder, dominant color, formats) disimpan ke DB
+- the original file is always saved under the `uploads` directory
+- if the MIME type is an image, the system generates additional visual metadata
+- images larger than the format widths are resized into multiple WebP variants
+- full metadata (path, size, dimensions, placeholder, dominant color, formats) is stored in the DB
 
-## Flow Per Endpoint
+## Per-Endpoint Flows
 
 ### `POST /upload`
 
-Kode terkait: `[2.6]` route, `[2.4]` service.
+Related code: `[2.6]` route, `[2.4]` service.
 
-Langkah detail:
+Detailed steps:
 
-1. `[2.2.1]` auth guard memverifikasi access token
-2. `[2.6.1]` route memvalidasi body upload
-3. `[2.6.2]` route memanggil `service.upload(file)`
-4. `[2.4.1]` service menyimpan file original ke disk
-5. `[2.4.2]` jika file image, service ambil metadata dan buat format turunan
-6. `[2.4.3]` service simpan metadata file ke database
-7. route mengembalikan response sukses `created`
+1. `[2.2.1]` auth guard verifies the access token
+2. `[2.6.1]` route validates the upload body
+3. `[2.6.2]` route calls `service.upload(file)`
+4. `[2.4.1]` service saves the original file to disk
+5. `[2.4.2]` if the file is an image, service extracts metadata and generates derived formats
+6. `[2.4.3]` service persists file metadata to the database
+7. route returns a success `created` response
 
 ### `GET /upload`
 
-Kode terkait: `[2.4]` route, `[2.2]` service.
+Related code: `[2.4]` route, `[2.2]` service.
 
-Langkah detail:
+Detailed steps:
 
-1. `[2.2.1]` auth guard memverifikasi access token
-2. `[2.4.1]` route memanggil `service.getAll()`
-3. service mengembalikan daftar file urut terbaru
-4. route mengembalikan response sukses `retrieved`
+1. `[2.2.1]` auth guard verifies the access token
+2. `[2.4.1]` route calls `service.getAll()`
+3. service returns a list of files ordered by newest
+4. route returns a success `retrieved` response
 
 ### `GET /upload/:id`
 
-Kode terkait: `[2.5]` route, `[2.3]` service.
+Related code: `[2.5]` route, `[2.3]` service.
 
-Langkah detail:
+Detailed steps:
 
-1. `[2.2.1]` auth guard memverifikasi access token
-2. `[2.5.1]` route memvalidasi param `id`
-3. `[2.5.2]` route memanggil `service.getById(id)`
-4. route mengembalikan response sukses `retrieved`
+1. `[2.2.1]` auth guard verifies the access token
+2. `[2.5.1]` route validates the `id` param
+3. `[2.5.2]` route calls `service.getById(id)`
+4. route returns a success `retrieved` response
 
 ### `DELETE /upload/:id`
 
-Kode terkait: `[2.3]` route, `[2.1]` service.
+Related code: `[2.3]` route, `[2.1]` service.
 
-Langkah detail:
+Detailed steps:
 
-1. `[2.2.1]` auth guard memverifikasi access token
-2. `[2.3.1]` route memvalidasi param `id`
-3. `[2.3.2]` route memanggil `service.delete(id)`
-4. `[2.1.1]` service menghapus file utama dari disk
-5. `[2.1.2]` service menghapus semua format turunan jika ada
-6. service menghapus record file di database
-7. route mengembalikan response sukses `deleted`
+1. `[2.2.1]` auth guard verifies the access token
+2. `[2.3.1]` route validates the `id` param
+3. `[2.3.2]` route calls `service.delete(id)`
+4. `[2.1.1]` service deletes the primary file from disk
+5. `[2.1.2]` service deletes all derived formats if present
+6. service deletes the file record from the database
+7. route returns a success `deleted` response
 
-## Kontrak Response API
+## API Response Contract
 
-Semua endpoint upload mengembalikan wrapper response yang konsisten:
+All upload endpoints return a consistent response wrapper:
 
 ### Response sukses
 
@@ -160,37 +160,37 @@ Semua endpoint upload mengembalikan wrapper response yang konsisten:
 }
 ```
 
-## Contoh Request Cepat
+## Quick Request Examples
 
-Semua endpoint butuh header:
+All endpoints require this header:
 
 ```bash
 Authorization: Bearer <access_token>
 ```
 
-### Upload file
+### Upload a file
 
 ```bash
 curl -X POST "http://localhost:3000/upload" \
   -H "Authorization: Bearer <access_token>" \
-  -F "file=@./contoh-gambar.jpg"
+  -F "file=@./example-image.jpg"
 ```
 
-### Ambil semua file
+### Get all files
 
 ```bash
 curl -X GET "http://localhost:3000/upload" \
   -H "Authorization: Bearer <access_token>"
 ```
 
-### Ambil file by id
+### Get a file by id
 
 ```bash
 curl -X GET "http://localhost:3000/upload/1" \
   -H "Authorization: Bearer <access_token>"
 ```
 
-### Hapus file by id
+### Delete a file by id
 
 ```bash
 curl -X DELETE "http://localhost:3000/upload/1" \
@@ -216,12 +216,12 @@ flowchart TD
     L --> I
 ```
 
-## Hal Yang Perlu Diperhatikan Saat Mengubah Modul Ini
+## Things to Watch When Modifying This Module
 
-- jangan ubah struktur `formats` tanpa menyesuaikan consumer di frontend
-- saat menambah format image baru, pastikan logika delete ikut membersihkan format tersebut
-- hindari menyimpan file tanpa `mkdir` recursive karena deployment environment bisa stateless
-- validasi MIME type harus tetap ketat untuk mencegah file processing yang tidak diinginkan
+- do not change the `formats` structure without updating the frontend consumer
+- when adding new image formats, ensure delete logic also cleans them up
+- avoid saving files without `mkdir` recursive, since deployment environments can be stateless
+- MIME type validation must remain strict to prevent unwanted file processing
 
 ## Referensi Source
 

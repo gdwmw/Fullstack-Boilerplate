@@ -1,27 +1,27 @@
 # Auth Module Documentation
 
-Dokumen ini menjelaskan alur dan logika modul authentication di folder ini.
+This document explains the flow and logic of the authentication module in this folder.
 
-## Cara Baca Dokumen Ini
+## How to Read This Document
 
-README ini sengaja disinkronkan dengan komentar bernomor di [route.ts](./route.ts).
+This README is intentionally kept in sync with the numbered comments in [route.ts](./route.ts).
 
-Artinya:
+Meaning:
 
-- saat melihat angka seperti `[6.3.5]` di dokumen ini, cari komentar dengan angka yang sama di [route.ts](./route.ts)
-- angka utamanya menunjukkan area besar
-- angka turunannya menunjukkan langkah spesifik di dalam flow
+- when you see a number like `[6.3.5]` in this document, find the comment with the same number in [route.ts](./route.ts)
+- the main number indicates a larger area/section
+- the sub-number indicates a specific step inside a flow
 
-Contoh cepat:
+Quick examples:
 
-- `[1]` berarti constants dan local types
-- `[5]` berarti helper auth bersama
-- `[6.3]` berarti flow endpoint `/auth/refresh`
-- `[6.3.11]` berarti blok kode rotasi session dan blocklist token lama
+- `[1]` means constants and local types
+- `[5]` means shared auth helpers
+- `[6.3]` means the `/auth/refresh` endpoint flow
+- `[6.3.11]` means the refresh-session rotation + old token blocklisting block
 
-## Peta Nomor Di Source
+## Source Numbering Map
 
-Nomor utama yang dipakai di [route.ts](./route.ts):
+Main numbers used in [route.ts](./route.ts):
 
 1. `[1]` Constants & local types
 2. `[2]` JWT payload helpers
@@ -36,45 +36,45 @@ Nomor utama yang dipakai di [route.ts](./route.ts):
 11. `[6.5]` `/auth/me`
 12. `[6.6]` `/auth/change-password`
 
-## Tujuan Modul
+## Module Responsibilities
 
-Modul auth bertanggung jawab untuk:
+The auth module is responsible for:
 
-- registrasi user baru
-- login user
-- menerbitkan access token dan refresh token
-- menyimpan refresh session ke database
-- melakukan refresh token rotation
-- logout dan revoke token
-- mengambil profil user login
-- mengganti password user login
+- registering new users
+- logging users in
+- issuing access tokens and refresh tokens
+- persisting refresh sessions to the database
+- rotating refresh tokens
+- logging out and revoking tokens
+- fetching the current authenticated user's profile
+- changing the current authenticated user's password
 
-## Komponen Yang Terlibat
+## Components
 
 ### Route layer
 
-File [route.ts](./route.ts) menangani:
+The file [route.ts](./route.ts) handles:
 
-- validasi request awal dengan schema Zod
-- orkestrasi flow auth
-- baca dan tulis cookie refresh token
-- generate JWT
-- bentuk response sukses dan error
+- initial request validation using Zod schemas
+- orchestrating auth flows
+- reading/writing the refresh token cookie
+- generating JWTs
+- shaping success/error responses
 
 ### Service layer
 
-File [service.ts](./service.ts) menangani:
+The file [service.ts](./service.ts) handles:
 
-- query ke database via Prisma
-- hashing password
-- hashing refresh token sebelum disimpan
-- blocklist token di Redis
-- rotasi refresh session
-- revoke session tunggal atau satu family session
+- database queries via Prisma
+- password hashing
+- refresh token hashing before persisting
+- token blocklisting in Redis
+- refresh session rotation
+- revoking a single session or an entire session family
 
 ### Schema layer
 
-File [schema.ts](./schema.ts) menangani validasi input untuk:
+The file [schema.ts](./schema.ts) validates inputs for:
 
 - register
 - login
@@ -82,50 +82,50 @@ File [schema.ts](./schema.ts) menangani validasi input untuk:
 
 ### Shared utility
 
-File [verifyAccessToken.ts](../../utils/verifyAccessToken.ts) dipakai untuk:
+The file [verifyAccessToken.ts](../../utils/verifyAccessToken.ts) is used to:
 
-- memastikan header bearer token ada
-- memverifikasi access token
-- mengecek apakah JTI access token sudah masuk blocklist Redis
+- ensure the bearer token header exists
+- verify the access token
+- check whether the access token JTI is present in the Redis blocklist
 
-## Gambaran Besar Auth Strategy
+## High-Level Auth Strategy
 
-Sistem ini memakai dua token:
+This system uses two tokens:
 
-- access token: dikembalikan di response body dan dipakai untuk request ke endpoint protected
-- refresh token: disimpan di cookie `HttpOnly` dan dipakai hanya untuk endpoint `/auth/refresh`
+- access token: returned in the response body and used to call protected endpoints
+- refresh token: stored in an `HttpOnly` cookie and used only for `/auth/refresh`
 
-Penyimpanan state token dibagi seperti ini:
+Token state is handled as follows:
 
-- access token bersifat stateless, tetapi bisa dibatalkan dengan blocklist berdasarkan `jti`
-- refresh token bersifat stateful, karena setiap token punya session record di database
-- refresh token yang disimpan di database bukan token mentah, tetapi hash SHA-256 nya
-- setiap refresh session punya `familyId` untuk mendeteksi dan menangani reuse atau compromise
+- access token is stateless, but can be invalidated via a blocklist by `jti`
+- refresh token is stateful because each token has a session record in the database
+- refresh tokens are not stored raw in the database; only their SHA-256 hash is stored
+- each refresh session has a `familyId` to detect and handle reuse or compromise
 
-## Data Yang Disimpan
+## Stored Data
 
-### Di JWT
+### In JWT
 
-Access token dan refresh token sama-sama membawa payload minimal berikut:
+Both access and refresh tokens carry at least:
 
 - `sub`: user id dalam bentuk string
 - `jti`: identifier unik token
 
-Refresh token juga dipakai untuk mendapatkan `exp` agar server tahu kapan session berakhir.
+The refresh token is also used to read `exp` so the server knows when the session ends.
 
-### Di Cookie
+### In Cookie
 
-Refresh token dikirim lewat cookie dengan karakteristik:
+Refresh tokens are sent via a cookie with these characteristics:
 
-- nama cookie diambil dari `JWT_REFRESH_COOKIE_NAME`, default `refreshToken`
+- cookie name comes from `JWT_REFRESH_COOKIE_NAME`, default `refreshToken`
 - `HttpOnly`
-- `SameSite` diambil dari env, default `Lax`
-- `Path` diambil dari env, default `/auth`
-- `Secure` aktif kecuali `JWT_REFRESH_COOKIE_SECURE=false`
+- `SameSite` comes from env, default `Lax`
+- `Path` comes from env, default `/auth`
+- `Secure` is enabled unless `JWT_REFRESH_COOKIE_SECURE=false`
 
-### Di Database Session
+### In Session Database
 
-Refresh session menyimpan beberapa informasi penting:
+Refresh sessions store these key fields:
 
 - `jti`
 - `familyId`
@@ -135,213 +135,213 @@ Refresh session menyimpan beberapa informasi penting:
 - `replacedByJti`
 - `rotatedFromJti`
 - `userId`
-- metadata client seperti `ipAddress` dan `userAgent`
+- client metadata such as `ipAddress` and `userAgent`
 
-### Di Redis Blocklist
+### In Redis Blocklist
 
-Redis menyimpan key `blocklist:<jti>` dengan TTL sampai token kedaluwarsa. Ini dipakai untuk:
+Redis stores `blocklist:<jti>` keys with a TTL until the token expires. This is used for:
 
-- access token yang di-logout
-- refresh token lama yang sudah di-rotate
-- token yang perlu langsung dianggap tidak valid
+- access tokens that were logged out
+- old refresh tokens that were rotated
+- tokens that must be considered invalid immediately
 
-## Helper Penting Di Route
+## Important Route Helpers
 
 ### `issueAccessAndRefreshTokens`
 
-Kode terkait: `[5]`
+Related code: `[5]`
 
-Helper ini:
+This helper:
 
-1. membuat `accessJti` dan `refreshJti`
-2. sign access token dan refresh token
-3. verify ulang refresh token untuk membaca `exp`
-4. mengembalikan token beserta `expiresAt`
+1. creates `accessJti` and `refreshJti`
+2. signs the access token and refresh token
+3. re-verifies the refresh token to read `exp`
+4. returns the tokens along with `expiresAt`
 
-Output helper ini dipakai oleh flow register, login, dan refresh.
+Its output is used by the register, login, and refresh flows.
 
 ### `getAuthenticatedUserId`
 
-Kode terkait: `[5]`
+Related code: `[5]`
 
-Helper ini dipakai untuk endpoint yang butuh access token valid, yaitu `/me` dan `/change-password`.
+This helper is used by endpoints that require a valid access token: `/me` and `/change-password`.
 
-Langkahnya:
+Steps:
 
-1. panggil utility `verifyAccessToken`
-2. ambil bearer token dari header authorization
-3. verify token
-4. parse `sub` menjadi `userId`
-5. jika gagal, kembalikan error auth
+1. call the `verifyAccessToken` utility
+2. extract the bearer token from the authorization header
+3. verify the token
+4. parse `sub` into `userId`
+5. if anything fails, return an auth error
 
 ### `getClientMetadata`
 
-Kode terkait: `[4]`
+Related code: `[4]`
 
-Helper ini mengambil metadata request dari header:
+This helper extracts request metadata from headers:
 
 - `x-forwarded-for` atau `x-real-ip`
 - `user-agent`
 
-Metadata ini disimpan ke refresh session untuk kebutuhan audit dan security tracking.
+This metadata is stored in the refresh session for audit and security tracking.
 
-## Flow Per Endpoint
+## Per-Endpoint Flows
 
 ### `/auth/register`
 
-Kode terkait: `[6.1]`
+Related code: `[6.1]`
 
-Tujuan endpoint ini adalah membuat user baru lalu langsung meng-authenticate user tersebut.
+This endpoint creates a new user and immediately authenticates them.
 
-Langkah detail:
+Detailed steps:
 
-1. `[6.1.1]` request body divalidasi dengan `registerSchema`
-2. `[6.1.1]` service `register` membuat user baru dan hash password dengan `Bun.password.hash`
-3. `[6.1.2]` route membuat access token dan refresh token baru
-4. `[6.1.3]` route mengambil metadata client dari header
-5. `[6.1.3]` route membuat refresh session baru di database dengan `familyId` baru
-6. `[6.1.4]` refresh token mentah ditulis ke cookie `HttpOnly`
-7. `[6.1.5]` access token dikembalikan di response body bersama data user
-8. status response di-set ke `201`
+1. `[6.1.1]` validate the request body with `registerSchema`
+2. `[6.1.1]` service `register` creates a new user and hashes the password with `Bun.password.hash`
+3. `[6.1.2]` route issues a new access token and refresh token
+4. `[6.1.3]` route extracts client metadata from headers
+5. `[6.1.3]` route creates a new refresh session in the database with a new `familyId`
+6. `[6.1.4]` write the raw refresh token to the `HttpOnly` cookie
+7. `[6.1.5]` return the access token in the response body along with the user data
+8. set the response status to `201`
 
-Catatan penting:
+Important notes:
 
-- setelah register, user tidak perlu login ulang karena token langsung diterbitkan
-- password tidak ikut dikembalikan ke response
+- after register, the user doesn't need to log in again because tokens are issued immediately
+- the password is never returned in the response
 
 ### `/auth/login`
 
-Kode terkait: `[6.2]`
+Related code: `[6.2]`
 
-Tujuan endpoint ini adalah memverifikasi kredensial lalu membuat pasangan token baru.
+This endpoint verifies credentials and creates a new token pair.
 
-Langkah detail:
+Detailed steps:
 
-1. `[6.2.1]` route memilih schema login berdasarkan `method` yaitu `email` atau `username`
-2. `[6.2.2]` service `login` mencari user berdasarkan identifier
-3. `[6.2.2]` password diverifikasi dengan `Bun.password.verify`
-4. jika kredensial salah, response `401`
-5. `[6.2.3]` jika valid, route membuat access token dan refresh token
-6. `[6.2.4]` route menyimpan refresh session baru ke database
-7. `[6.2.5]` route menulis refresh token ke cookie
-8. `[6.2.5]` route mengembalikan access token di response body
+1. `[6.2.1]` route selects the login schema based on `method` (`email` or `username`)
+2. `[6.2.2]` service `login` looks up the user by identifier
+3. `[6.2.2]` verify the password with `Bun.password.verify`
+4. if credentials are invalid, respond with `401`
+5. `[6.2.3]` if valid, route issues an access token and refresh token
+6. `[6.2.4]` route persists the new refresh session to the database
+7. `[6.2.5]` route writes the refresh token to the cookie
+8. `[6.2.5]` route returns the access token in the response body
 
-Catatan penting:
+Important notes:
 
-- satu login membuat satu refresh session baru
-- token refresh yang disimpan di database tetap berbentuk hash, bukan plain token
+- each login creates a new refresh session
+- refresh tokens stored in the database are hashes, not plaintext tokens
 
 ### `/auth/refresh`
 
-Kode terkait: `[6.3]`
+Related code: `[6.3]`
 
-Ini adalah flow paling penting karena di sinilah rotasi refresh token terjadi.
+This is the most important flow because refresh token rotation happens here.
 
-Tujuan endpoint ini adalah menukar refresh token lama menjadi access token baru dan refresh token baru.
+This endpoint exchanges an old refresh token for a new access token and a new refresh token.
 
-Langkah detail:
+Detailed steps:
 
-1. `[6.3.1]` route membaca cookie dan mengambil refresh token mentah
-2. jika cookie tidak ada, cookie dibersihkan dan response `401`
-3. `[6.3.2]` refresh token diverifikasi dengan `refreshJwt.verify`
-4. `[6.3.2]` route membaca `sub` sebagai `userId` dan `jti` sebagai `refreshJti`
-5. jika token decode gagal atau payload tidak valid, cookie dibersihkan dan response `401`
+1. `[6.3.1]` route reads the cookie and extracts the raw refresh token
+2. if the cookie is missing, clear the cookie and respond with `401`
+3. `[6.3.2]` verify the refresh token with `refreshJwt.verify`
+4. `[6.3.2]` route reads `sub` as `userId` and `jti` as `refreshJti`
+5. if decoding fails or the payload is invalid, clear the cookie and respond with `401`
 6. `[6.3.3]` route mengecek apakah `refreshJti` ada di Redis blocklist
-7. `[6.3.4]` route mengambil session berdasarkan `jti`
-8. jika session tidak ada, token dianggap invalid
+7. `[6.3.4]` route loads the session by `jti`
+8. if the session doesn't exist, consider the token invalid
 9. `[6.3.5]` route membandingkan hash token mentah dengan `tokenHash` di database
-10. jika hash tidak cocok, seluruh family session di-revoke karena ini indikasi token reuse atau compromise
-11. `[6.3.6]` jika session sudah revoked dan punya `replacedByJti`, seluruh family session ikut di-revoke
-12. `[6.3.7]` jika session sudah expired, session itu di-revoke dan response `401`
-13. `[6.3.8]` route memastikan user pemilik token masih ada
-14. `[6.3.9]` route membuat pasangan token baru
+10. if the hash doesn't match, revoke the entire session family (token reuse/compromise signal)
+11. `[6.3.6]` if the session is revoked and has `replacedByJti`, revoke the entire family as well
+12. `[6.3.7]` if the session is expired, revoke it and respond with `401`
+13. `[6.3.8]` route ensures the token owner user still exists
+14. `[6.3.9]` route issues a new token pair
 15. `[6.3.11]` route menambahkan `jti` refresh token lama ke Redis blocklist
 16. `[6.3.11]` route menjalankan `rotateRefreshSession`
-17. `[6.3.11]` service menandai session lama sebagai revoked dan menyimpan `replacedByJti`
-18. `[6.3.11]` service membuat session baru dengan `familyId` yang sama
-19. `[6.3.12]` route menulis refresh token baru ke cookie
+17. `[6.3.11]` service marks the old session as revoked and stores `replacedByJti`
+18. `[6.3.11]` service creates a new session with the same `familyId`
+19. `[6.3.12]` route writes the new refresh token to the cookie
 20. `[6.3.12]` route mengembalikan access token baru di response body
 
-Kenapa flow ini cukup ketat:
+Why this flow is strict:
 
-- refresh token lama tidak boleh dipakai dua kali
-- setiap rotasi meninggalkan jejak relasi session lama ke session baru
-- jika ada indikasi penyalahgunaan, satu family token bisa dimatikan sekaligus
+- an old refresh token must never be usable twice
+- every rotation leaves a trace linking old sessions to new sessions
+- if abuse is detected, the entire token family can be revoked at once
 
 ### `/auth/logout`
 
-Kode terkait: `[6.4]`
+Related code: `[6.4]`
 
-Tujuan endpoint ini adalah mengakhiri sesi aktif secepat mungkin.
+This endpoint terminates the active session as quickly as possible.
 
-Langkah detail:
+Detailed steps:
 
-1. `[6.4.1]` route membaca refresh token dari cookie, jika ada
-2. `[6.4.2]` refresh token diverifikasi untuk mengambil `jti` dan `exp`
-3. `[6.4.2]` session refresh dengan `jti` tersebut di-revoke
-4. `[6.4.2]` `jti` refresh token dimasukkan ke Redis blocklist sampai waktu expiry
-5. route membaca access token dari header authorization, jika ada
-6. `[6.4.3]` access token diverifikasi untuk mengambil `jti` dan `exp`
-7. `[6.4.3]` `jti` access token juga dimasukkan ke Redis blocklist
-8. `[6.4.4]` cookie refresh token dibersihkan
-9. route mengembalikan response sukses
+1. `[6.4.1]` the route reads the refresh token from the cookie, if present
+2. `[6.4.2]` verify the refresh token to extract `jti` and `exp`
+3. `[6.4.2]` revoke the refresh session for that `jti`
+4. `[6.4.2]` add the refresh token `jti` to the Redis blocklist until expiry
+5. route reads the access token from the authorization header, if present
+6. `[6.4.3]` verify the access token to extract `jti` and `exp`
+7. `[6.4.3]` add the access token `jti` to the Redis blocklist as well
+8. `[6.4.4]` the refresh cookie is cleared
+9. route returns a success response
 
-Catatan penting:
+Important notes:
 
-- logout tetap mencoba membersihkan dua sisi token, access dan refresh
-- walaupun access token stateless, blocklist membuatnya bisa dibatalkan sebelum expiry alami
+- logout attempts to invalidate both token types: access and refresh
+- even though the access token is stateless, blocklisting allows early invalidation before natural expiry
 
 ### `/auth/me`
 
-Kode terkait: `[6.5]`
+Related code: `[6.5]`
 
-Tujuan endpoint ini adalah mengambil profil user yang sedang login.
+This endpoint fetches the profile of the currently authenticated user.
 
-Langkah detail:
+Detailed steps:
 
-1. `[6.5.1]` route memverifikasi access token dengan helper `getAuthenticatedUserId`
-2. `[5]` helper memastikan token ada, valid, dan tidak di-blocklist
+1. `[6.5.1]` route verifies the access token using the `getAuthenticatedUserId` helper
+2. `[5]` helper ensures the token exists, is valid, and is not blocklisted
 3. `[5]` user id diambil dari claim `sub`
-4. `[6.5.2]` service mengambil data user berdasarkan id
-5. jika user tidak ada, response `404`
-6. jika ada, data user dikembalikan
+4. `[6.5.2]` service fetches the user data by id
+5. if the user doesn't exist, respond with `404`
+6. otherwise return the user data
 
 ### `/auth/change-password`
 
-Kode terkait: `[6.6]`
+Related code: `[6.6]`
 
-Tujuan endpoint ini adalah mengganti password user yang sedang login.
+This endpoint changes the password of the currently authenticated user.
 
-Langkah detail:
+Detailed steps:
 
-1. `[6.6.1]` route memverifikasi access token dengan helper `getAuthenticatedUserId`
-2. `[6.6.2]` request body divalidasi dengan `changePasswordSchema`
-3. `[6.6.3]` service mengambil user dari database
+1. `[6.6.1]` route verifies the access token using the `getAuthenticatedUserId` helper
+2. `[6.6.2]` validate the request body with `changePasswordSchema`
+3. `[6.6.3]` service loads the user from the database
 4. `[6.6.3]` service memverifikasi `oldPassword`
-5. jika password lama salah, response `401`
+5. if the old password is incorrect, respond with `401`
 6. `[6.6.3]` jika valid, `newPassword` di-hash
-7. `[6.6.3]` password user di-update di database
-8. route mengembalikan data user terbaru
+7. `[6.6.3]` update the user's password in the database
+8. route returns the updated user data
 
-Catatan penting:
+Important notes:
 
-- flow ini belum otomatis me-revoke semua session lama setelah password berubah
-- jika nanti ingin security lebih ketat, langkah berikutnya yang masuk akal adalah revoke seluruh refresh family milik user setelah password change
+- this flow does not yet automatically revoke all previous sessions after a password change
+- for stricter security, the next sensible step is revoking the user's entire refresh family after a password change
 
-## Ringkasan Relasi Antar Layer
+## Summary of Layer Responsibilities
 
-Berikut urutan tanggung jawabnya:
+Order of responsibilities:
 
-1. route menerima request dan melakukan parsing awal
-2. schema memvalidasi input
-3. service mengerjakan operasi database, hash, dan Redis
-4. route mengatur JWT, cookie, dan format response
+1. route receives the request and performs initial parsing
+2. schema validates input
+3. service performs database operations, hashing, and Redis operations
+4. route manages JWTs, cookies, and response formatting
 
-Singkatnya, route adalah orchestrator, service adalah executor logic yang menyentuh storage, dan utility menangani validasi auth yang dipakai ulang.
+In short: the route is the orchestrator, the service is the executor that touches storage, and utilities provide reusable auth validation.
 
-## Kontrak Response API
+## API Response Contract
 
-Semua endpoint auth mengembalikan wrapper response yang konsisten:
+All auth endpoints return a consistent response wrapper:
 
 ### Response sukses
 
@@ -368,12 +368,12 @@ Semua endpoint auth mengembalikan wrapper response yang konsisten:
 }
 ```
 
-Catatan:
+Notes:
 
-- field `token` bisa `null` jika error tidak terkait status token
-- field `code` terisi jika sumber error berasal dari Prisma known error
+- `token` can be `null` if the error is not related to token status
+- `code` is present when the error originates from a Prisma known error
 
-## Contoh Request Cepat
+## Quick Request Examples
 
 ### Register
 
@@ -447,13 +447,13 @@ flowchart TD
     R --> S[Return new access token]
 ```
 
-## Hal Yang Perlu Diperhatikan Saat Mengubah Modul Ini
+## Things to Watch When Modifying This Module
 
-- jangan ubah format claim `sub` jika helper masih mengharapkan numeric user id dalam string
-- jangan simpan refresh token mentah ke database
-- rotasi refresh token harus tetap atomic agar session lama dan baru tidak bentrok
-- kalau menambah endpoint protected, pakai helper auth yang sama supaya perilaku konsisten
-- jika menambah logout all devices, basis logikanya ada di `familyId` dan revoke session per user
+- do not change the `sub` claim format while helpers expect a numeric user id encoded as a string
+- never store raw refresh tokens in the database
+- refresh token rotation must remain atomic so old/new sessions don't conflict
+- when adding protected endpoints, reuse the same auth helpers for consistent behavior
+- if adding "logout all devices", base the logic on `familyId` and revoking sessions per user
 
 ## Referensi Source
 

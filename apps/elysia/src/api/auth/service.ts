@@ -7,7 +7,7 @@ import { TChangePasswordSchema, TLoginSchema, TRegisterSchema } from "./type";
 
 // ---------------------------------------------------------------------------
 // [1] Constants & helper types
-// Konstanta durasi token dan kontrak payload session.
+// Token duration constants and session payload contracts.
 // ---------------------------------------------------------------------------
 
 const ACCESS_TOKEN_EXPIRES_IN = process.env.JWT_ACCESS_EXPIRES_IN || "15m";
@@ -33,7 +33,7 @@ interface IRotateRefreshSessionPayload extends IRefreshSessionBasePayload {
   rotatedFromJti?: string;
 }
 
-// [1.1] Hash token untuk penyimpanan aman di DB.
+// [1.1] Hashes a token for safe storage in the database.
 const hashToken = async (token: string) => {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token));
   return Array.from(new Uint8Array(digest))
@@ -43,14 +43,14 @@ const hashToken = async (token: string) => {
 
 // ---------------------------------------------------------------------------
 // [2] Auth service
-// Seluruh logic otentikasi, session refresh, dan blocklist token.
+// All authentication logic: refresh sessions and token blocklisting.
 // ---------------------------------------------------------------------------
 
 export const service = {
-  // [2.1] Expose TTL token agar bisa dipakai route/helper lain.
+  // [2.1] Exposes token TTL so it can be reused by other routes/helpers.
   ACCESS_TOKEN_EXPIRES_IN,
 
-  // [2.2] Blocklist token sampai masa berlakunya habis.
+  // [2.2] Blocklists a token until it expires.
   async addToBlocklist(jti: string, expiresAt: Date) {
     const ttlSeconds = Math.floor((expiresAt.getTime() - Date.now()) / 1000);
     if (ttlSeconds > 0) {
@@ -58,7 +58,7 @@ export const service = {
     }
   },
 
-  // [2.3] Ganti password user jika password lama valid.
+  // [2.3] Changes the user password if the old password is valid.
   async changePassword(id: number, data: TChangePasswordSchema) {
     const res = await prisma.users.findUnique({
       where: { id },
@@ -80,7 +80,7 @@ export const service = {
     });
   },
 
-  // [2.4] Buat refresh session baru (token disimpan dalam bentuk hash).
+  // [2.4] Creates a new refresh session (the token is stored as a hash).
   async createRefreshSession(data: ICreateRefreshSessionPayload) {
     const tokenHash = await hashToken(data.token);
 
@@ -98,17 +98,17 @@ export const service = {
     });
   },
 
-  // [2.5] Ambil refresh session berdasarkan jti.
+  // [2.5] Gets a refresh session by jti.
   async getRefreshSessionByJti(jti: string) {
     return await prisma.session.findUnique({ where: { jti } });
   },
 
-  // [2.6] Konversi durasi refresh token menjadi max-age cookie (detik).
+  // [2.6] Converts refresh token duration into cookie max-age (seconds).
   getRefreshTokenMaxAgeSeconds() {
     return Math.floor(parseDurationToMs(REFRESH_TOKEN_EXPIRES_IN) / 1000);
   },
 
-  // [2.7] Ambil user by id untuk endpoint auth yang butuh profil user.
+  // [2.7] Gets a user by id for auth endpoints that require the user profile.
   async getUserById(id: number) {
     return await prisma.users.findUnique({
       include: { image: true },
@@ -117,19 +117,19 @@ export const service = {
     });
   },
 
-  // [2.8] Cek apakah jti token sudah diblok.
+  // [2.8] Checks whether a token jti is already blocklisted.
   async isBlocklisted(jti: string) {
     const exists = await redis.exists(`blocklist:${jti}`);
     return exists === 1;
   },
 
-  // [2.9] Bandingkan token raw dari cookie dengan hash di DB.
+  // [2.9] Compares the raw cookie token with the expected DB hash.
   async isRefreshTokenHashMatch(token: string, expectedHash: string) {
     const tokenHash = await hashToken(token);
     return tokenHash === expectedHash;
   },
 
-  // [2.10] Login dengan email/username + password.
+  // [2.10] Logs in with email/username + password.
   async login(data: TLoginSchema) {
     const res = await prisma.users.findUnique({
       include: { image: true },
@@ -146,10 +146,10 @@ export const service = {
     return user;
   },
 
-  // [2.11] Expose TTL refresh token untuk helper cookie di route.
+  // [2.11] Exposes refresh token TTL for cookie helpers in routes.
   REFRESH_TOKEN_EXPIRES_IN,
 
-  // [2.12] Register user baru dengan password ter-hash.
+  // [2.12] Registers a new user with a hashed password.
   async register(data: TRegisterSchema) {
     const hashedPassword = await Bun.password.hash(data.password);
 
@@ -166,7 +166,7 @@ export const service = {
     });
   },
 
-  // [2.13] Bersihkan refresh session yang sudah kedaluwarsa.
+  // [2.13] Removes expired refresh sessions.
   async removeExpiredRefreshSessions() {
     return await prisma.session.deleteMany({
       where: {
@@ -177,7 +177,7 @@ export const service = {
     });
   },
 
-  // [2.14] Revoke seluruh session dalam satu token family milik user.
+  // [2.14] Revokes all sessions within a single token family for a user.
   async revokeRefreshFamily(userId: number, familyId: string) {
     return await prisma.session.updateMany({
       data: { revokedAt: new Date() },
@@ -189,7 +189,7 @@ export const service = {
     });
   },
 
-  // [2.15] Revoke refresh session aktif berdasarkan jti.
+  // [2.15] Revokes an active refresh session by jti.
   async revokeRefreshSessionByJti(jti: string) {
     return await prisma.session.updateMany({
       data: { revokedAt: new Date() },
@@ -200,7 +200,7 @@ export const service = {
     });
   },
 
-  // [2.16] Rotasi refresh session: revoke session lama lalu buat session baru.
+  // [2.16] Rotates a refresh session: revoke the old session, then create a new session.
   async rotateRefreshSession(data: IRotateRefreshSessionPayload) {
     const tokenHash = await hashToken(data.token);
 
