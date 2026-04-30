@@ -15,7 +15,6 @@ export interface IErrorResponse {
   code: null | string;
   message: null | string;
   success: false;
-  token: { access: boolean; refresh: boolean } | null;
 }
 
 interface I {

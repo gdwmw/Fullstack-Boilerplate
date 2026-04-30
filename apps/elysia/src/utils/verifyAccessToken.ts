@@ -18,7 +18,6 @@ export const verifyResponse = async ({
   if (!res) {
     return ERROR_RESPONSE({
       message: responseMessage("Access token").required,
-      token: { access: false },
     });
   }
 
@@ -27,7 +26,6 @@ export const verifyResponse = async ({
   if (!decoded || typeof decoded !== "object") {
     return ERROR_RESPONSE({
       message: responseMessage("Access token").invalid,
-      token: { access: false },
     });
   }
 
@@ -37,7 +35,6 @@ export const verifyResponse = async ({
     if (blocked === 1) {
       return ERROR_RESPONSE({
         message: responseMessage("Access token").invalid,
-        token: { access: false },
       });
     }
   }
