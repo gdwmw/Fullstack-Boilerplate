@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { templateLog } from "@repo/utils";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { DehydratedState, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -11,7 +11,8 @@ import { FC, HTMLInputTypeAttribute, KeyboardEvent, ReactElement, useEffect, use
 import { SubmitHandler, useForm } from "react-hook-form";
 
 import { Avatar, ExampleATWM, ExampleInput, FormContainer, SubmitButton } from "@/src/components";
-import { DELETEUpload, GETMe, IErrorResponse, IMeResponse, inputValidations, POSTUpload, PUTUsers } from "@/src/utils";
+import { ReactQueryProvider } from "@/src/libs";
+import { DELETEUpload, GETMe, IErrorResponse, inputValidations, POSTUpload, PUTUsers } from "@/src/utils";
 
 import { profileSchema, TProfileSchema } from "../schema";
 
@@ -60,10 +61,16 @@ const FORM_FIELDS_DATA: IFormField[] = [
 ];
 
 interface I {
-  user: IMeResponse | null;
+  dehydratedState: DehydratedState;
 }
 
-export const Main: FC<I> = (props): ReactElement => {
+export const Main: FC<I> = (props): ReactElement => (
+  <ReactQueryProvider dehydratedState={props.dehydratedState}>
+    <MainContent />
+  </ReactQueryProvider>
+);
+
+const MainContent: FC = (): ReactElement => {
   const session = useSession();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -72,7 +79,6 @@ export const Main: FC<I> = (props): ReactElement => {
   const [loading, setLoading] = useState(false);
 
   const meQuery = useQuery({
-    initialData: props.user ?? undefined,
     queryFn: async () => {
       const res = await GETMe();
       return res.data;
