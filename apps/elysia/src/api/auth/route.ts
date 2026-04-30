@@ -151,7 +151,6 @@ const getAuthenticatedUserId = async ({
     return {
       error: ERROR_RESPONSE({
         message: responseMessage("Access token").invalid,
-        token: { access: false },
       }),
       userId: null,
     };
@@ -271,7 +270,6 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         set.status = 401;
         return ERROR_RESPONSE({
           message: responseMessage("Refresh token").required,
-          token: { refresh: false },
         });
       }
 
@@ -285,7 +283,6 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         set.status = 401;
         return ERROR_RESPONSE({
           message: responseMessage("Refresh token").invalid + " or " + responseMessage("Refresh token").expired,
-          token: { refresh: false },
         });
       }
 
@@ -295,7 +292,6 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         set.status = 401;
         return ERROR_RESPONSE({
           message: responseMessage("Refresh token").invalid,
-          token: { refresh: false },
         });
       }
 
@@ -307,7 +303,6 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         set.status = 401;
         return ERROR_RESPONSE({
           message: responseMessage("Refresh token").invalid,
-          token: { refresh: false },
         });
       }
 
@@ -320,7 +315,6 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         set.status = 401;
         return ERROR_RESPONSE({
           message: responseMessage("Refresh token").invalid,
-          token: { refresh: false },
         });
       }
 
@@ -334,7 +328,6 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         set.status = 401;
         return ERROR_RESPONSE({
           message: responseMessage("Refresh token").invalid,
-          token: { refresh: false },
         });
       }
 
@@ -345,7 +338,6 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         set.status = 401;
         return ERROR_RESPONSE({
           message: responseMessage("Refresh token").expired,
-          token: { refresh: false },
         });
       }
 

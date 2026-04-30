@@ -6,23 +6,8 @@ export const SUCCESS_RESPONSE = ({ data, message = null }: { data: unknown; mess
   success: true,
 });
 
-export const ERROR_RESPONSE = ({
-  error,
-  message,
-  token,
-}: {
-  error?: unknown;
-  message: null | string;
-  token?: { access?: boolean; refresh?: boolean } | null;
-}) => ({
+export const ERROR_RESPONSE = ({ error, message }: { error?: unknown; message: null | string }) => ({
   code: error instanceof Prisma.PrismaClientKnownRequestError ? error.code : null,
-  error: null,
   message: message,
   success: false,
-  token: token
-    ? {
-        access: (token.refresh ?? true) ? (token.access ?? true) : false,
-        refresh: token.refresh ?? true,
-      }
-    : null,
 });
