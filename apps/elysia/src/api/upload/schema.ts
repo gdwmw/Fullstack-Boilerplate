@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const uploadSchema = z.object({
   file: z.instanceof(File).refine((file) => file.size > 0, {
-    message: "File cannot be empty",
+    message: "file cannot be empty",
   }),
 });
 

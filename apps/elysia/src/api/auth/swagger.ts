@@ -3,7 +3,7 @@ import { DocumentDecoration } from "elysia";
 const successResponseSchema = {
   properties: {
     data: {},
-    message: { example: "Authentication success", nullable: true, type: "string" },
+    message: { example: "authentication success", nullable: true, type: "string" },
     success: { example: true, type: "boolean" },
   },
   type: "object",
@@ -13,7 +13,7 @@ const errorResponseSchema = {
   properties: {
     code: { example: "P2025", nullable: true, type: "string" },
     error: { example: null, nullable: true },
-    message: { example: "Access token is invalid", nullable: true, type: "string" },
+    message: { example: "access token is invalid", nullable: true, type: "string" },
     success: { example: false, type: "boolean" },
     token: {
       nullable: true,
@@ -65,7 +65,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
     },
     security: [{ bearerAuth: [] }],
     summary: "Change Password",
-    tags: [label],
+    tags: [label.toLowerCase()],
   },
   login: {
     description: "Authenticate user and issue access/refresh token pair",
@@ -104,7 +104,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
       },
     },
     summary: "Login",
-    tags: [label],
+    tags: [label.toLowerCase()],
   },
   logout: {
     description: "Logout current session. Refresh token is read from HttpOnly cookie. Access token is optional but will be blocklisted if provided.",
@@ -119,7 +119,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
       },
     },
     summary: "Logout",
-    tags: [label],
+    tags: [label.toLowerCase()],
   },
   me: {
     description: "Get current authenticated user profile",
@@ -151,7 +151,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
     },
     security: [{ bearerAuth: [] }],
     summary: "Get Current User",
-    tags: [label],
+    tags: [label.toLowerCase()],
   },
   refresh: {
     description: "Rotate refresh token and issue a new access token. Refresh token is read from HttpOnly cookie.",
@@ -182,7 +182,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
       },
     },
     summary: "Refresh Token",
-    tags: [label],
+    tags: [label.toLowerCase()],
   },
   register: {
     description: "Register user and issue access/refresh token pair",
@@ -232,6 +232,6 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
       },
     },
     summary: "Register",
-    tags: [label],
+    tags: [label.toLowerCase()],
   },
 });

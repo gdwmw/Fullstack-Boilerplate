@@ -9,9 +9,9 @@ export const registerSchema = z.object({
     .string()
     .min(8, { message: schemaMessage.string.min("Password", 8) })
     .max(72, { message: schemaMessage.string.max("Password", 72) })
-    .regex(/^(?=.*[A-Z])/, { message: "Password must have at least 1 uppercase letter" })
-    .regex(/^(?=.*\d)/, { message: "Password must have at least 1 number" })
-    .regex(/^(?=.*[!@#$%^&*])/, { message: "Password must have at least 1 symbol (!@#$%^&*)" }),
+    .regex(/^(?=.*[A-Z])/, { message: "password must have at least 1 uppercase letter" })
+    .regex(/^(?=.*\d)/, { message: "password must have at least 1 number" })
+    .regex(/^(?=.*[!@#$%^&*])/, { message: "password must have at least 1 symbol (!@#$%^&*)" }),
   phone: z.string().min(10, { message: schemaMessage.string.min("Phone", 10) }),
   role: z
     .enum(["user", "admin"], { message: schemaMessage.string.enum("Role") })
@@ -35,8 +35,8 @@ export const changePasswordSchema = z.object({
     .string()
     .min(8, { message: schemaMessage.string.min("Password", 8) })
     .max(72, { message: schemaMessage.string.max("Password", 72) })
-    .regex(/^(?=.*[A-Z])/, { message: "Password must have at least 1 uppercase letter" })
-    .regex(/^(?=.*\d)/, { message: "Password must have at least 1 number" })
-    .regex(/^(?=.*[!@#$%^&*])/, { message: "Password must have at least 1 symbol (!@#$%^&*)" }),
+    .regex(/^(?=.*[A-Z])/, { message: "password must have at least 1 uppercase letter" })
+    .regex(/^(?=.*\d)/, { message: "password must have at least 1 number" })
+    .regex(/^(?=.*[!@#$%^&*])/, { message: "password must have at least 1 symbol (!@#$%^&*)" }),
   oldPassword: z.string().min(1, { message: schemaMessage.string.required("Current password") }),
 });
