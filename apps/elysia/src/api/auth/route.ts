@@ -11,7 +11,7 @@ import { docs } from "./swagger";
 
 // ---------------------------------------------------------------------------
 // [1] Constants & local types
-// Menentukan label route, nama cookie, dan type helper yang dipakai lokal.
+// Defines the route label, cookie name, and local helper types.
 // ---------------------------------------------------------------------------
 
 const LABEL = "Authentication";
@@ -31,7 +31,7 @@ type ResponseSet = {
 
 // ---------------------------------------------------------------------------
 // [2] JWT payload helpers
-// Membaca field penting dari payload JWT dengan parsing defensif.
+// Reads important fields from the JWT payload with defensive parsing.
 // ---------------------------------------------------------------------------
 
 const parseSubjectToUserId = (sub: unknown) => {
@@ -46,7 +46,7 @@ const parseJwtExp = (value: unknown) => (typeof value === "number" ? value : nul
 
 // ---------------------------------------------------------------------------
 // [3] Refresh cookie helpers
-// Membaca, membuat, dan membersihkan cookie refresh token.
+// Reads, creates, and clears the refresh token cookie.
 // ---------------------------------------------------------------------------
 
 const readRefreshTokenFromCookie = (cookieHeader: string | undefined) => {
@@ -78,7 +78,7 @@ const clearRefreshCookie = () => {
 
 // ---------------------------------------------------------------------------
 // [4] Request helpers
-// Mengambil metadata request yang nanti disimpan ke refresh session.
+// Extracts request metadata that will be stored in the refresh session.
 // ---------------------------------------------------------------------------
 
 const getClientMetadata = (headers: HeadersMap) => {
@@ -93,7 +93,7 @@ const getClientMetadata = (headers: HeadersMap) => {
 
 // ---------------------------------------------------------------------------
 // [5] JWT & auth guard helpers
-// Helper bersama untuk issue token dan ambil user id dari access token.
+// Shared helpers to issue tokens and extract the user id from the access token.
 // ---------------------------------------------------------------------------
 
 const issueAccessAndRefreshTokens = async ({
@@ -162,7 +162,7 @@ const getAuthenticatedUserId = async ({
 
 // ---------------------------------------------------------------------------
 // [6] Routes
-// Endpoint auth dimulai dari sini. Nomor di komentar dipakai juga di README.
+// Auth endpoints start here. The numbered comments are also referenced by the README.
 // ---------------------------------------------------------------------------
 
 export const AuthRoutes = new Elysia({ prefix: "/auth" })
@@ -172,18 +172,18 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
   .onError(({ error, set }) => handlePrismaError(LABEL, error, set))
 
   // ----- [6.1] /register -----
-  // Flow: validate body -> create user -> issue tokens -> simpan session -> set cookie -> return response.
+  // Flow: validate body -> create user -> issue tokens -> persist session -> set cookie -> return response.
   .post(
     "/register",
     async ({ accessJwt, body, headers, refreshJwt, set }) => {
-      // [6.1.1] Validasi payload register lalu buat user baru.
+      // [6.1.1] Validate the register payload, then create a new user.
       const payload = registerSchema.parse(body);
       const res = await service.register(payload);
 
-      // [6.1.2] Buat pasangan access token dan refresh token untuk user baru.
+      // [6.1.2] Create an access/refresh token pair for the new user.
       const tokens = await issueAccessAndRefreshTokens({ accessJwt, refreshJwt, userId: res.id });
 
-      // [6.1.3] Ambil metadata request lalu simpan refresh session ke database.
+      // [6.1.3] Extract request metadata, then persist the refresh session to the database.
       const clientMetadata = getClientMetadata(headers as HeadersMap);
 
       await service.createRefreshSession({
@@ -196,12 +196,12 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         userId: res.id,
       });
 
-      // [6.1.4] Tulis refresh token ke cookie HttpOnly agar client tidak pegang token ini di JS runtime.
+      // [6.1.4] Write the refresh token to an HttpOnly cookie so the client never holds it in JS runtime.
       set.headers["set-cookie"] = createRefreshCookie(tokens.refreshToken);
 
       set.status = 201;
 
-      // [6.1.5] Kembalikan data user dan access token ke client.
+      // [6.1.5] Return the user data and access token to the client.
       return SUCCESS_RESPONSE({
         data: { ...res, accessToken: tokens.accessToken },
         message: responseMessage("Register").success,
@@ -212,14 +212,14 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
   )
 
   // ----- [6.2] /login -----
-  // Flow: validate login -> verifikasi user -> issue tokens -> simpan session -> set cookie -> return response.
+  // Flow: validate login -> verify user -> issue tokens -> persist session -> set cookie -> return response.
   .post(
     "/login",
     async ({ accessJwt, body, headers, refreshJwt, set }) => {
-      // [6.2.1] Validasi payload berdasarkan metode login: email atau username.
+      // [6.2.1] Validate the payload based on the login method: email or username.
       const payload = loginSchema((body as { method: "email" | "username" }).method).parse(body);
 
-      // [6.2.2] Verifikasi kredensial user di service.
+      // [6.2.2] Verify the user credentials in the service layer.
       const res = await service.login(payload);
 
       if (!res) {
@@ -229,10 +229,10 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         });
       }
 
-      // [6.2.3] Jika valid, issue token pair baru.
+      // [6.2.3] If valid, issue a new token pair.
       const tokens = await issueAccessAndRefreshTokens({ accessJwt, refreshJwt, userId: res.id });
 
-      // [6.2.4] Simpan session refresh baru lengkap dengan metadata client.
+      // [6.2.4] Persist the new refresh session along with client metadata.
       const clientMetadata = getClientMetadata(headers as HeadersMap);
 
       await service.createRefreshSession({
@@ -245,7 +245,7 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         userId: res.id,
       });
 
-      // [6.2.5] Tulis refresh token ke cookie dan kirim access token di response body.
+      // [6.2.5] Write the refresh token to the cookie and send the access token in the response body.
       set.headers["set-cookie"] = createRefreshCookie(tokens.refreshToken);
 
       return SUCCESS_RESPONSE({
@@ -258,11 +258,11 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
   )
 
   // ----- [6.3] /refresh -----
-  // Flow: baca cookie -> verifikasi token lama -> validasi session -> rotate session -> set cookie baru -> return access token baru.
+  // Flow: read cookie -> verify old token -> validate session -> rotate session -> set new cookie -> return new access token.
   .post(
     "/refresh",
     async ({ accessJwt, headers, refreshJwt, set }) => {
-      // [6.3.1] Ambil refresh token dari cookie request.
+      // [6.3.1] Read the refresh token from the request cookie.
       const cookieHeader = (headers as HeadersMap).cookie;
       const refreshToken = readRefreshTokenFromCookie(cookieHeader);
 
@@ -275,7 +275,7 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         });
       }
 
-      // [6.3.2] Verify JWT refresh token lalu ambil user id dan jti dari payload.
+      // [6.3.2] Verify the refresh JWT, then extract user id and jti from the payload.
       const decoded = await refreshJwt.verify(refreshToken);
       const userId = parseSubjectToUserId((decoded as JwtPayload)?.sub);
       const refreshJti = parseJwtStringField((decoded as JwtPayload)?.jti);
@@ -289,7 +289,7 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         });
       }
 
-      // [6.3.3] Tolak token yang sudah ada di blocklist Redis.
+      // [6.3.3] Reject tokens that are already present in the Redis blocklist.
       if (await service.isBlocklisted(refreshJti)) {
         set.headers["set-cookie"] = clearRefreshCookie();
         set.status = 401;
@@ -299,7 +299,7 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         });
       }
 
-      // [6.3.4] Ambil refresh session aktif berdasarkan jti token.
+      // [6.3.4] Load the active refresh session by the token jti.
       const session = await service.getRefreshSessionByJti(refreshJti);
 
       if (!session) {
@@ -311,7 +311,7 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         });
       }
 
-      // [6.3.5] Cocokkan token mentah dari cookie dengan hash token di database.
+      // [6.3.5] Compare the raw cookie token to the hashed token stored in the database.
       const isHashMatch = await service.isRefreshTokenHashMatch(refreshToken, session.tokenHash);
 
       if (!isHashMatch) {
@@ -324,7 +324,7 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         });
       }
 
-      // [6.3.6] Jika session lama sudah revoked, anggap token tidak lagi boleh dipakai.
+      // [6.3.6] If the old session is already revoked, consider the token no longer usable.
       if (session.revokedAt) {
         if (session.replacedByJti) {
           await service.revokeRefreshFamily(session.userId, session.familyId);
@@ -338,7 +338,7 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         });
       }
 
-      // [6.3.7] Session kedaluwarsa juga langsung direvoke agar state tetap bersih.
+      // [6.3.7] If the session is expired, revoke it immediately to keep state clean.
       if (session.expiresAt.getTime() <= Date.now()) {
         await service.revokeRefreshSessionByJti(session.jti);
         set.headers["set-cookie"] = clearRefreshCookie();
@@ -349,7 +349,7 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         });
       }
 
-      // [6.3.8] Pastikan user pemilik token masih ada.
+      // [6.3.8] Ensure the token owner user still exists.
       const user = await service.getUserById(userId);
 
       if (!user) {
@@ -358,13 +358,13 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         return ERROR_RESPONSE({ message: responseMessage("Users").notFound });
       }
 
-      // [6.3.9] Issue token pair baru untuk rotasi.
+      // [6.3.9] Issue a new token pair for rotation.
       const tokens = await issueAccessAndRefreshTokens({ accessJwt, refreshJwt, userId: user.id });
 
-      // [6.3.10] Simpan metadata client untuk session baru.
+      // [6.3.10] Persist client metadata for the new session.
       const clientMetadata = getClientMetadata(headers as HeadersMap);
 
-      // [6.3.11] Blocklist token lama lalu rotate refresh session secara stateful.
+      // [6.3.11] Blocklist the old token, then rotate the refresh session (statefully).
       await service.addToBlocklist(session.jti, session.expiresAt);
       await service.rotateRefreshSession({
         currentJti: session.jti,
@@ -378,7 +378,7 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         userId: user.id,
       });
 
-      // [6.3.12] Tulis refresh token baru ke cookie dan kirim access token baru.
+      // [6.3.12] Write the new refresh token to the cookie and return the new access token.
       set.headers["set-cookie"] = createRefreshCookie(tokens.refreshToken);
 
       return SUCCESS_RESPONSE({
@@ -391,16 +391,16 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
   )
 
   // ----- [6.4] /logout -----
-  // Flow: revoke refresh token jika ada -> blocklist access token jika ada -> bersihkan cookie.
+  // Flow: revoke refresh token if present -> blocklist access token if present -> clear cookie.
   .post(
     "/logout",
     async ({ accessJwt, headers, refreshJwt, set }) => {
-      // [6.4.1] Coba ambil refresh token dari cookie untuk dibatalkan.
+      // [6.4.1] Try to read the refresh token from the cookie to revoke it.
       const cookieHeader = (headers as HeadersMap).cookie;
       const refreshToken = readRefreshTokenFromCookie(cookieHeader);
 
       if (refreshToken) {
-        // [6.4.2] Jika refresh token valid, revoke session dan blocklist jti-nya.
+        // [6.4.2] If the refresh token is valid, revoke the session and blocklist its jti.
         const decodedRefresh = await refreshJwt.verify(refreshToken);
         const refreshJti = parseJwtStringField((decodedRefresh as JwtPayload)?.jti);
         const refreshExp = parseJwtExp((decodedRefresh as JwtPayload)?.exp);
@@ -418,14 +418,14 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
       const bearerToken = authorization?.startsWith("Bearer ") ? authorization.slice(7) : undefined;
 
       if (bearerToken) {
-        // [6.4.3] Access token yang sedang aktif juga diblok agar tidak bisa dipakai lagi.
+        // [6.4.3] Blocklist the currently active access token so it can't be used again.
         const decodedAccess = await accessJwt.verify(bearerToken);
         if (decodedAccess?.jti && decodedAccess.exp) {
           await service.addToBlocklist(decodedAccess.jti, new Date(decodedAccess.exp * 1000));
         }
       }
 
-      // [6.4.4] Bersihkan cookie refresh token di browser/client.
+      // [6.4.4] Clear the refresh token cookie in the browser/client.
       set.headers["set-cookie"] = clearRefreshCookie();
 
       return SUCCESS_RESPONSE({ data: null, message: responseMessage("Logout").success });
@@ -435,18 +435,18 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
   )
 
   // ----- [6.5] /me -----
-  // Flow: verifikasi access token -> ambil user id -> ambil profil user -> return response.
+  // Flow: verify access token -> extract user id -> fetch user profile -> return response.
   .get(
     "/me",
     async ({ accessJwt, headers, set }) => {
-      // [6.5.1] Pastikan access token valid dan bisa dipetakan ke user id.
+      // [6.5.1] Ensure the access token is valid and can be mapped to a user id.
       const auth = await getAuthenticatedUserId({ accessJwt, headers, set });
       if (auth.error) {
         set.status = 401;
         return auth.error;
       }
 
-      // [6.5.2] Ambil data user berdasarkan id dari claim token.
+      // [6.5.2] Fetch the user data using the id from the token claim.
       const res = await service.getUserById(auth.userId);
 
       if (!res) {
@@ -461,21 +461,21 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
   )
 
   // ----- [6.6] /change-password -----
-  // Flow: verifikasi access token -> validasi body -> verifikasi password lama -> update password.
+  // Flow: verify access token -> validate body -> verify old password -> update password.
   .post(
     "/change-password",
     async ({ accessJwt, body, headers, set }) => {
-      // [6.6.1] Pastikan request datang dari user yang sudah login.
+      // [6.6.1] Ensure the request is made by an authenticated user.
       const auth = await getAuthenticatedUserId({ accessJwt, headers, set });
       if (auth.error) {
         set.status = 401;
         return auth.error;
       }
 
-      // [6.6.2] Validasi payload perubahan password.
+      // [6.6.2] Validate the change-password payload.
       const payload = changePasswordSchema.parse(body);
 
-      // [6.6.3] Service akan cek password lama lalu update password baru yang sudah di-hash.
+      // [6.6.3] The service validates the old password, then updates the password with a hashed new password.
       const res = await service.changePassword(auth.userId, payload);
 
       if (!res) {

@@ -4,12 +4,12 @@ import { prisma } from "@/src/libs";
 import { TPayloadSchema } from "./type";
 
 // ---------------------------------------------------------------------------
-// [1] Service utama users
-// Semua logic utama users CRUD
+// [1] Users primary service
+// All core users CRUD logic
 // ---------------------------------------------------------------------------
 
 export const service = {
-  // [1.1] Hapus user
+  // [1.1] Delete a user
   async delete(id: number) {
     return await prisma.users.delete({
       include: { image: true },
@@ -18,7 +18,7 @@ export const service = {
     });
   },
 
-  // [1.2] Ambil semua user
+  // [1.2] Get all users
   async getAll() {
     return await prisma.users.findMany({
       include: { image: true },
@@ -27,7 +27,7 @@ export const service = {
     });
   },
 
-  // [1.3] Ambil user by id
+  // [1.3] Get a user by id
   async getById(id: number) {
     return await prisma.users.findUnique({
       include: { image: true },
@@ -36,7 +36,7 @@ export const service = {
     });
   },
 
-  // [1.4] Update user
+  // [1.4] Update a user
   async put(id: number, data: TPayloadSchema) {
     const { imageId, ...rest } = data;
     return await prisma.users.update({

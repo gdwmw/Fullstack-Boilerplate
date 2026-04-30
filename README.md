@@ -45,7 +45,7 @@ This boilerplate provides common foundations often needed in production projects
 ## 🧰 Tech Stack
 
 * **Monorepo**: Turborepo, pnpm
-* **Frontend**: Next.js, Tailwind CSS, Zustand, React Hook Form, Zod
+* **Frontend**: Next.js, Tailwind CSS, Jotai, React Hook Form, Zod
 * **Backend**: Elysia.js, Prisma, PostgreSQL, JWT
 * **Tooling**: ESLint, Prettier, Husky, Commitizen
 

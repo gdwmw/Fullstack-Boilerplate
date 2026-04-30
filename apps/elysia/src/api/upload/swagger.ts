@@ -3,7 +3,7 @@ import { DocumentDecoration } from "elysia";
 const successResponseSchema = {
   properties: {
     data: {},
-    message: { example: "Upload data retrieved successfully", nullable: true, type: "string" },
+    message: { example: "upload data retrieved successfully", nullable: true, type: "string" },
     success: { example: true, type: "boolean" },
   },
   type: "object",
@@ -13,7 +13,7 @@ const errorResponseSchema = {
   properties: {
     code: { example: "P2025", nullable: true, type: "string" },
     error: { example: null, nullable: true },
-    message: { example: "Upload not found", nullable: true, type: "string" },
+    message: { example: "upload not found", nullable: true, type: "string" },
     success: { example: false, type: "boolean" },
     token: {
       nullable: true,
@@ -59,7 +59,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
     },
     security: [{ bearerAuth: [] }],
     summary: "Delete File",
-    tags: [label],
+    tags: [label.toLowerCase()],
   },
   getAll: {
     description: "Get all uploaded files",
@@ -83,7 +83,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
     },
     security: [{ bearerAuth: [] }],
     summary: "Get All Files",
-    tags: [label],
+    tags: [label.toLowerCase()],
   },
   getById: {
     description: "Get a file by ID",
@@ -116,7 +116,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
     },
     security: [{ bearerAuth: [] }],
     summary: "Get File by ID",
-    tags: [label],
+    tags: [label.toLowerCase()],
   },
   upload: {
     description: "Upload a file",
@@ -165,6 +165,6 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
     },
     security: [{ bearerAuth: [] }],
     summary: "Upload File",
-    tags: [label],
+    tags: [label.toLowerCase()],
   },
 });

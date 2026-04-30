@@ -2,17 +2,18 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { templateLog } from "@repo/utils";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FC, HTMLInputTypeAttribute, KeyboardEvent, ReactElement, useEffect, useState, useTransition } from "react";
+import { FC, HTMLInputTypeAttribute, KeyboardEvent, ReactElement, useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 
 import { Avatar, ExampleATWM, ExampleInput, FormContainer, SubmitButton } from "@/src/components";
-import { DELETEUpload, IErrorResponse, IMeResponse, inputValidations, POSTUpload, PUTUsers } from "@/src/utils";
+import { DELETEUpload, GETMe, IErrorResponse, IMeResponse, inputValidations, POSTUpload, PUTUsers } from "@/src/utils";
 
-import { profileSchema, TProfileSchema } from "./schema";
+import { profileSchema, TProfileSchema } from "../schema";
 
 const API_URL = process.env.NEXT_PUBLIC_BASE_API_URL;
 
@@ -65,24 +66,46 @@ interface I {
 export const Main: FC<I> = (props): ReactElement => {
   const session = useSession();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [errorMessage, setErrorMessage] = useState<string | undefined>("");
   const [previewImage, setPreviewImage] = useState<null | string>(null);
-  const [loading, setTransition] = useTransition();
+  const [loading, setLoading] = useState(false);
+
+  const meQuery = useQuery({
+    initialData: props.user ?? undefined,
+    queryFn: async () => {
+      const res = await GETMe();
+      return res.data;
+    },
+    queryKey: ["me"],
+  });
 
   const {
     formState: { errors },
     handleSubmit,
     register,
+    reset,
     watch,
   } = useForm<TProfileSchema>({
     defaultValues: {
-      email: props.user?.email,
-      name: props.user?.name,
-      phone: props.user?.phone,
-      username: props.user?.username,
+      email: meQuery.data?.email,
+      name: meQuery.data?.name,
+      phone: meQuery.data?.phone,
+      username: meQuery.data?.username,
     },
     resolver: zodResolver(profileSchema),
   });
+
+  useEffect(() => {
+    if (meQuery.data) {
+      reset({
+        email: meQuery.data.email,
+        name: meQuery.data.name,
+        phone: meQuery.data.phone,
+        username: meQuery.data.username,
+      });
+    }
+  }, [meQuery.data, reset]);
 
   useEffect(() => {
     // eslint-disable-next-line
@@ -98,51 +121,70 @@ export const Main: FC<I> = (props): ReactElement => {
     //eslint-disable-next-line
   }, [watch("image")]);
 
-  const onSubmit: SubmitHandler<TProfileSchema> = (dt) => {
-    setTransition(async () => {
-      try {
-        let imageId: null | number | undefined = props.user?.imageId;
+  const updateProfileMutation = useMutation({
+    mutationFn: async (dt: TProfileSchema) => {
+      const currentUser = meQuery.data;
+      if (!currentUser) {
+        throw new Error("Failed to load current user");
+      }
 
-        if (dt.image && dt.image.length > 0) {
-          if (props.user?.imageId) {
-            await DELETEUpload(props.user.imageId);
-          }
+      let imageId: null | number | undefined = currentUser.imageId;
 
-          const uploadResponse = await POSTUpload({
-            file: dt.image[0],
-          });
-
-          imageId = uploadResponse.data.id;
+      if (dt.image && dt.image.length > 0) {
+        if (currentUser.imageId) {
+          await DELETEUpload(currentUser.imageId);
         }
 
-        const userResponse = await PUTUsers(props.user?.id ?? 0, {
-          email: dt.email,
-          imageId: imageId,
-          name: dt.name,
-          phone: dt.phone,
-          username: dt.username,
+        const uploadResponse = await POSTUpload({
+          file: dt.image[0],
         });
 
-        await session.update({
-          user: {
-            ...session.data?.user,
-            email: userResponse.data.email,
-            image: userResponse.data.image,
-            imageId: userResponse.data.imageId,
-            name: userResponse.data.name,
-            phone: userResponse.data.phone,
-            username: userResponse.data.username,
-          },
-        });
-
-        templateLog.SUCCESS("Profile success!", "auth/profile");
-        router.refresh();
-      } catch (error) {
-        const axiosError = error as AxiosError<IErrorResponse>;
-        setErrorMessage(axiosError.response?.data?.message ?? "Failed to update profile");
-        templateLog.WARN("Profile failed!", "auth/profile");
+        imageId = uploadResponse.data.id;
       }
-    });
+
+      const userResponse = await PUTUsers(currentUser.id ?? 0, {
+        email: dt.email,
+        imageId: imageId,
+        name: dt.name,
+        phone: dt.phone,
+        username: dt.username,
+      });
+
+      return userResponse.data;
+    },
+    onError: (error) => {
+      const axiosError = error as AxiosError<IErrorResponse>;
+      setErrorMessage(axiosError.response?.data?.message ?? "Failed to update profile");
+      templateLog.WARN("Profile failed!", "auth/profile");
+    },
+    onMutate: () => {
+      setLoading(true);
+    },
+    onSettled: () => {
+      setLoading(false);
+    },
+    onSuccess: async (updatedUser) => {
+      await session.update({
+        user: {
+          ...session.data?.user,
+          email: updatedUser.email,
+          image: updatedUser.image,
+          imageId: updatedUser.imageId,
+          name: updatedUser.name,
+          phone: updatedUser.phone,
+          username: updatedUser.username,
+        },
+      });
+
+      await queryClient.invalidateQueries({ queryKey: ["me"] });
+      templateLog.SUCCESS("Profile success!", "auth/profile");
+      router.refresh();
+    },
+  });
+
+  const onSubmit: SubmitHandler<TProfileSchema> = (dt) => {
+    setErrorMessage("");
+    updateProfileMutation.mutate(dt);
   };
 
   return (
@@ -152,14 +194,14 @@ export const Main: FC<I> = (props): ReactElement => {
           <Avatar
             className="mx-auto min-h-32 min-w-32"
             iconSize={64}
-            placeholder={previewImage ? null : props.user?.image?.placeholder}
-            src={previewImage ? previewImage : props.user?.image ? `${API_URL}${props.user?.image?.formats?.thumbnail?.url}` : ""}
+            placeholder={previewImage ? null : meQuery.data?.image?.placeholder}
+            src={previewImage ? previewImage : meQuery.data?.image ? `${API_URL}${meQuery.data?.image?.formats?.thumbnail?.url}` : ""}
           />
 
           {FORM_FIELDS_DATA.map((dt, i) => (
             <ExampleInput
               color="default"
-              disabled={loading}
+              disabled={updateProfileMutation.isPending}
               errorMessage={errors[dt.name]?.message as string | undefined}
               key={i}
               label={dt.label}
@@ -187,7 +229,7 @@ export const Main: FC<I> = (props): ReactElement => {
             </Link>
           </div>
 
-          <SubmitButton color="black" disabled={loading} label="UPDATE" size="sm" variant="solid" />
+          <SubmitButton color="black" disabled={updateProfileMutation.isPending} label="UPDATE" size="sm" variant="solid" />
         </form>
       </FormContainer>
     </main>

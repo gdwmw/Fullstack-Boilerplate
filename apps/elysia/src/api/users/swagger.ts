@@ -3,7 +3,7 @@ import { DocumentDecoration } from "elysia";
 const successResponseSchema = {
   properties: {
     data: {},
-    message: { example: "Users data retrieved successfully", nullable: true, type: "string" },
+    message: { example: "users data retrieved successfully", nullable: true, type: "string" },
     success: { example: true, type: "boolean" },
   },
   type: "object",
@@ -13,7 +13,7 @@ const errorResponseSchema = {
   properties: {
     code: { example: "P2025", nullable: true, type: "string" },
     error: { example: null, nullable: true },
-    message: { example: "Users not found", nullable: true, type: "string" },
+    message: { example: "users not found", nullable: true, type: "string" },
     success: { example: false, type: "boolean" },
     token: {
       nullable: true,
@@ -59,7 +59,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
     },
     security: [{ bearerAuth: [] }],
     summary: "Delete",
-    tags: [label],
+    tags: [label.toLowerCase()],
   },
   getAll: {
     description: "Get all users",
@@ -83,7 +83,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
     },
     security: [{ bearerAuth: [] }],
     summary: "Get All",
-    tags: [label],
+    tags: [label.toLowerCase()],
   },
   getById: {
     description: "Get a user by ID",
@@ -116,7 +116,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
     },
     security: [{ bearerAuth: [] }],
     summary: "Get by ID",
-    tags: [label],
+    tags: [label.toLowerCase()],
   },
   put: {
     description: "Update a user by ID",
@@ -176,6 +176,6 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
     },
     security: [{ bearerAuth: [] }],
     summary: "Update",
-    tags: [label],
+    tags: [label.toLowerCase()],
   },
 });

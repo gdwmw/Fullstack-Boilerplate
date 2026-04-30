@@ -10,25 +10,25 @@ import { docs } from "./swagger";
 
 // ---------------------------------------------------------------------------
 // [1] Constants
-// Label dan konstanta lain yang dipakai di seluruh modul users
+// Label and other constants used throughout the users module.
 // ---------------------------------------------------------------------------
 
 const LABEL = "Users";
 
 // ---------------------------------------------------------------------------
 // [2] UsersRoutes
-// Semua endpoint users, penomoran sinkron dengan README
+// All users endpoints. Numbering is kept in sync with the README.
 // ---------------------------------------------------------------------------
 
 export const UsersRoutes = new Elysia({ prefix: "/users" })
   .use(accessJwtPlugin)
 
-  // [2.1] Error handler global untuk users
+  // [2.1] Global error handler for users
   .onError(({ error, set }) => handlePrismaError(LABEL, error, set))
 
-  // [2.2] Auth guard: semua endpoint users harus login
+  // [2.2] Auth guard: all users endpoints require authentication
   .onBeforeHandle(async ({ accessJwt, headers, set }) => {
-    // [2.2.1] Verifikasi access token sebelum proses apapun
+    // [2.2.1] Verify the access token before doing anything
     const verifyResponse = await verifyAccessToken({
       accessJwt,
       headers,
@@ -40,51 +40,51 @@ export const UsersRoutes = new Elysia({ prefix: "/users" })
     return;
   })
 
-  // [2.3] Hapus user
+  // [2.3] Delete a user
   .delete(
     "/:id",
     async ({ params }) => {
-      // [2.3.1] Validasi param id
+      // [2.3.1] Validate the id param
       const { id } = paramSchema.parse(params);
-      // [2.3.2] Hapus user dari DB
+      // [2.3.2] Delete the user from the database
       const res = await service.delete(id);
       return SUCCESS_RESPONSE({ data: res, message: responseMessage(LABEL).deleted });
     },
     { detail: docs(LABEL).delete },
   )
 
-  // [2.4] Ambil semua user
+  // [2.4] Get all users
   .get(
     "/",
     async () => {
-      // [2.4.1] Ambil semua user dari DB
+      // [2.4.1] Fetch all users from the database
       const res = await service.getAll();
       return SUCCESS_RESPONSE({ data: res, message: responseMessage(LABEL).retrieved });
     },
     { detail: docs(LABEL).getAll },
   )
 
-  // [2.5] Ambil user by id
+  // [2.5] Get a user by id
   .get(
     "/:id",
     async ({ params }) => {
-      // [2.5.1] Validasi param id
+      // [2.5.1] Validate the id param
       const { id } = paramSchema.parse(params);
-      // [2.5.2] Ambil user dari DB
+      // [2.5.2] Fetch the user from the database
       const res = await service.getById(id);
       return SUCCESS_RESPONSE({ data: res, message: responseMessage(LABEL).retrieved });
     },
     { detail: docs(LABEL).getById },
   )
 
-  // [2.6] Update user
+  // [2.6] Update a user
   .put(
     "/:id",
     async ({ body, params }) => {
-      // [2.6.1] Validasi param id dan body
+      // [2.6.1] Validate the id param and request body
       const { id } = paramSchema.parse(params);
       const payload = payloadSchema.parse(body);
-      // [2.6.2] Update user di DB
+      // [2.6.2] Update the user in the database
       const res = await service.put(id, payload);
       return SUCCESS_RESPONSE({ data: res, message: responseMessage(LABEL).updated });
     },

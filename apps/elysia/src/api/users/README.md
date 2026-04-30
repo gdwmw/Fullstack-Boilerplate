@@ -1,27 +1,27 @@
 # Users Module Documentation
 
-Dokumen ini menjelaskan alur dan logika modul users di folder ini.
+This document explains the flow and logic of the users module in this folder.
 
-## Cara Baca Dokumen Ini
+## How to Read This Document
 
-README ini disinkronkan dengan komentar bernomor di [route.ts](./route.ts) dan [service.ts](./service.ts).
+This README is kept in sync with the numbered comments in [route.ts](./route.ts) and [service.ts](./service.ts).
 
-Artinya:
+Meaning:
 
-- saat melihat angka seperti `[2.6.2]` di dokumen ini, cari komentar dengan angka yang sama di source
-- angka utama menunjukkan area besar modul
-- angka turunan menunjukkan langkah detail di dalam flow
+- when you see a number like `[2.6.2]` in this document, find the comment with the same number in the source
+- the main number indicates a larger module area/section
+- the sub-number indicates detailed steps inside a flow
 
-Contoh cepat:
+Quick examples:
 
-- `[1]` berarti service utama users
-- `[1.4]` berarti flow update user di service
-- `[2.2]` berarti auth guard untuk semua endpoint users
-- `[2.6]` berarti endpoint `PUT /users/:id`
+- `[1]` means the primary users service
+- `[1.4]` means the update-user flow in the service
+- `[2.2]` means the auth guard for all users endpoints
+- `[2.6]` means the `PUT /users/:id` endpoint
 
-## Peta Nomor Di Source
+## Source Numbering Map
 
-Nomor utama yang dipakai di source:
+Main numbers used in the source:
 
 1. `[1]` Service utama users
 2. `[1.1]` `service.delete`
@@ -35,102 +35,102 @@ Nomor utama yang dipakai di source:
 10. `[2.5]` `GET /users/:id`
 11. `[2.6]` `PUT /users/:id`
 
-## Tujuan Modul
+## Module Responsibilities
 
-Modul users bertanggung jawab untuk:
+The users module is responsible for:
 
-- menyediakan endpoint CRUD data user (tanpa create karena ditangani auth)
-- mengambil daftar user dan detail user
-- memperbarui profil user berdasarkan id
-- menghapus user berdasarkan id
-- memastikan response user tidak membocorkan field sensitif
+- providing CRUD endpoints for user data (without create, which is handled by auth)
+- listing users and retrieving user details
+- updating a user profile by id
+- deleting a user by id
+- ensuring user responses do not leak sensitive fields
 
-## Komponen Yang Terlibat
+## Components
 
 ### Route layer
 
-File [route.ts](./route.ts) menangani:
+The file [route.ts](./route.ts) handles:
 
-- auth guard dengan verifikasi access token
-- validasi request param dan body
-- pemanggilan service users
-- pembentukan response sukses/error
+- auth guard via access token verification
+- request param and body validation
+- calling the users service
+- shaping success/error responses
 
 ### Service layer
 
-File [service.ts](./service.ts) menangani:
+The file [service.ts](./service.ts) handles:
 
-- query database tabel `users`
-- include relasi image user
-- omit field sensitif melalui `AUTH_OMIT_FIELDS`
-- operasi delete, getAll, getById, dan put
+- database queries for the `users` table
+- including the user's image relation
+- omitting sensitive fields via `AUTH_OMIT_FIELDS`
+- delete, getAll, getById, and put operations
 
 ### Schema layer
 
-File [schema.ts](./schema.ts) menangani validasi input untuk:
+The file [schema.ts](./schema.ts) validates inputs for:
 
-- param id endpoint users
-- payload update user
+- users endpoint id params
+- user update payloads
 
-## Gambaran Besar Users Strategy
+## High-Level Users Strategy
 
-Strategi modul users:
+The users module strategy:
 
-- semua endpoint diproteksi access token
-- semua operasi data user berpusat di service untuk menjaga konsistensi query
-- response user selalu melalui rule omit field auth sensitif
-- update user mendukung relasi `imageId`, termasuk set ke `null`
+- all endpoints are protected by an access token
+- all user data operations go through the service to keep queries consistent
+- user responses always omit sensitive auth fields
+- update supports the `imageId` relation, including setting it to `null`
 
-## Flow Per Endpoint
+## Per-Endpoint Flows
 
 ### `GET /users`
 
-Kode terkait: `[2.4]` route, `[1.2]` service.
+Related code: `[2.4]` route, `[1.2]` service.
 
-Langkah detail:
+Detailed steps:
 
-1. `[2.2.1]` auth guard memverifikasi access token
-2. `[2.4.1]` route memanggil `service.getAll()`
-3. service mengambil semua user urut id asc
-4. route mengembalikan response sukses `retrieved`
+1. `[2.2.1]` auth guard verifies the access token
+2. `[2.4.1]` route calls `service.getAll()`
+3. service fetches all users ordered by id ascending
+4. route returns a success `retrieved` response
 
 ### `GET /users/:id`
 
-Kode terkait: `[2.5]` route, `[1.3]` service.
+Related code: `[2.5]` route, `[1.3]` service.
 
-Langkah detail:
+Detailed steps:
 
-1. `[2.2.1]` auth guard memverifikasi access token
-2. `[2.5.1]` route memvalidasi param `id`
-3. `[2.5.2]` route memanggil `service.getById(id)`
-4. route mengembalikan response sukses `retrieved`
+1. `[2.2.1]` auth guard verifies the access token
+2. `[2.5.1]` route validates the `id` param
+3. `[2.5.2]` route calls `service.getById(id)`
+4. route returns a success `retrieved` response
 
 ### `PUT /users/:id`
 
-Kode terkait: `[2.6]` route, `[1.4]` service.
+Related code: `[2.6]` route, `[1.4]` service.
 
-Langkah detail:
+Detailed steps:
 
-1. `[2.2.1]` auth guard memverifikasi access token
-2. `[2.6.1]` route memvalidasi param `id` dan body payload
-3. `[2.6.2]` route memanggil `service.put(id, payload)`
-4. service update data user dan relasi `imageId`
-5. route mengembalikan response sukses `updated`
+1. `[2.2.1]` auth guard verifies the access token
+2. `[2.6.1]` route validates the `id` param and request body
+3. `[2.6.2]` route calls `service.put(id, payload)`
+4. service updates user data and the `imageId` relation
+5. route returns a success `updated` response
 
 ### `DELETE /users/:id`
 
-Kode terkait: `[2.3]` route, `[1.1]` service.
+Related code: `[2.3]` route, `[1.1]` service.
 
-Langkah detail:
+Detailed steps:
 
-1. `[2.2.1]` auth guard memverifikasi access token
-2. `[2.3.1]` route memvalidasi param `id`
-3. `[2.3.2]` route memanggil `service.delete(id)`
-4. route mengembalikan response sukses `deleted`
+1. `[2.2.1]` auth guard verifies the access token
+2. `[2.3.1]` route validates the `id` param
+3. `[2.3.2]` route calls `service.delete(id)`
+4. route returns a success `deleted` response
 
-## Kontrak Response API
+## API Response Contract
 
-Semua endpoint users mengembalikan wrapper response yang konsisten:
+All users endpoints return a consistent response wrapper:
 
 ### Response sukses
 
@@ -154,29 +154,29 @@ Semua endpoint users mengembalikan wrapper response yang konsisten:
 }
 ```
 
-## Contoh Request Cepat
+## Quick Request Examples
 
-Semua endpoint butuh header:
+All endpoints require this header:
 
 ```bash
 Authorization: Bearer <access_token>
 ```
 
-### Ambil semua user
+### Get all users
 
 ```bash
 curl -X GET "http://localhost:3000/users" \
   -H "Authorization: Bearer <access_token>"
 ```
 
-### Ambil user by id
+### Get a user by id
 
 ```bash
 curl -X GET "http://localhost:3000/users/1" \
   -H "Authorization: Bearer <access_token>"
 ```
 
-### Update user
+### Update a user
 
 ```bash
 curl -X PUT "http://localhost:3000/users/1" \
@@ -189,7 +189,7 @@ curl -X PUT "http://localhost:3000/users/1" \
   }'
 ```
 
-### Hapus user
+### Delete a user
 
 ```bash
 curl -X DELETE "http://localhost:3000/users/1" \
@@ -212,12 +212,12 @@ flowchart TD
     G --> H
 ```
 
-## Hal Yang Perlu Diperhatikan Saat Mengubah Modul Ini
+## Things to Watch When Modifying This Module
 
-- jangan hapus `omit: AUTH_OMIT_FIELDS` karena field auth sensitif harus tetap tersembunyi
-- jika menambah field payload update, selaraskan schema dan type agar tidak mismatch
-- perubahan relasi `imageId` harus tetap kompatibel dengan nilai `null`
-- bila menambah endpoint baru, tetap gunakan auth guard yang sama untuk konsistensi security
+- do not remove `omit: AUTH_OMIT_FIELDS` because sensitive auth fields must remain hidden
+- when adding payload fields, keep schema and types aligned to avoid mismatches
+- changes to the `imageId` relation must remain compatible with `null`
+- when adding new endpoints, keep using the same auth guard for consistent security
 
 ## Referensi Source
 

@@ -2,16 +2,17 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { templateLog } from "@repo/utils";
+import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { Eye, EyeOff } from "lucide-react";
 import { signOut } from "next-auth/react";
-import { FC, HTMLInputTypeAttribute, ReactElement, useState, useTransition } from "react";
+import { FC, HTMLInputTypeAttribute, ReactElement, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 
 import { ExampleInput, FormContainer, SubmitButton } from "@/src/components";
 import { IErrorResponse, POSTChangePassword, POSTLogout } from "@/src/utils";
 
-import { changePasswordSchema, TChangePasswordSchema } from "./schema";
+import { changePasswordSchema, TChangePasswordSchema } from "../schema";
 
 interface IFormField {
   label: string;
@@ -42,7 +43,6 @@ const FORM_FIELDS_DATA: IFormField[] = [
 export const Main: FC = (): ReactElement => {
   const [passwordVisibility, setPasswordVisibility] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>("");
-  const [loading, setTransition] = useTransition();
 
   const {
     formState: { errors },
@@ -54,27 +54,33 @@ export const Main: FC = (): ReactElement => {
     resolver: zodResolver(changePasswordSchema),
   });
 
-  const onSubmit: SubmitHandler<TChangePasswordSchema> = (dt) => {
-    setTransition(async () => {
-      setErrorMessage("");
+  const changePasswordMutation = useMutation({
+    mutationFn: async (dt: TChangePasswordSchema) => {
+      const { confirmPassword: _confirmPassword, ...changePasswordPayload } = dt;
+      await POSTChangePassword(changePasswordPayload);
+      await POSTLogout();
+      signOut();
+      return true;
+    },
+    onError: (error) => {
+      const axiosError = error as AxiosError<IErrorResponse>;
+      setErrorMessage(axiosError.response?.data?.message ?? "Failed to change password");
+      templateLog.WARN("Change password failed!", "auth/change-password");
+    },
+    onSuccess: () => {
+      templateLog.SUCCESS("Change password success!", "auth/change-password");
+      reset();
+    },
+  });
 
-      if (getValues("newPassword") === getValues("confirmPassword")) {
-        try {
-          const { confirmPassword: _confirmPassword, ...changePasswordPayload } = dt;
-          await POSTChangePassword(changePasswordPayload);
-          templateLog.SUCCESS("Change password success!", "auth/change-password");
-          await POSTLogout();
-          signOut();
-          reset();
-        } catch (error) {
-          const axiosError = error as AxiosError<IErrorResponse>;
-          setErrorMessage(axiosError.response?.data?.message ?? "Failed to change password");
-          templateLog.WARN("Change password failed!", "auth/change-password");
-        }
-      } else {
-        setErrorMessage("Confirm password does not match new password");
-      }
-    });
+  const onSubmit: SubmitHandler<TChangePasswordSchema> = (dt) => {
+    setErrorMessage("");
+    if (getValues("newPassword") !== getValues("confirmPassword")) {
+      setErrorMessage("Confirm password does not match new password");
+      return;
+    }
+
+    changePasswordMutation.mutate(dt);
   };
 
   return (
@@ -84,7 +90,7 @@ export const Main: FC = (): ReactElement => {
           {FORM_FIELDS_DATA.map((dt, i) => (
             <ExampleInput
               color="default"
-              disabled={loading}
+              disabled={changePasswordMutation.isPending}
               errorMessage={errors[dt.name]?.message}
               icon={passwordVisibility ? <Eye size={18} /> : <EyeOff size={18} />}
               iconOnClick={() => setPasswordVisibility((prev) => !prev)}
@@ -98,7 +104,7 @@ export const Main: FC = (): ReactElement => {
 
           <span className="text-center text-xs text-red-600">{errorMessage}</span>
 
-          <SubmitButton color="black" disabled={loading} label="UPDATE" size="sm" variant="solid" />
+          <SubmitButton color="black" disabled={changePasswordMutation.isPending} label="UPDATE" size="sm" variant="solid" />
         </form>
       </FormContainer>
     </main>
