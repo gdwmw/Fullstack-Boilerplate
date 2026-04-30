@@ -34,6 +34,7 @@ export const eslintConfig = defineConfig([
     },
     rules: {
       // "better-tailwindcss/enforce-consistent-class-order": ["warn", { order: "official" }],
+      "@tanstack/query/mutation-property-order": "off",
       "better-tailwindcss/enforce-consistent-important-position": ["warn", { position: "recommended" }],
       "better-tailwindcss/enforce-consistent-variable-syntax": ["warn", { syntax: "shorthand" }],
       "better-tailwindcss/enforce-shorthand-classes": ["warn"],

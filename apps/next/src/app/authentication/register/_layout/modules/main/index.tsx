@@ -2,11 +2,12 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { templateLog } from "@repo/utils";
+import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FC, HTMLInputTypeAttribute, KeyboardEvent, ReactElement, useState, useTransition } from "react";
+import { FC, HTMLInputTypeAttribute, KeyboardEvent, ReactElement, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 
 import { ExampleATWM, ExampleInput, FormContainer, SubmitButton } from "@/src/components";
@@ -69,7 +70,6 @@ export const Main: FC = (): ReactElement => {
   const router = useRouter();
   const [passwordVisibility, setPasswordVisibility] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>("");
-  const [loading, setTransition] = useTransition();
 
   const {
     formState: { errors },
@@ -81,26 +81,32 @@ export const Main: FC = (): ReactElement => {
     resolver: zodResolver(registerSchema),
   });
 
-  const onSubmit: SubmitHandler<TRegisterSchema> = (dt) => {
-    setTransition(async () => {
-      setErrorMessage("");
+  const registerMutation = useMutation({
+    mutationFn: async (dt: TRegisterSchema) => {
+      const { confirmPassword: _confirmPassword, ...registerPayload } = dt;
+      await POSTRegister(registerPayload);
+      return true;
+    },
+    onError: (error) => {
+      const axiosError = error as AxiosError<IErrorResponse>;
+      setErrorMessage(axiosError.response?.data?.message ?? "Registration failed. Please try again.");
+      templateLog.WARN("Register failed!", "auth/register");
+    },
+    onSuccess: () => {
+      templateLog.SUCCESS("Register success!", "auth/register");
+      router.push("/authentication/login");
+      reset();
+    },
+  });
 
-      if (getValues("password") === getValues("confirmPassword")) {
-        try {
-          const { confirmPassword: _confirmPassword, ...registerPayload } = dt;
-          await POSTRegister(registerPayload);
-          templateLog.SUCCESS("Register success!", "auth/register");
-          router.push("/authentication/login");
-          reset();
-        } catch (error) {
-          const axiosError = error as AxiosError<IErrorResponse>;
-          setErrorMessage(axiosError.response?.data?.message ?? "Registration failed. Please try again.");
-          templateLog.WARN("Register failed!", "auth/register");
-        }
-      } else {
-        setErrorMessage("Confirm password does not match password");
-      }
-    });
+  const onSubmit: SubmitHandler<TRegisterSchema> = (dt) => {
+    setErrorMessage("");
+    if (getValues("password") !== getValues("confirmPassword")) {
+      setErrorMessage("Confirm password does not match password");
+      return;
+    }
+
+    registerMutation.mutate(dt);
   };
 
   return (
@@ -110,7 +116,7 @@ export const Main: FC = (): ReactElement => {
           {FORM_FIELDS_DATA.map((dt, i) => (
             <ExampleInput
               color="default"
-              disabled={loading}
+              disabled={registerMutation.isPending}
               errorMessage={errors[dt.name]?.message}
               icon={dt.isPassword ? passwordVisibility ? <Eye size={18} /> : <EyeOff size={18} /> : undefined}
               iconOnClick={dt.isPassword ? () => setPasswordVisibility((prev) => !prev) : undefined}
@@ -125,15 +131,21 @@ export const Main: FC = (): ReactElement => {
 
           <span className="text-center text-xs text-red-600">{errorMessage}</span>
 
-          <SubmitButton color="black" disabled={loading} label="REGISTER" size="sm" variant="solid" />
+          <SubmitButton color="black" disabled={registerMutation.isPending} label="REGISTER" size="sm" variant="solid" />
 
           <div className="mx-auto text-center">
             <span className="text-xs">Already have an account? </span>
             <Link
-              className={ExampleATWM({ className: "inline text-xs", color: "blue", disabled: loading, size: "sm", variant: "ghost" })}
+              className={ExampleATWM({
+                className: "inline text-xs",
+                color: "blue",
+                disabled: registerMutation.isPending,
+                size: "sm",
+                variant: "ghost",
+              })}
               href={"/authentication/login"}
               onClick={(e) => {
-                if (loading) {
+                if (registerMutation.isPending) {
                   e.preventDefault();
                 } else {
                   setPasswordVisibility(false);
