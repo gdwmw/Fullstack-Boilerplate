@@ -12,7 +12,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { ExampleATWM, ExampleInput, FormContainer, SubmitButton } from "@/src/components";
 import { IErrorResponse, inputValidations, POSTRegister } from "@/src/utils";
 
-import { registerSchema, TRegisterSchema } from "./schema";
+import { registerSchema, TRegisterSchema } from "../schema";
 
 interface IFormField {
   isPassword?: boolean;

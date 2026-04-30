@@ -11,7 +11,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { ExampleInput, FormContainer, SubmitButton } from "@/src/components";
 import { IErrorResponse, POSTChangePassword, POSTLogout } from "@/src/utils";
 
-import { changePasswordSchema, TChangePasswordSchema } from "./schema";
+import { changePasswordSchema, TChangePasswordSchema } from "../schema";
 
 interface IFormField {
   label: string;

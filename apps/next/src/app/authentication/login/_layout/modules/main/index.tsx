@@ -13,7 +13,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { ExampleATWM, ExampleInput, FormContainer, SubmitButton } from "@/src/components";
 import { IErrorResponse, POSTLogin } from "@/src/utils";
 
-import { loginSchema, TLoginSchema } from "./schema";
+import { loginSchema, TLoginSchema } from "../schema";
 
 export const Main: FC = (): ReactElement => {
   const router = useRouter();

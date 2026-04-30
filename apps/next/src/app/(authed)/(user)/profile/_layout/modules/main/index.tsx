@@ -12,7 +12,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { Avatar, ExampleATWM, ExampleInput, FormContainer, SubmitButton } from "@/src/components";
 import { DELETEUpload, IErrorResponse, IMeResponse, inputValidations, POSTUpload, PUTUsers } from "@/src/utils";
 
-import { profileSchema, TProfileSchema } from "./schema";
+import { profileSchema, TProfileSchema } from "../schema";
 
 const API_URL = process.env.NEXT_PUBLIC_BASE_API_URL;
 
