@@ -1,51 +1,31 @@
 import { Metadata, Viewport } from "next";
 import { FC, ReactElement } from "react";
 
+import { DEFAULT_ROBOTS, DEFAULT_VIEWPORT, SITE_CREATOR, SITE_DESCRIPTION, SITE_IMAGE, SITE_NAME, SITE_URL } from "@/src/constants";
+
 import { Main } from "./_layout/modules/main/index-example";
 
-export const viewport: Viewport = {
-  initialScale: 1.0,
-  width: "device-width",
-};
+export const viewport: Viewport = DEFAULT_VIEWPORT;
 
 export const metadata: Metadata = {
-  description: "Boilerplate by Gede Dewo Wahyu M.W",
+  description: SITE_DESCRIPTION,
   keywords: ["Boilerplate"],
   openGraph: {
-    description: "Boilerplate by Gede Dewo Wahyu M.W",
-    images: [
-      {
-        alt: "Next.js",
-        height: 800,
-        url: "https://boilerplate.zettara.com/assets/images/logos/Vercel.png", // Must be an absolute URL and PNG format
-        width: 800,
-      },
-    ],
+    description: SITE_DESCRIPTION,
+    images: [{ alt: SITE_NAME, height: 800, url: SITE_IMAGE, width: 800 }],
     locale: "en_US",
-    siteName: "Next.js",
-    title: "Next.js | Home",
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} | Home`,
     type: "website",
-    url: "https://boilerplate.zettara.com/",
+    url: SITE_URL,
   },
-  robots: {
-    follow: true,
-    googleBot: {
-      follow: true,
-      index: true,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-      "max-video-preview": -1,
-      noimageindex: false,
-    },
-    index: true,
-    nocache: false,
-  },
+  robots: DEFAULT_ROBOTS,
   twitter: {
     card: "summary_large_image",
-    creator: "@gdwmw",
-    description: "Boilerplate by Gede Dewo Wahyu M.W",
-    images: ["https://boilerplate.zettara.com/assets/images/logos/Vercel.png"], // Must be an absolute URL and PNG format
-    title: "Next.js | Home",
+    creator: SITE_CREATOR,
+    description: SITE_DESCRIPTION,
+    images: [SITE_IMAGE],
+    title: `${SITE_NAME} | Home`,
   },
 };
 
