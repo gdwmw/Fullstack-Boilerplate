@@ -43,6 +43,7 @@ const FORM_FIELDS_DATA: IFormField[] = [
 export const Main: FC = (): ReactElement => {
   const [passwordVisibility, setPasswordVisibility] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>("");
+  const [loading, setLoading] = useState(false);
 
   const {
     formState: { errors },
@@ -64,19 +65,26 @@ export const Main: FC = (): ReactElement => {
     },
     onError: (error) => {
       const axiosError = error as AxiosError<IErrorResponse>;
-      setErrorMessage(axiosError.response?.data?.message ?? "Failed to change password");
-      templateLog.WARN("Change password failed!", "auth/change-password");
+      setErrorMessage(axiosError.response?.data?.message ?? "failed to change password");
+      templateLog.WARN("change password failed!", "auth/change-password");
+    },
+    onMutate: () => {
+      setLoading(true);
+    },
+    onSettled: () => {
+      setLoading(false);
     },
     onSuccess: () => {
-      templateLog.SUCCESS("Change password success!", "auth/change-password");
+      templateLog.SUCCESS("change password success!", "auth/change-password");
       reset();
     },
   });
 
   const onSubmit: SubmitHandler<TChangePasswordSchema> = (dt) => {
     setErrorMessage("");
+
     if (getValues("newPassword") !== getValues("confirmPassword")) {
-      setErrorMessage("Confirm password does not match new password");
+      setErrorMessage("confirm password does not match new password");
       return;
     }
 
@@ -90,7 +98,7 @@ export const Main: FC = (): ReactElement => {
           {FORM_FIELDS_DATA.map((dt, i) => (
             <ExampleInput
               color="default"
-              disabled={changePasswordMutation.isPending}
+              disabled={loading}
               errorMessage={errors[dt.name]?.message}
               icon={passwordVisibility ? <Eye size={18} /> : <EyeOff size={18} />}
               iconOnClick={() => setPasswordVisibility((prev) => !prev)}
@@ -104,7 +112,7 @@ export const Main: FC = (): ReactElement => {
 
           <span className="text-center text-xs text-red-600">{errorMessage}</span>
 
-          <SubmitButton color="black" disabled={changePasswordMutation.isPending} label="UPDATE" size="sm" variant="solid" />
+          <SubmitButton color="black" disabled={loading} label="UPDATE" size="sm" variant="solid" />
         </form>
       </FormContainer>
     </main>

@@ -70,6 +70,7 @@ export const Main: FC = (): ReactElement => {
   const router = useRouter();
   const [passwordVisibility, setPasswordVisibility] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>("");
+  const [loading, setLoading] = useState(false);
 
   const {
     formState: { errors },
@@ -89,11 +90,17 @@ export const Main: FC = (): ReactElement => {
     },
     onError: (error) => {
       const axiosError = error as AxiosError<IErrorResponse>;
-      setErrorMessage(axiosError.response?.data?.message ?? "Registration failed. Please try again.");
-      templateLog.WARN("Register failed!", "auth/register");
+      setErrorMessage(axiosError.response?.data?.message ?? "registration failed. please try again.");
+      templateLog.WARN("register failed!", "auth/register");
+    },
+    onMutate: () => {
+      setLoading(true);
+    },
+    onSettled: () => {
+      setLoading(false);
     },
     onSuccess: () => {
-      templateLog.SUCCESS("Register success!", "auth/register");
+      templateLog.SUCCESS("register success!", "auth/register");
       router.push("/authentication/login");
       reset();
     },
@@ -101,8 +108,9 @@ export const Main: FC = (): ReactElement => {
 
   const onSubmit: SubmitHandler<TRegisterSchema> = (dt) => {
     setErrorMessage("");
+
     if (getValues("password") !== getValues("confirmPassword")) {
-      setErrorMessage("Confirm password does not match password");
+      setErrorMessage("confirm password does not match password");
       return;
     }
 
@@ -111,12 +119,12 @@ export const Main: FC = (): ReactElement => {
 
   return (
     <main>
-      <FormContainer className={{ innerContainer: "max-w-[450px]" }} href={"/"} label={"Home"}>
+      <FormContainer className={{ innerContainer: "max-w-112.5" }} href={"/"} label={"Home"}>
         <form className="flex w-full flex-col gap-3 overflow-y-auto" onSubmit={handleSubmit(onSubmit)}>
           {FORM_FIELDS_DATA.map((dt, i) => (
             <ExampleInput
               color="default"
-              disabled={registerMutation.isPending}
+              disabled={loading}
               errorMessage={errors[dt.name]?.message}
               icon={dt.isPassword ? passwordVisibility ? <Eye size={18} /> : <EyeOff size={18} /> : undefined}
               iconOnClick={dt.isPassword ? () => setPasswordVisibility((prev) => !prev) : undefined}
@@ -131,7 +139,7 @@ export const Main: FC = (): ReactElement => {
 
           <span className="text-center text-xs text-red-600">{errorMessage}</span>
 
-          <SubmitButton color="black" disabled={registerMutation.isPending} label="REGISTER" size="sm" variant="solid" />
+          <SubmitButton color="black" disabled={loading} label="REGISTER" size="sm" variant="solid" />
 
           <div className="mx-auto text-center">
             <span className="text-xs">Already have an account? </span>
@@ -139,13 +147,13 @@ export const Main: FC = (): ReactElement => {
               className={ExampleATWM({
                 className: "inline text-xs",
                 color: "blue",
-                disabled: registerMutation.isPending,
+                disabled: loading,
                 size: "sm",
                 variant: "ghost",
               })}
               href={"/authentication/login"}
               onClick={(e) => {
-                if (registerMutation.isPending) {
+                if (loading) {
                   e.preventDefault();
                 } else {
                   setPasswordVisibility(false);

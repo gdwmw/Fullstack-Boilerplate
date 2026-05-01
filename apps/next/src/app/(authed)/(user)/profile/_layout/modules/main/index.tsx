@@ -131,7 +131,7 @@ const MainContent: FC = (): ReactElement => {
     mutationFn: async (dt: TProfileSchema) => {
       const currentUser = meQuery.data;
       if (!currentUser) {
-        throw new Error("Failed to load current user");
+        throw new Error("failed to load current user");
       }
 
       let imageId: null | number | undefined = currentUser.imageId;
@@ -160,8 +160,8 @@ const MainContent: FC = (): ReactElement => {
     },
     onError: (error) => {
       const axiosError = error as AxiosError<IErrorResponse>;
-      setErrorMessage(axiosError.response?.data?.message ?? "Failed to update profile");
-      templateLog.WARN("Profile failed!", "auth/profile");
+      setErrorMessage(axiosError.response?.data?.message ?? "failed to update profile");
+      templateLog.WARN("update profile failed!", "auth/profile");
     },
     onMutate: () => {
       setLoading(true);
@@ -183,7 +183,7 @@ const MainContent: FC = (): ReactElement => {
       });
 
       await queryClient.invalidateQueries({ queryKey: ["me"] });
-      templateLog.SUCCESS("Profile success!", "auth/profile");
+      templateLog.SUCCESS("update profile success!", "auth/profile");
       router.refresh();
     },
   });
@@ -207,7 +207,7 @@ const MainContent: FC = (): ReactElement => {
           {FORM_FIELDS_DATA.map((dt, i) => (
             <ExampleInput
               color="default"
-              disabled={updateProfileMutation.isPending}
+              disabled={loading}
               errorMessage={errors[dt.name]?.message as string | undefined}
               key={i}
               label={dt.label}
@@ -235,7 +235,7 @@ const MainContent: FC = (): ReactElement => {
             </Link>
           </div>
 
-          <SubmitButton color="black" disabled={updateProfileMutation.isPending} label="UPDATE" size="sm" variant="solid" />
+          <SubmitButton color="black" disabled={loading} label="UPDATE" size="sm" variant="solid" />
         </form>
       </FormContainer>
     </main>
