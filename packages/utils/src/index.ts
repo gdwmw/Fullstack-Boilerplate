@@ -1,2 +1,2 @@
+export * from "./logTemplate";
 export * from "./parseDurationToMs";
-export * from "./templateLog";

@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { templateLog } from "@repo/utils";
+import { logTemplate } from "@repo/utils";
 import { DehydratedState, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
@@ -161,7 +161,7 @@ const MainContent: FC = (): ReactElement => {
     onError: (error) => {
       const axiosError = error as AxiosError<IErrorResponse>;
       setErrorMessage(axiosError.response?.data?.message ?? "failed to update profile");
-      templateLog.WARN("update profile failed!", "auth/profile");
+      logTemplate.WARN("update profile failed!", "auth/profile");
     },
     onMutate: () => {
       setLoading(true);
@@ -183,7 +183,7 @@ const MainContent: FC = (): ReactElement => {
       });
 
       await queryClient.invalidateQueries({ queryKey: ["me"] });
-      templateLog.SUCCESS("update profile success!", "auth/profile");
+      logTemplate.SUCCESS("update profile success!", "auth/profile");
       router.refresh();
     },
   });

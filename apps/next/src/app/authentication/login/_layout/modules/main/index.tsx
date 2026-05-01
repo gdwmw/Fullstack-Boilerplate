@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { templateLog } from "@repo/utils";
+import { logTemplate } from "@repo/utils";
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { ArrowLeftRight, Eye, EyeOff } from "lucide-react";
@@ -53,7 +53,7 @@ export const Main: FC = (): ReactElement => {
     onError: (error) => {
       const axiosError = error as AxiosError<IErrorResponse>;
       setErrorMessage(axiosError.response?.data?.message ?? "login failed. please try again.");
-      templateLog.WARN("login failed!", "auth/login");
+      logTemplate.WARN("login failed!", "auth/login");
     },
     onMutate: () => {
       setLoading(true);
@@ -62,7 +62,7 @@ export const Main: FC = (): ReactElement => {
       setLoading(false);
     },
     onSuccess: () => {
-      templateLog.SUCCESS("login success!", "auth/login");
+      logTemplate.SUCCESS("login success!", "auth/login");
       router.push("/");
       router.refresh();
       reset();

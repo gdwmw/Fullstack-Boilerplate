@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { templateLog } from "@repo/utils";
+import { logTemplate } from "@repo/utils";
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { Eye, EyeOff } from "lucide-react";
@@ -91,7 +91,7 @@ export const Main: FC = (): ReactElement => {
     onError: (error) => {
       const axiosError = error as AxiosError<IErrorResponse>;
       setErrorMessage(axiosError.response?.data?.message ?? "registration failed. please try again.");
-      templateLog.WARN("register failed!", "auth/register");
+      logTemplate.WARN("register failed!", "auth/register");
     },
     onMutate: () => {
       setLoading(true);
@@ -100,7 +100,7 @@ export const Main: FC = (): ReactElement => {
       setLoading(false);
     },
     onSuccess: () => {
-      templateLog.SUCCESS("register success!", "auth/register");
+      logTemplate.SUCCESS("register success!", "auth/register");
       router.push("/authentication/login");
       reset();
     },

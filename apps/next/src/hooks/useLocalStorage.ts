@@ -1,4 +1,4 @@
-import { templateLog } from "@repo/utils";
+import { logTemplate } from "@repo/utils";
 import { useCallback, useState } from "react";
 
 interface IUseLocalStorageOptions<T> {
@@ -26,7 +26,7 @@ export const useLocalStorage = <T>(key: string, options: IUseLocalStorageOptions
       const item = window.localStorage.getItem(key);
       return item ? deserialize(item) : (defaultValue as T);
     } catch (error) {
-      templateLog.WARN(`Error reading localStorage key "${key}": ${String(error)}`, "localStorage");
+      logTemplate.WARN(`Error reading localStorage key "${key}": ${String(error)}`, "localStorage");
       return defaultValue as T;
     }
   });
@@ -43,7 +43,7 @@ export const useLocalStorage = <T>(key: string, options: IUseLocalStorageOptions
           window.localStorage.setItem(key, serialize(valueToStore));
         }
       } catch (error) {
-        templateLog.WARN(`Error setting localStorage key "${key}": ${String(error)}`, "localStorage");
+        logTemplate.WARN(`Error setting localStorage key "${key}": ${String(error)}`, "localStorage");
       }
     },
     [key, serialize, value],
@@ -56,7 +56,7 @@ export const useLocalStorage = <T>(key: string, options: IUseLocalStorageOptions
         window.localStorage.removeItem(key);
       }
     } catch (error) {
-      templateLog.WARN(`Error removing localStorage key "${key}": ${String(error)}`, "localStorage");
+      logTemplate.WARN(`Error removing localStorage key "${key}": ${String(error)}`, "localStorage");
     }
   }, [key, defaultValue]);
 

@@ -23,7 +23,7 @@ const formatLog = ({ label, level, message }: { label?: string; level: LogLevel;
   return `${color}${level} : ${prefix}${message}${COLORS.reset}`;
 };
 
-export const templateLog = {
+export const logTemplate = {
   DEBUG: (message: string, label?: string) => console.debug(formatLog({ label, level: "DEBUG", message })),
   ERROR: (message: string, label?: string) => console.error(formatLog({ label, level: "ERROR", message })),
   INFO: (message: string, label?: string) => console.log(formatLog({ label, level: "INFO", message })),

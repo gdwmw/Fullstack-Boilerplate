@@ -1,4 +1,4 @@
-import { templateLog } from "@repo/utils";
+import { logTemplate } from "@repo/utils";
 import { HTTPHeaders, StatusMap } from "elysia";
 import { ElysiaCookie } from "elysia/dist/cookies";
 
@@ -21,7 +21,7 @@ export const handlePrismaError = (
 
   const splitedRawMessage = error.message.split("\n");
   const lastLine = splitedRawMessage[splitedRawMessage.length - 1];
-  templateLog.ERROR(lastLine.toLowerCase(), error.code);
+  logTemplate.ERROR(lastLine.toLowerCase(), error.code);
 
   switch (error.code) {
     case "P2000":

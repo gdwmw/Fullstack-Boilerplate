@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { templateLog } from "@repo/utils";
+import { logTemplate } from "@repo/utils";
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { Eye, EyeOff } from "lucide-react";
@@ -66,7 +66,7 @@ export const Main: FC = (): ReactElement => {
     onError: (error) => {
       const axiosError = error as AxiosError<IErrorResponse>;
       setErrorMessage(axiosError.response?.data?.message ?? "failed to change password");
-      templateLog.WARN("change password failed!", "auth/change-password");
+      logTemplate.WARN("change password failed!", "auth/change-password");
     },
     onMutate: () => {
       setLoading(true);
@@ -75,7 +75,7 @@ export const Main: FC = (): ReactElement => {
       setLoading(false);
     },
     onSuccess: () => {
-      templateLog.SUCCESS("change password success!", "auth/change-password");
+      logTemplate.SUCCESS("change password success!", "auth/change-password");
       reset();
     },
   });
