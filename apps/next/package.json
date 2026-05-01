@@ -44,7 +44,6 @@
   "devDependencies": {
     "@repo/constants": "workspace:*",
     "@repo/eslint-config": "workspace:*",
-    "@repo/schemas": "workspace:*",
     "@repo/utils": "workspace:*",
     "@storybook/addon-themes": "^10.3.6",
     "@storybook/nextjs-vite": "^10.3.6",

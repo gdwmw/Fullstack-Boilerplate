@@ -14,7 +14,6 @@
       "@/*": ["./*"],
       "@repo/constants": ["../../packages/constants/src/index.ts"],
       "@repo/eslint-config": ["../../packages/eslint-config/src/index.ts"],
-      "@repo/schemas": ["../../packages/schemas/src/index.ts"],
       "@repo/utils": ["../../packages/utils/src/index.ts"]
     }
   },

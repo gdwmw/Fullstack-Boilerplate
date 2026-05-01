@@ -31,7 +31,6 @@
   "devDependencies": {
     "@repo/constants": "workspace:*",
     "@repo/eslint-config": "workspace:*",
-    "@repo/schemas": "workspace:*",
     "@repo/utils": "workspace:*",
     "@types/sharp": "^0.32.0",
     "bun-types": "latest"
