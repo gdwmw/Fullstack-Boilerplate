@@ -1,6 +1,6 @@
 import IORedis from "ioredis";
 
-import { logger } from "./logger";
+import { logger } from "./pino";
 
 export const redis = new IORedis(process.env.REDIS_URL || "redis://localhost:6379", {
   maxRetriesPerRequest: 3,
