@@ -17,7 +17,8 @@ export const handlePrismaError = (
     status?: keyof StatusMap | number;
   },
 ) => {
-  if (!(error instanceof Prisma.PrismaClientKnownRequestError)) return;
+  if (!(error instanceof Prisma.PrismaClientKnownRequestError))
+    return ERROR_RESPONSE({ error: null, message: `an unknown error occurred while processing ${label}` });
 
   const splitedRawMessage = error.message.split("\n");
   const lastLine = splitedRawMessage[splitedRawMessage.length - 1];

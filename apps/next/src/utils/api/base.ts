@@ -47,7 +47,7 @@ export const apiRequest = async <T>({ auth = true, ...props }: I): Promise<ISucc
     return res.data;
   } catch (error) {
     let statusCode: number | undefined;
-    let errorMessage = "unknown error occurred";
+    let errorMessage = "an unknown error occurred";
 
     if (axios.isAxiosError<IErrorResponse>(error)) {
       if (process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_DEBUG_MODE === "true") {

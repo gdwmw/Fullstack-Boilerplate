@@ -8,11 +8,6 @@ import { prisma } from "@/src/libs";
 
 import { ImageFormat, UploadResponse } from "./type";
 
-// ---------------------------------------------------------------------------
-// [1] Constants & Helpers
-// Core constants, formats, and helpers for upload
-// ---------------------------------------------------------------------------
-
 const UPLOAD_DIR = join(process.cwd(), "uploads");
 
 const IMAGE_FORMATS: { name: string; width: number }[] = [
@@ -24,7 +19,6 @@ const IMAGE_FORMATS: { name: string; width: number }[] = [
 
 const IMAGE_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif", "image/tiff"];
 
-// [1.1] Helper to resize and save multiple formats
 async function processImage(buffer: Buffer, mimeType: string, originalWidth: number): Promise<Record<string, ImageFormat>> {
   const formats: Record<string, ImageFormat> = {};
   for (const format of IMAGE_FORMATS) {
@@ -50,20 +44,13 @@ async function processImage(buffer: Buffer, mimeType: string, originalWidth: num
   return formats;
 }
 
-// ---------------------------------------------------------------------------
-// [2] Upload primary service
-// All core upload CRUD logic
-// ---------------------------------------------------------------------------
-
 export const service = {
-  // [2.1] Delete a file
   async delete(fileId: number) {
     const fileRecord = await prisma.files.findUnique({ where: { id: fileId } });
     if (!fileRecord) {
       throw new Error("File not found");
     }
     await prisma.files.delete({ where: { id: fileId } });
-    // [2.1.1] Delete the primary file
     const deleteFile = async (filename: string) => {
       try {
         await unlink(join(UPLOAD_DIR, filename));
@@ -72,7 +59,6 @@ export const service = {
       }
     };
     await deleteFile(fileRecord.filename);
-    // [2.1.2] Delete all derived formats if present
     if (fileRecord.formats) {
       const formats = fileRecord.formats as unknown as Record<string, ImageFormat>;
       await Promise.all(Object.values(formats).map((f) => deleteFile(f.filename)));
@@ -80,22 +66,18 @@ export const service = {
     return fileRecord;
   },
 
-  // [2.2] Get all files
   async getAll() {
     return await prisma.files.findMany({ orderBy: { createdAt: "desc" } });
   },
 
-  // [2.3] Get a file by id
   async getById(fileId: number) {
     return await prisma.files.findUnique({ where: { id: fileId } });
   },
 
-  // [2.4] Upload a new file
   async upload(file: File): Promise<UploadResponse> {
     // eslint-disable-next-line no-useless-catch
     try {
       await mkdir(UPLOAD_DIR, { recursive: true });
-      // [2.4.1] Save the original file
       const originalFilename = file.name;
       const extension = extname(originalFilename);
       const filename = `${randomUUID()}${extension}`;
@@ -110,7 +92,6 @@ export const service = {
       let placeholder: null | string = null;
       let formats: null | Record<string, ImageFormat> = null;
 
-      // [2.4.2] Process metadata and derived formats if the file is an image
       if (IMAGE_MIME_TYPES.includes(file.type)) {
         const metadata = await sharp(buffer).metadata();
         width = metadata.width ?? null;
@@ -126,7 +107,6 @@ export const service = {
         }
       }
 
-      // [2.4.3] Persist file metadata to the database
       const fileRecord = await prisma.files.create({
         data: {
           dominantColor,

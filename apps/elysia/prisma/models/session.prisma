@@ -1,4 +1,4 @@
-model session {
+model sessions {
   id            Int      @id @default(autoincrement())
   userId        Int      @map("user_id")
   jti           String   @unique
@@ -17,5 +17,5 @@ model session {
   @@index([userId], map: "auth_sessions_user_id_idx")
   @@index([familyId], map: "auth_sessions_family_id_idx")
   @@index([expiresAt], map: "auth_sessions_expires_at_idx")
-  @@map("session")
+  @@map("sessions")
 }

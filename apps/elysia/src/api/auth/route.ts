@@ -2,8 +2,7 @@ import Elysia, { HTTPHeaders, StatusMap } from "elysia";
 import { ElysiaCookie } from "elysia/dist/cookies";
 
 import { ERROR_RESPONSE, responseMessage, SUCCESS_RESPONSE } from "@/src/constants";
-import { accessJwtPlugin, refreshJwtPlugin } from "@/src/libs";
-import { getBearerToken, handlePrismaError, verifyAccessToken } from "@/src/utils";
+import { accessJwtPlugin, getBearerToken, handlePrismaError, refreshJwtPlugin, verifyAccessToken } from "@/src/utils";
 
 import { changePasswordSchema, loginSchema, registerSchema } from "./schema";
 import { service } from "./service";
