@@ -9,7 +9,7 @@ import { docs } from "./swagger";
 
 const LABEL = "users";
 
-export const UsersRoutes = new Elysia({ prefix: "/users" })
+export const usersRoutes = new Elysia({ prefix: "/users" })
   .use(accessJwtPlugin)
 
   .onError(({ error, set }) => handlePrismaError(LABEL, error, set))

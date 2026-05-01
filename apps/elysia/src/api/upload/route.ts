@@ -9,7 +9,7 @@ import { docs } from "./swagger";
 
 const LABEL = "upload";
 
-export const UploadRoutes = new Elysia({ prefix: "/upload" })
+export const uploadRoutes = new Elysia({ prefix: "/upload" })
   .use(accessJwtPlugin)
 
   .onError(({ error, set }) => handlePrismaError(LABEL, error, set))

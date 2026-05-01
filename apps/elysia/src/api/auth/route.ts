@@ -163,7 +163,7 @@ const getAuthenticatedUserId = async ({
 // Auth endpoints start here. The numbered comments are also referenced by the README.
 // ---------------------------------------------------------------------------
 
-export const AuthRoutes = new Elysia({ prefix: "/auth" })
+export const authRoutes = new Elysia({ prefix: "/auth" })
   .use(accessJwtPlugin)
   .use(refreshJwtPlugin)
 

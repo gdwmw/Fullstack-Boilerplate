@@ -1,7 +1,7 @@
 import { Elysia } from "elysia";
 import { join } from "path";
 
-import { AuthRoutes, UploadRoutes, UsersRoutes } from "./api";
+import { authRoutes, uploadRoutes, usersRoutes } from "./api";
 import { logger } from "./libs";
 import { cleanupSessionsWorker, corsPlugin, requestLoggerPlugin, swaggerPlugin } from "./utils";
 
@@ -31,9 +31,9 @@ const app = new Elysia()
   .get("/", () => "Hello Elysia")
   .get("/uploads/*", ({ params }) => Bun.file(join(process.cwd(), "uploads", params["*"])))
 
-  .use(AuthRoutes)
-  .use(UploadRoutes)
-  .use(UsersRoutes)
+  .use(authRoutes)
+  .use(uploadRoutes)
+  .use(usersRoutes)
 
   .listen(ELYSIA_PORT || 1337);
 
