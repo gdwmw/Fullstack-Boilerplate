@@ -1,4 +1,4 @@
-import { eslintConfig } from "@repo/eslint-config/next";
+import { nextConfig } from "@repo/eslint-config/next";
 
 /** @type {import("eslint").Linter.Config[]} */
-export default eslintConfig;
+export default nextConfig;

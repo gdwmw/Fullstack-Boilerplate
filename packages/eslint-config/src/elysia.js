@@ -1,7 +1,8 @@
 import { defineConfig, globalIgnores } from "eslint/config";
-import { config as baseConfig } from "../eslint-config/base.js";
 
-export const eslintConfig = defineConfig([
+import { baseConfig } from "./base.js";
+
+export const elysiaConfig = defineConfig([
   ...baseConfig,
   globalIgnores(["prisma/**", "src/generated/**"]),
   {

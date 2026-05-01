@@ -6,9 +6,10 @@ import jest from "eslint-plugin-jest";
 import reactPlugin from "eslint-plugin-react";
 import storybook from "eslint-plugin-storybook";
 import { defineConfig, globalIgnores } from "eslint/config";
-import { config as baseConfig } from "../eslint-config/base.js";
 
-export const eslintConfig = defineConfig([
+import { baseConfig } from "./base.js";
+
+export const nextConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   reactPlugin.configs.flat.recommended,
@@ -40,7 +41,12 @@ export const eslintConfig = defineConfig([
       "better-tailwindcss/enforce-shorthand-classes": ["warn"],
       "better-tailwindcss/no-deprecated-classes": ["warn"],
       "better-tailwindcss/no-duplicate-classes": ["warn"],
-      "better-tailwindcss/no-unknown-classes": ["warn", { ignore: ["font-inter", "font-geistMono", "font-geistSans", "font-roboto"] }],
+      "better-tailwindcss/no-unknown-classes": [
+        "warn",
+        {
+          ignore: ["font-inter", "font-geistMono", "font-geistSans", "font-roboto"],
+        },
+      ],
       "better-tailwindcss/no-unnecessary-whitespace": ["warn"],
       curly: ["warn"],
       "react/display-name": "warn",

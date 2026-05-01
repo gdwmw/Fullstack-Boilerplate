@@ -3,11 +3,16 @@
   "version": "0.1.0",
   "type": "module",
   "private": true,
+  "scripts": {
+    "lint": "eslint --max-warnings 0",
+    "lint:fix": "eslint --fix",
+    "prettier": "prettier --write ."
+  },
   "exports": {
-    "./base": "./base.js",
-    "./elysia": "./elysia.js",
-    "./next": "./next.js",
-    "./utils": "./utils.js"
+    "./base": "./src/base.js",
+    "./elysia": "./src/elysia.js",
+    "./next": "./src/next.js",
+    "./utils": "./src/utils.js"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",

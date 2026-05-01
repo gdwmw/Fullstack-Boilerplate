@@ -9,10 +9,25 @@
     "bash -c 'cd apps/elysia && eslint --no-warn-ignored --max-warnings 0'",
     "prettier --write"
   ],
+  "packages/constants/**/*.{js,jsx,ts,tsx,mjs,cjs}": [
+    "bash -c 'cd packages/constants && eslint --fix'",
+    "bash -c 'cd packages/constants && eslint --no-warn-ignored --max-warnings 0'",
+    "prettier --write"
+  ],
+  "packages/eslint-config/**/*.{js,jsx,ts,tsx,mjs,cjs}": [
+    "bash -c 'cd packages/eslint-config && eslint --fix'",
+    "bash -c 'cd packages/eslint-config && eslint --no-warn-ignored --max-warnings 0'",
+    "prettier --write"
+  ],
+  "packages/schemas/**/*.{js,jsx,ts,tsx,mjs,cjs}": [
+    "bash -c 'cd packages/schemas && eslint --fix'",
+    "bash -c 'cd packages/schemas && eslint --no-warn-ignored --max-warnings 0'",
+    "prettier --write"
+  ],
   "packages/utils/**/*.{js,jsx,ts,tsx,mjs,cjs}": [
     "bash -c 'cd packages/utils && eslint --fix'",
     "bash -c 'cd packages/utils && eslint --no-warn-ignored --max-warnings 0'",
     "prettier --write"
   ],
-  "*.{js,jsx,ts,tsx,mjs,cjs,json,css}": ["prettier --write"]
+  "*.{json,css}": ["prettier --write"]
 }
