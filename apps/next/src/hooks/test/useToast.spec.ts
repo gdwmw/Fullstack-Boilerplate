@@ -1,19 +1,20 @@
 import { act, renderHook } from "@testing-library/react";
+import { vi } from "vitest";
 
 import { useToast } from "../useToast";
 
 describe("useToast", () => {
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.spyOn(Math, "random").mockReturnValue(0.123456789);
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0.123456789);
   });
 
   afterEach(() => {
     act(() => {
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
     });
-    jest.useRealTimers();
-    jest.restoreAllMocks();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   it("adds success toast", () => {
@@ -73,7 +74,7 @@ describe("useToast", () => {
     expect(result.current.toasts).toHaveLength(1);
 
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
     expect(result.current.toasts).toHaveLength(0);
   });

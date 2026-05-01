@@ -47,11 +47,11 @@
       "dependsOn": ["^reset"]
     },
     "storybook:build": {
-      "dependsOn": ["^jest:test"],
+      "dependsOn": ["^vitest:run"],
       "outputs": ["storybook-static/**"]
     },
-    "jest:test": {
-      "dependsOn": ["^jest:test"]
+    "vitest:run": {
+      "dependsOn": ["^vitest:run"]
     },
     "lint": {
       "dependsOn": ["^lint"]

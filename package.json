@@ -11,7 +11,7 @@
     "migrate": "turbo run migrate",
     "reset": "turbo run reset",
     "storybook:build": "turbo run storybook:build",
-    "jest:test": "turbo run jest:test",
+    "vitest:run": "turbo run vitest:run",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
     "prettier": "turbo run prettier",

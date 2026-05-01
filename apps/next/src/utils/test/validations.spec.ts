@@ -1,14 +1,16 @@
+import { vi } from "vitest";
+
 import { inputValidations } from "../validations";
 
 type KeyEventMock = {
   key: string;
-  preventDefault: jest.Mock;
+  preventDefault: ReturnType<typeof vi.fn>;
 };
 
 const createKeyEventMock = (key: string): KeyEventMock =>
   ({
     key,
-    preventDefault: jest.fn(),
+    preventDefault: vi.fn(),
   }) as KeyEventMock;
 
 describe("inputValidations", () => {
