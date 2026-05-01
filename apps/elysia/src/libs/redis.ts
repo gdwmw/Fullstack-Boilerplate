@@ -11,6 +11,7 @@ const redisLogger = logger.child({ scope: "redis" });
 redis.on("error", (err) => {
   redisLogger.error({ error: err.message.toLowerCase() }, "redis connection error");
 });
+
 redis.on("connect", () => {
   redisLogger.info("redis connected");
 });
