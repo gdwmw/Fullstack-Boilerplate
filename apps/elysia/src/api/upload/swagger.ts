@@ -1,170 +1,157 @@
 import { DocumentDecoration } from "elysia";
 
-const successResponseSchema = {
-  properties: {
-    data: {},
-    message: { example: "upload data retrieved successfully", nullable: true, type: "string" },
-    success: { example: true, type: "boolean" },
-  },
-  type: "object",
-} as const;
+import { responseMessage } from "@/src/constants";
 
-const errorResponseSchema = {
-  properties: {
-    code: { example: "P2025", nullable: true, type: "string" },
-    error: { example: null, nullable: true },
-    message: { example: "upload not found", nullable: true, type: "string" },
-    success: { example: false, type: "boolean" },
-    token: {
-      nullable: true,
-      properties: {
-        access: { type: "boolean" },
-        refresh: { type: "boolean" },
-      },
-      type: "object",
+export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "upload", DocumentDecoration> => {
+  const successResponseSchema = {
+    properties: {
+      data: {},
+      message: { example: responseMessage(label).retrieved, nullable: true, type: "string" },
+      success: { example: true, type: "boolean" },
     },
-  },
-  type: "object",
-} as const;
+    type: "object",
+  } as const;
 
-export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "upload", DocumentDecoration> => ({
-  delete: {
-    description: "Delete an uploaded file",
-    parameters: [{ in: "path", name: "id", required: true, schema: { example: 1, type: "integer" } }],
-    responses: {
-      200: {
-        content: {
-          "application/json": {
-            schema: successResponseSchema,
-          },
-        },
-        description: "File deleted successfully",
-      },
-      401: {
-        content: {
-          "application/json": {
-            schema: errorResponseSchema,
-          },
-        },
-        description: "Unauthorized",
-      },
-      404: {
-        content: {
-          "application/json": {
-            schema: errorResponseSchema,
-          },
-        },
-        description: "File not found",
-      },
+  const errorResponseSchema = {
+    properties: {
+      code: { example: "P2025", nullable: true, type: "string" },
+      message: { example: responseMessage(label).notFound, nullable: true, type: "string" },
+      success: { example: false, type: "boolean" },
     },
-    security: [{ bearerAuth: [] }],
-    summary: "Delete File",
-    tags: [label.toLowerCase()],
-  },
-  getAll: {
-    description: "Get all uploaded files",
-    responses: {
-      200: {
-        content: {
-          "application/json": {
-            schema: successResponseSchema,
-          },
-        },
-        description: "Files retrieved successfully",
-      },
-      401: {
-        content: {
-          "application/json": {
-            schema: errorResponseSchema,
-          },
-        },
-        description: "Unauthorized",
-      },
-    },
-    security: [{ bearerAuth: [] }],
-    summary: "Get All Files",
-    tags: [label.toLowerCase()],
-  },
-  getById: {
-    description: "Get a file by ID",
-    parameters: [{ in: "path", name: "id", required: true, schema: { example: 1, type: "integer" } }],
-    responses: {
-      200: {
-        content: {
-          "application/json": {
-            schema: successResponseSchema,
-          },
-        },
-        description: "File retrieved successfully",
-      },
-      401: {
-        content: {
-          "application/json": {
-            schema: errorResponseSchema,
-          },
-        },
-        description: "Unauthorized",
-      },
-      404: {
-        content: {
-          "application/json": {
-            schema: errorResponseSchema,
-          },
-        },
-        description: "File not found",
-      },
-    },
-    security: [{ bearerAuth: [] }],
-    summary: "Get File by ID",
-    tags: [label.toLowerCase()],
-  },
-  upload: {
-    description: "Upload a file",
-    requestBody: {
-      content: {
-        "multipart/form-data": {
-          schema: {
-            properties: {
-              file: {
-                format: "binary",
-                type: "string",
-              },
+    type: "object",
+  } as const;
+
+  return {
+    delete: {
+      description: "Delete an uploaded file",
+      parameters: [{ in: "path", name: "id", required: true, schema: { example: 1, type: "integer" } }],
+      responses: {
+        200: {
+          content: {
+            "application/json": {
+              schema: successResponseSchema,
             },
-            required: ["file"],
-            type: "object",
           },
+          description: "File deleted successfully",
+        },
+        401: {
+          content: {
+            "application/json": {
+              schema: errorResponseSchema,
+            },
+          },
+          description: "Unauthorized",
+        },
+        404: {
+          content: {
+            "application/json": {
+              schema: errorResponseSchema,
+            },
+          },
+          description: "File not found",
         },
       },
-      required: true,
+      security: [{ bearerAuth: [] }],
+      summary: "Delete File",
+      tags: [label.toLowerCase()],
     },
-    responses: {
-      200: {
-        content: {
-          "application/json": {
-            schema: successResponseSchema,
+    getAll: {
+      description: "Get all uploaded files",
+      responses: {
+        200: {
+          content: {
+            "application/json": {
+              schema: successResponseSchema,
+            },
           },
+          description: "Files retrieved successfully",
         },
-        description: "File uploaded successfully",
-      },
-      400: {
-        content: {
-          "application/json": {
-            schema: errorResponseSchema,
+        401: {
+          content: {
+            "application/json": {
+              schema: errorResponseSchema,
+            },
           },
+          description: "Unauthorized",
         },
-        description: "Invalid request payload",
       },
-      401: {
-        content: {
-          "application/json": {
-            schema: errorResponseSchema,
-          },
-        },
-        description: "Unauthorized",
-      },
+      security: [{ bearerAuth: [] }],
+      summary: "Get All Files",
+      tags: [label.toLowerCase()],
     },
-    security: [{ bearerAuth: [] }],
-    summary: "Upload File",
-    tags: [label.toLowerCase()],
-  },
-});
+    getById: {
+      description: "Get a file by ID",
+      parameters: [{ in: "path", name: "id", required: true, schema: { example: 1, type: "integer" } }],
+      responses: {
+        200: {
+          content: {
+            "application/json": {
+              schema: successResponseSchema,
+            },
+          },
+          description: "File retrieved successfully",
+        },
+        401: {
+          content: {
+            "application/json": {
+              schema: errorResponseSchema,
+            },
+          },
+          description: "Unauthorized",
+        },
+      },
+      security: [{ bearerAuth: [] }],
+      summary: "Get File by ID",
+      tags: [label.toLowerCase()],
+    },
+    upload: {
+      description: "Upload a file",
+      requestBody: {
+        content: {
+          "multipart/form-data": {
+            schema: {
+              properties: {
+                file: {
+                  format: "binary",
+                  type: "string",
+                },
+              },
+              required: ["file"],
+              type: "object",
+            },
+          },
+        },
+        required: true,
+      },
+      responses: {
+        200: {
+          content: {
+            "application/json": {
+              schema: successResponseSchema,
+            },
+          },
+          description: "File uploaded successfully",
+        },
+        400: {
+          content: {
+            "application/json": {
+              schema: errorResponseSchema,
+            },
+          },
+          description: "Invalid request payload",
+        },
+        401: {
+          content: {
+            "application/json": {
+              schema: errorResponseSchema,
+            },
+          },
+          description: "Unauthorized",
+        },
+      },
+      security: [{ bearerAuth: [] }],
+      summary: "Upload File",
+      tags: [label.toLowerCase()],
+    },
+  };
+};
