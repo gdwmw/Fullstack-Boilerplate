@@ -19,11 +19,6 @@
     "bash -c 'cd packages/eslint-config && eslint --no-warn-ignored --max-warnings 0'",
     "prettier --write"
   ],
-  "packages/schemas/**/*.{js,jsx,ts,tsx,mjs,cjs}": [
-    "bash -c 'cd packages/schemas && eslint --fix'",
-    "bash -c 'cd packages/schemas && eslint --no-warn-ignored --max-warnings 0'",
-    "prettier --write"
-  ],
   "packages/utils/**/*.{js,jsx,ts,tsx,mjs,cjs}": [
     "bash -c 'cd packages/utils && eslint --fix'",
     "bash -c 'cd packages/utils && eslint --no-warn-ignored --max-warnings 0'",
