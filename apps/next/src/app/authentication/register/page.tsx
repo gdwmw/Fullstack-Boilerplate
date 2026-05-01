@@ -1,12 +1,7 @@
-import { Metadata, Viewport } from "next";
+import { Metadata } from "next";
 import { FC, ReactElement } from "react";
 
 import RegisterLayout from "./_layout";
-
-export const viewport: Viewport = {
-  initialScale: 1.0,
-  width: "device-width",
-};
 
 export const metadata: Metadata = {
   title: "Register",
