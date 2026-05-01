@@ -1,11 +1,9 @@
-import { Metadata, Viewport } from "next";
+import { Metadata } from "next";
 import { FC, ReactElement } from "react";
 
-import { DEFAULT_ROBOTS, DEFAULT_VIEWPORT, SITE_CREATOR, SITE_DESCRIPTION, SITE_IMAGE, SITE_NAME, SITE_URL } from "@/src/constants";
+import { DEFAULT_ROBOTS, SITE_CREATOR, SITE_DESCRIPTION, SITE_IMAGE, SITE_NAME, SITE_URL } from "@/src/constants";
 
 import { Main } from "./_layout/modules/main/index-example";
-
-export const viewport: Viewport = DEFAULT_VIEWPORT;
 
 export const metadata: Metadata = {
   description: SITE_DESCRIPTION,

@@ -4,11 +4,6 @@ export const SITE_DESCRIPTION = "Boilerplate by Gede Dewo Wahyu M.W";
 export const SITE_IMAGE = `${SITE_URL}/assets/images/logos/Vercel.png`;
 export const SITE_CREATOR = "@gdwmw";
 
-export const DEFAULT_VIEWPORT = {
-  initialScale: 1.0,
-  width: "device-width",
-} as const;
-
 export const DEFAULT_ROBOTS = {
   follow: true,
   googleBot: {

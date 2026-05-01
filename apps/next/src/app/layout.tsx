@@ -1,10 +1,15 @@
-import { Metadata } from "next";
+import { Metadata, Viewport } from "next";
 import { FC, PropsWithChildren, ReactElement } from "react";
 
 import { APIConnectionChecker } from "../components";
 import { NextAuthProvider, NextThemesProvider, ReactQueryProvider } from "../libs";
 import { geistMono, geistSans, inter, roboto } from "./fonts";
 import "./globals.css";
+
+export const viewport: Viewport = {
+  initialScale: 1.0,
+  width: "device-width",
+};
 
 export const metadata: Metadata = {
   authors: [{ name: "Gede Dewo Wahyu M.W", url: "https://github.com/gdwmw" }],
