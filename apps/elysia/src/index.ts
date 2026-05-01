@@ -144,7 +144,7 @@ const app = new Elysia()
   .use(AuthRoutes)
   .use(UploadRoutes)
   .use(UsersRoutes)
-  // Serve uploaded files statically
+
   .get("/uploads/*", ({ params }) => Bun.file(join(process.cwd(), "uploads", params["*"])))
   .listen(ELYSIA_PORT || 1337);
 
