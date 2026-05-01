@@ -14,20 +14,20 @@ import { docs } from "./swagger";
 // Defines the route label, cookie name, and local helper types.
 // ---------------------------------------------------------------------------
 
-const LABEL = "Authentication";
+const LABEL = "authentication";
 const REFRESH_COOKIE_NAME = process.env.JWT_REFRESH_COOKIE_NAME || "refreshToken";
 const REFRESH_COOKIE_PATH = process.env.JWT_REFRESH_COOKIE_PATH || "/auth";
 const REFRESH_COOKIE_SAME_SITE = process.env.JWT_REFRESH_COOKIE_SAME_SITE || "Lax";
 const REFRESH_COOKIE_SECURE = process.env.JWT_REFRESH_COOKIE_SECURE !== "false";
 
-type HeadersMap = Record<string, string | undefined>;
-type JwtPayload = null | Record<string, unknown> | undefined;
-type ResponseSet = {
+type THeadersMap = Record<string, string | undefined>;
+type TJwtPayload = null | Record<string, unknown> | undefined;
+interface IResponseSet {
   cookie?: Record<string, ElysiaCookie>;
   headers: HTTPHeaders;
   redirect?: string;
   status?: keyof StatusMap | number;
-};
+}
 
 // ---------------------------------------------------------------------------
 // [2] JWT payload helpers
@@ -81,7 +81,7 @@ const clearRefreshCookie = () => {
 // Extracts request metadata that will be stored in the refresh session.
 // ---------------------------------------------------------------------------
 
-const getClientMetadata = (headers: HeadersMap) => {
+const getClientMetadata = (headers: THeadersMap) => {
   const rawIp = headers["x-forwarded-for"] || headers["x-real-ip"];
   const ipAddress = rawIp?.split(",")[0]?.trim();
 
@@ -134,9 +134,9 @@ const getAuthenticatedUserId = async ({
   headers,
   set,
 }: {
-  accessJwt: { verify(token: string): Promise<JwtPayload> };
+  accessJwt: { verify(token: string): Promise<TJwtPayload> };
   headers: { authorization?: string };
-  set: ResponseSet;
+  set: IResponseSet;
 }) => {
   const verifyResponse = await verifyAccessToken({ accessJwt, headers, set });
   if (verifyResponse) {
@@ -183,7 +183,7 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
       const tokens = await issueAccessAndRefreshTokens({ accessJwt, refreshJwt, userId: res.id });
 
       // [6.1.3] Extract request metadata, then persist the refresh session to the database.
-      const clientMetadata = getClientMetadata(headers as HeadersMap);
+      const clientMetadata = getClientMetadata(headers as THeadersMap);
 
       await service.createRefreshSession({
         expiresAt: tokens.expiresAt,
@@ -232,7 +232,7 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
       const tokens = await issueAccessAndRefreshTokens({ accessJwt, refreshJwt, userId: res.id });
 
       // [6.2.4] Persist the new refresh session along with client metadata.
-      const clientMetadata = getClientMetadata(headers as HeadersMap);
+      const clientMetadata = getClientMetadata(headers as THeadersMap);
 
       await service.createRefreshSession({
         expiresAt: tokens.expiresAt,
@@ -262,7 +262,7 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
     "/refresh",
     async ({ accessJwt, headers, refreshJwt, set }) => {
       // [6.3.1] Read the refresh token from the request cookie.
-      const cookieHeader = (headers as HeadersMap).cookie;
+      const cookieHeader = (headers as THeadersMap).cookie;
       const refreshToken = readRefreshTokenFromCookie(cookieHeader);
 
       if (!refreshToken) {
@@ -275,8 +275,8 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
 
       // [6.3.2] Verify the refresh JWT, then extract user id and jti from the payload.
       const decoded = await refreshJwt.verify(refreshToken);
-      const userId = parseSubjectToUserId((decoded as JwtPayload)?.sub);
-      const refreshJti = parseJwtStringField((decoded as JwtPayload)?.jti);
+      const userId = parseSubjectToUserId((decoded as TJwtPayload)?.sub);
+      const refreshJti = parseJwtStringField((decoded as TJwtPayload)?.jti);
 
       if (!decoded || !userId || !refreshJti) {
         set.headers["set-cookie"] = clearRefreshCookie();
@@ -354,7 +354,7 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
       const tokens = await issueAccessAndRefreshTokens({ accessJwt, refreshJwt, userId: user.id });
 
       // [6.3.10] Persist client metadata for the new session.
-      const clientMetadata = getClientMetadata(headers as HeadersMap);
+      const clientMetadata = getClientMetadata(headers as THeadersMap);
 
       // [6.3.11] Blocklist the old token, then rotate the refresh session (statefully).
       await service.addToBlocklist(session.jti, session.expiresAt);
@@ -388,14 +388,14 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
     "/logout",
     async ({ accessJwt, headers, refreshJwt, set }) => {
       // [6.4.1] Try to read the refresh token from the cookie to revoke it.
-      const cookieHeader = (headers as HeadersMap).cookie;
+      const cookieHeader = (headers as THeadersMap).cookie;
       const refreshToken = readRefreshTokenFromCookie(cookieHeader);
 
       if (refreshToken) {
         // [6.4.2] If the refresh token is valid, revoke the session and blocklist its jti.
         const decodedRefresh = await refreshJwt.verify(refreshToken);
-        const refreshJti = parseJwtStringField((decodedRefresh as JwtPayload)?.jti);
-        const refreshExp = parseJwtExp((decodedRefresh as JwtPayload)?.exp);
+        const refreshJti = parseJwtStringField((decodedRefresh as TJwtPayload)?.jti);
+        const refreshExp = parseJwtExp((decodedRefresh as TJwtPayload)?.exp);
 
         if (refreshJti) {
           await service.revokeRefreshSessionByJti(refreshJti);

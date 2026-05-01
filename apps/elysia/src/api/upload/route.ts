@@ -13,7 +13,7 @@ import { docs } from "./swagger";
 // Label and other constants used throughout the upload module.
 // ---------------------------------------------------------------------------
 
-const LABEL = "Upload";
+const LABEL = "upload";
 
 // ---------------------------------------------------------------------------
 // [2] UploadRoutes

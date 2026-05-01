@@ -13,7 +13,7 @@ import { docs } from "./swagger";
 // Label and other constants used throughout the users module.
 // ---------------------------------------------------------------------------
 
-const LABEL = "Users";
+const LABEL = "users";
 
 // ---------------------------------------------------------------------------
 // [2] UsersRoutes
