@@ -117,7 +117,7 @@ const issueAccessAndRefreshTokens = async ({
   const exp = parseJwtExp((decodedRefresh as null | Record<string, unknown> | undefined)?.exp);
 
   if (!exp) {
-    throw new Error("Failed to parse refresh token expiration");
+    throw new Error("failed to parse refresh token expiration");
   }
 
   return {
@@ -150,7 +150,7 @@ const getAuthenticatedUserId = async ({
   if (!userId) {
     return {
       error: ERROR_RESPONSE({
-        message: responseMessage("Access token").invalid,
+        message: responseMessage("access token").invalid,
       }),
       userId: null,
     };
@@ -203,7 +203,7 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
       // [6.1.5] Return the user data and access token to the client.
       return SUCCESS_RESPONSE({
         data: { ...res, accessToken: tokens.accessToken },
-        message: responseMessage("Register").success,
+        message: responseMessage("register").success,
       });
     },
 
@@ -224,7 +224,7 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
       if (!res) {
         set.status = 401;
         return ERROR_RESPONSE({
-          message: payload.method === "email" ? responseMessage("Email or Password").invalid : responseMessage("Username or Password").invalid,
+          message: payload.method === "email" ? responseMessage("email or password").invalid : responseMessage("username or password").invalid,
         });
       }
 
@@ -249,7 +249,7 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
 
       return SUCCESS_RESPONSE({
         data: { ...res, accessToken: tokens.accessToken },
-        message: responseMessage("Login").success,
+        message: responseMessage("login").success,
       });
     },
 
@@ -269,7 +269,7 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         set.headers["set-cookie"] = clearRefreshCookie();
         set.status = 401;
         return ERROR_RESPONSE({
-          message: responseMessage("Refresh token").required,
+          message: responseMessage("refresh token").required,
         });
       }
 
@@ -282,7 +282,7 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         set.headers["set-cookie"] = clearRefreshCookie();
         set.status = 401;
         return ERROR_RESPONSE({
-          message: responseMessage("Refresh token").invalid + " or " + responseMessage("Refresh token").expired,
+          message: responseMessage("refresh token").invalid + " or " + responseMessage("refresh token").expired,
         });
       }
 
@@ -291,7 +291,7 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         set.headers["set-cookie"] = clearRefreshCookie();
         set.status = 401;
         return ERROR_RESPONSE({
-          message: responseMessage("Refresh token").invalid,
+          message: responseMessage("refresh token").invalid,
         });
       }
 
@@ -302,7 +302,7 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         set.headers["set-cookie"] = clearRefreshCookie();
         set.status = 401;
         return ERROR_RESPONSE({
-          message: responseMessage("Refresh token").invalid,
+          message: responseMessage("refresh token").invalid,
         });
       }
 
@@ -314,7 +314,7 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         set.headers["set-cookie"] = clearRefreshCookie();
         set.status = 401;
         return ERROR_RESPONSE({
-          message: responseMessage("Refresh token").invalid,
+          message: responseMessage("refresh token").invalid,
         });
       }
 
@@ -327,7 +327,7 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         set.headers["set-cookie"] = clearRefreshCookie();
         set.status = 401;
         return ERROR_RESPONSE({
-          message: responseMessage("Refresh token").invalid,
+          message: responseMessage("refresh token").invalid,
         });
       }
 
@@ -337,7 +337,7 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
         set.headers["set-cookie"] = clearRefreshCookie();
         set.status = 401;
         return ERROR_RESPONSE({
-          message: responseMessage("Refresh token").expired,
+          message: responseMessage("refresh token").expired,
         });
       }
 
@@ -347,7 +347,7 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
       if (!user) {
         set.headers["set-cookie"] = clearRefreshCookie();
         set.status = 404;
-        return ERROR_RESPONSE({ message: responseMessage("Users").notFound });
+        return ERROR_RESPONSE({ message: responseMessage("users").notFound });
       }
 
       // [6.3.9] Issue a new token pair for rotation.
@@ -375,7 +375,7 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
 
       return SUCCESS_RESPONSE({
         data: { accessToken: tokens.accessToken },
-        message: responseMessage("Token").updated,
+        message: responseMessage("token").updated,
       });
     },
 
@@ -420,7 +420,7 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
       // [6.4.4] Clear the refresh token cookie in the browser/client.
       set.headers["set-cookie"] = clearRefreshCookie();
 
-      return SUCCESS_RESPONSE({ data: null, message: responseMessage("Logout").success });
+      return SUCCESS_RESPONSE({ data: null, message: responseMessage("logout").success });
     },
 
     { detail: docs(LABEL).logout },
@@ -443,10 +443,10 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
 
       if (!res) {
         set.status = 404;
-        return ERROR_RESPONSE({ message: responseMessage("Users").notFound });
+        return ERROR_RESPONSE({ message: responseMessage("users").notFound });
       }
 
-      return SUCCESS_RESPONSE({ data: res, message: responseMessage("Users").retrieved });
+      return SUCCESS_RESPONSE({ data: res, message: responseMessage("users").retrieved });
     },
 
     { detail: docs(LABEL).me },
@@ -472,10 +472,10 @@ export const AuthRoutes = new Elysia({ prefix: "/auth" })
 
       if (!res) {
         set.status = 401;
-        return ERROR_RESPONSE({ message: responseMessage("Current password").invalid });
+        return ERROR_RESPONSE({ message: responseMessage("current password").invalid });
       }
 
-      return SUCCESS_RESPONSE({ data: res, message: responseMessage("Password").updated });
+      return SUCCESS_RESPONSE({ data: res, message: responseMessage("password").updated });
     },
 
     { detail: docs(LABEL).changePassword },

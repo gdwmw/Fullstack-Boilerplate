@@ -61,6 +61,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
       summary: "Change Password",
       tags: [label.toLowerCase()],
     },
+
     login: {
       description: "Authenticate user and issue access/refresh token pair",
       requestBody: {
@@ -100,6 +101,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
       summary: "Login",
       tags: [label.toLowerCase()],
     },
+
     logout: {
       description:
         "Logout current session. Refresh token is read from HttpOnly cookie. Access token is optional but will be blocklisted if provided.",
@@ -116,6 +118,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
       summary: "Logout",
       tags: [label.toLowerCase()],
     },
+
     me: {
       description: "Get current authenticated user profile",
       responses: {
@@ -148,6 +151,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
       summary: "Get Current User",
       tags: [label.toLowerCase()],
     },
+
     refresh: {
       description: "Rotate refresh token and issue a new access token. Refresh token is read from HttpOnly cookie.",
       responses: {
@@ -179,6 +183,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
       summary: "Refresh Token",
       tags: [label.toLowerCase()],
     },
+
     register: {
       description: "Register user and issue access/refresh token pair",
       requestBody: {

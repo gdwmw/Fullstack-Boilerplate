@@ -55,6 +55,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
       summary: "Delete File",
       tags: [label.toLowerCase()],
     },
+
     getAll: {
       description: "Get all uploaded files",
       responses: {
@@ -79,6 +80,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
       summary: "Get All Files",
       tags: [label.toLowerCase()],
     },
+
     getById: {
       description: "Get a file by ID",
       parameters: [{ in: "path", name: "id", required: true, schema: { example: 1, type: "integer" } }],
@@ -104,6 +106,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
       summary: "Get File by ID",
       tags: [label.toLowerCase()],
     },
+
     upload: {
       description: "Upload a file",
       requestBody: {

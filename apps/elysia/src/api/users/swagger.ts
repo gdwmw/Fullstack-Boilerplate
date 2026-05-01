@@ -55,6 +55,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
       summary: "Delete",
       tags: [label.toLowerCase()],
     },
+
     getAll: {
       description: "Get all users",
       responses: {
@@ -79,6 +80,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
       summary: "Get All",
       tags: [label.toLowerCase()],
     },
+
     getById: {
       description: "Get a user by ID",
       parameters: [{ in: "path", name: "id", required: true, schema: { example: 1, type: "integer" } }],
@@ -112,6 +114,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
       summary: "Get by ID",
       tags: [label.toLowerCase()],
     },
+
     put: {
       description: "Update a user by ID",
       parameters: [{ in: "path", name: "id", required: true, schema: { example: 1, type: "integer" } }],
