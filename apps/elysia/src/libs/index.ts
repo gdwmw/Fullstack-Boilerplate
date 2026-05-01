@@ -1,4 +1,4 @@
 export * from "./jwt";
-export * from "./logger";
+export * from "./pino";
 export * from "./prisma";
 export * from "./redis";
