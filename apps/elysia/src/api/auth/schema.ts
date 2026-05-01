@@ -1,6 +1,5 @@
+import { schemaMessage } from "@repo/constants";
 import { z } from "zod";
-
-import { schemaMessage } from "@/src/constants";
 
 export const registerSchema = z.object({
   email: z.email({ message: schemaMessage.string.email("email") }),

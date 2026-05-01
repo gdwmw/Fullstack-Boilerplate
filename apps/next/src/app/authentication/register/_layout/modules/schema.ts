@@ -1,6 +1,5 @@
+import { schemaMessage } from "@repo/constants";
 import { z } from "zod";
-
-import { schemaMessage } from "@/src/constants";
 
 export const registerSchema = z.object({
   confirmPassword: z.string().min(1, { message: schemaMessage.string.required("Confirm password") }),
