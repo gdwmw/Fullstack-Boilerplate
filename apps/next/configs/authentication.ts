@@ -26,7 +26,7 @@ export const options: NextAuthOptions = {
       if (user) {
         const sessionStartedAt = Date.now();
 
-        token.id = parseInt(user.id);
+        token.id = Number.parseInt(user.id);
         token.email = user.email;
         token.name = user.name;
         token.username = user.username;
@@ -52,19 +52,19 @@ export const options: NextAuthOptions = {
 
     async session({ session, token }: { session: Session; token: JWT }) {
       session.user = {
-        id: token.id as number | undefined,
-        accessToken: token.accessToken as null | string | undefined,
-        accessTokenExpiresAt: token.accessTokenExpiresAt as number | undefined,
-        email: token.email as null | string | undefined,
-        image: token.image as IUploadResponse | null | undefined,
-        imageId: token.imageId as null | number | undefined,
-        name: token.name as null | string | undefined,
-        phone: token.phone as string | undefined,
-        role: token.role as "admin" | "user" | undefined,
-        sessionExpiresAt: token.sessionExpiresAt as number | undefined,
-        sessionStartedAt: token.sessionStartedAt as number | undefined,
-        status: token.status as string | undefined,
-        username: token.username as string | undefined,
+        id: token.id,
+        accessToken: token.accessToken,
+        accessTokenExpiresAt: token.accessTokenExpiresAt,
+        email: token.email,
+        image: token.image,
+        imageId: token.imageId,
+        name: token.name,
+        phone: token.phone,
+        role: token.role,
+        sessionExpiresAt: token.sessionExpiresAt,
+        sessionStartedAt: token.sessionStartedAt,
+        status: token.status,
+        username: token.username,
       };
       return session;
     },
@@ -85,7 +85,7 @@ export const options: NextAuthOptions = {
 
         try {
           const res = await POSTLogin({ identifier, method: method === "email" ? "email" : "username", password });
-          // eslint-disable-next-line
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           return res.data as any;
         } catch {
           return null;

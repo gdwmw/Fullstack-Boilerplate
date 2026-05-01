@@ -24,7 +24,7 @@ interface I {
   headers?: AxiosRequestHeaders;
   label: string;
   method?: Method;
-  // eslint-disable-next-line
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params?: Record<string, any>;
 }
 
@@ -35,7 +35,7 @@ export const apiRequest = async <T>({ auth = true, ...props }: I): Promise<ISucc
     const res: AxiosResponse<ISuccessResponse<T>> = await axios({
       data: props.data,
       headers: {
-        ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+        ...(accessToken && { Authorization: `Bearer ${accessToken as string}` }),
         ...props.headers,
       },
       method: props.method,
@@ -51,7 +51,7 @@ export const apiRequest = async <T>({ auth = true, ...props }: I): Promise<ISucc
 
     if (axios.isAxiosError<IErrorResponse>(error)) {
       if (process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_DEBUG_MODE === "true") {
-        logTemplate.ERROR(String(error.response), "axios");
+        logTemplate.ERROR(JSON.stringify(error.response), "axios");
       }
       statusCode = error.response?.status;
       errorMessage = error.response?.data?.message ?? error.message;

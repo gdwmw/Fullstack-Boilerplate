@@ -1,4 +1,2 @@
-import { elysiaConfig } from "@repo/eslint-config/elysia";
-
 /** @type {import("eslint").Linter.Config[]} */
-export default elysiaConfig;
+export { elysiaConfig as default } from "@repo/eslint-config/elysia";

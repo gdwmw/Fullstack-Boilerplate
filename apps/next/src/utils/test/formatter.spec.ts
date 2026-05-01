@@ -14,6 +14,6 @@ describe("currencyFormat", () => {
   });
 
   it("throws for invalid amount", () => {
-    expect(() => currencyFormat("invalid", "USD")).toThrow("Invalid amount value");
+    expect(() => currencyFormat("invalid", "USD")).toThrow("invalid amount value");
   });
 });

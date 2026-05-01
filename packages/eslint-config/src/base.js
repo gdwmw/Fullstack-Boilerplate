@@ -1,6 +1,5 @@
 import js from "@eslint/js";
 import eslintConfigPrettier from "eslint-config-prettier";
-// import onlyWarn from "eslint-plugin-only-warn";
 import perfectionist from "eslint-plugin-perfectionist";
 import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
 import turboPlugin from "eslint-plugin-turbo";
@@ -95,11 +94,6 @@ export const baseConfig = [
       ],
     },
   },
-  // {
-  //   plugins: {
-  //     onlyWarn,
-  //   },
-  // },
   {
     ignores: ["dist/**"],
   },

@@ -114,7 +114,7 @@ const MainContent: FC = (): ReactElement => {
   }, [meQuery.data, reset]);
 
   useEffect(() => {
-    // eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/incompatible-library
     const file = watch("image")?.[0];
     if (file) {
       const reader = new FileReader();
@@ -124,7 +124,7 @@ const MainContent: FC = (): ReactElement => {
       reader.readAsDataURL(file);
     }
 
-    //eslint-disable-next-line
+    //eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watch("image")]);
 
   const updateProfileMutation = useMutation({
@@ -201,15 +201,15 @@ const MainContent: FC = (): ReactElement => {
             className="mx-auto min-h-32 min-w-32"
             iconSize={64}
             placeholder={previewImage ? null : meQuery.data?.image?.placeholder}
-            src={previewImage ? previewImage : meQuery.data?.image ? `${API_URL}${meQuery.data?.image?.formats?.thumbnail?.url}` : ""}
+            src={previewImage || (meQuery.data?.image ? `${API_URL}${meQuery.data?.image?.formats?.thumbnail?.url}` : "")}
           />
 
-          {FORM_FIELDS_DATA.map((dt, i) => (
+          {FORM_FIELDS_DATA.map((dt) => (
             <ExampleInput
               color="default"
               disabled={loading}
               errorMessage={errors[dt.name]?.message as string | undefined}
-              key={i}
+              key={dt.name}
               label={dt.label}
               maxLength={dt.maxLength}
               onKeyDown={dt.onKeyDown}

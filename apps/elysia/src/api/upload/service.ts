@@ -4,6 +4,7 @@ import { extname, join } from "path";
 import { getPlaiceholder } from "plaiceholder";
 import sharp from "sharp";
 
+import { Prisma } from "@/src/generated/prisma/client";
 import { prisma } from "@/src/libs";
 
 import { ImageFormat, UploadResponse } from "./type";
@@ -17,7 +18,7 @@ const IMAGE_FORMATS: { name: string; width: number }[] = [
   { name: "large", width: 1000 },
 ];
 
-const IMAGE_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif", "image/tiff"];
+const IMAGE_MIME_TYPES = new Set(["image/avif", "image/gif", "image/jpeg", "image/png", "image/tiff", "image/webp"]);
 
 async function processImage(buffer: Buffer, mimeType: string, originalWidth: number): Promise<Record<string, ImageFormat>> {
   const formats: Record<string, ImageFormat> = {};
@@ -75,70 +76,65 @@ export const service = {
   },
 
   async upload(file: File): Promise<UploadResponse> {
-    // eslint-disable-next-line no-useless-catch
-    try {
-      await mkdir(UPLOAD_DIR, { recursive: true });
-      const originalFilename = file.name;
-      const extension = extname(originalFilename);
-      const filename = `${randomUUID()}${extension}`;
-      const filePath = join(UPLOAD_DIR, filename);
-      const relativePath = `uploads/${filename}`;
-      const buffer = Buffer.from(await file.arrayBuffer());
-      await writeFile(filePath, buffer);
+    await mkdir(UPLOAD_DIR, { recursive: true });
+    const originalFilename = file.name;
+    const extension = extname(originalFilename);
+    const filename = `${randomUUID()}${extension}`;
+    const filePath = join(UPLOAD_DIR, filename);
+    const relativePath = `uploads/${filename}`;
+    const buffer = Buffer.from(await file.arrayBuffer());
+    await writeFile(filePath, buffer);
 
-      let width: null | number = null;
-      let height: null | number = null;
-      let dominantColor: null | string = null;
-      let placeholder: null | string = null;
-      let formats: null | Record<string, ImageFormat> = null;
+    let width: null | number = null;
+    let height: null | number = null;
+    let dominantColor: null | string = null;
+    let placeholder: null | string = null;
+    let formats: null | Record<string, ImageFormat> = null;
 
-      if (IMAGE_MIME_TYPES.includes(file.type)) {
-        const metadata = await sharp(buffer).metadata();
-        width = metadata.width ?? null;
-        height = metadata.height ?? null;
-        if (width && height) {
-          const [{ base64, color }, processedFormats] = await Promise.all([
-            getPlaiceholder(buffer, { size: 32 }),
-            processImage(buffer, file.type, width),
-          ]);
-          placeholder = base64;
-          dominantColor = color.hex;
-          formats = processedFormats;
-        }
+    if (IMAGE_MIME_TYPES.has(file.type)) {
+      const metadata = await sharp(buffer).metadata();
+      width = metadata.width ?? null;
+      height = metadata.height ?? null;
+      if (width && height) {
+        const [{ base64, color }, processedFormats] = await Promise.all([
+          getPlaiceholder(buffer, { size: 32 }),
+          processImage(buffer, file.type, width),
+        ]);
+        placeholder = base64;
+        dominantColor = color.hex;
+        formats = processedFormats;
       }
-
-      const fileRecord = await prisma.files.create({
-        data: {
-          dominantColor,
-          filename,
-          formats: formats ? JSON.parse(JSON.stringify(formats)) : undefined,
-          height,
-          mimetype: file.type || "application/octet-stream",
-          originalFilename,
-          path: relativePath,
-          placeholder,
-          size: file.size,
-          width,
-        },
-      });
-
-      return {
-        id: fileRecord.id,
-        createdAt: fileRecord.createdAt,
-        dominantColor: fileRecord.dominantColor,
-        filename: fileRecord.filename,
-        formats: (fileRecord.formats as null | Record<string, ImageFormat>) ?? null,
-        height: fileRecord.height,
-        mimetype: fileRecord.mimetype,
-        originalFilename: fileRecord.originalFilename,
-        path: fileRecord.path,
-        placeholder: fileRecord.placeholder,
-        size: fileRecord.size,
-        url: `/${fileRecord.path}`,
-        width: fileRecord.width,
-      };
-    } catch (error) {
-      throw error;
     }
+
+    const fileRecord = await prisma.files.create({
+      data: {
+        dominantColor,
+        filename,
+        formats: formats ? (structuredClone(formats) as unknown as Prisma.InputJsonValue) : undefined,
+        height,
+        mimetype: file.type || "application/octet-stream",
+        originalFilename,
+        path: relativePath,
+        placeholder,
+        size: file.size,
+        width,
+      },
+    });
+
+    return {
+      id: fileRecord.id,
+      createdAt: fileRecord.createdAt,
+      dominantColor: fileRecord.dominantColor,
+      filename: fileRecord.filename,
+      formats: (fileRecord.formats as null | Record<string, ImageFormat>) ?? null,
+      height: fileRecord.height,
+      mimetype: fileRecord.mimetype,
+      originalFilename: fileRecord.originalFilename,
+      path: fileRecord.path,
+      placeholder: fileRecord.placeholder,
+      size: fileRecord.size,
+      url: `/${fileRecord.path}`,
+      width: fileRecord.width,
+    };
   },
 };

@@ -23,7 +23,6 @@ export const uploadRoutes = new Elysia({ prefix: "/upload" })
     if (verifyResponse) {
       return verifyResponse;
     }
-    return;
   })
 
   .delete(

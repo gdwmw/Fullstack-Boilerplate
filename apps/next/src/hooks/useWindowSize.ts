@@ -14,26 +14,26 @@ export const useWindowSize = (options: IUseWindowSizeOptions = {}): IWindowSize 
   const { initialHeight = 0, initialWidth = 0 } = options;
 
   const [windowSize, setWindowSize] = useState<IWindowSize>({
-    height: typeof window !== "undefined" ? window.innerHeight : initialHeight,
-    width: typeof window !== "undefined" ? window.innerWidth : initialWidth,
+    height: typeof globalThis === "undefined" ? initialHeight : globalThis.innerHeight,
+    width: typeof globalThis === "undefined" ? initialWidth : globalThis.innerWidth,
   });
 
   const handleResize = useCallback(() => {
     setWindowSize({
-      height: window.innerHeight,
-      width: window.innerWidth,
+      height: globalThis.innerHeight,
+      width: globalThis.innerWidth,
     });
   }, []);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
+    if (typeof globalThis === "undefined") {
       return;
     }
 
-    window.addEventListener("resize", handleResize);
+    globalThis.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("resize", handleResize);
+      globalThis.removeEventListener("resize", handleResize);
     };
   }, [handleResize]);
 

@@ -1,4 +1,2 @@
-import { utilsConfig } from "./src/utils.js";
-
 /** @type {import("eslint").Linter.Config[]} */
-export default utilsConfig;
+export { utilsConfig as default } from "./src/utils.js";

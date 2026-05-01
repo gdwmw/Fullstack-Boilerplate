@@ -117,22 +117,36 @@ export const Main: FC = (): ReactElement => {
     registerMutation.mutate(dt);
   };
 
+  const getPasswordIcon = (isPassword: boolean) => {
+    if (!isPassword) {
+      return undefined;
+    }
+    return passwordVisibility ? <Eye size={18} /> : <EyeOff size={18} />;
+  };
+
+  const getInputType = (isPassword: boolean, fieldType: HTMLInputTypeAttribute): HTMLInputTypeAttribute => {
+    if (isPassword) {
+      return passwordVisibility ? "text" : "password";
+    }
+    return fieldType;
+  };
+
   return (
     <main>
       <FormContainer className={{ innerContainer: "max-w-112.5" }} href={"/"} label={"Home"}>
         <form className="flex w-full flex-col gap-3 overflow-y-auto" onSubmit={handleSubmit(onSubmit)}>
-          {FORM_FIELDS_DATA.map((dt, i) => (
+          {FORM_FIELDS_DATA.map((dt) => (
             <ExampleInput
               color="default"
               disabled={loading}
               errorMessage={errors[dt.name]?.message}
-              icon={dt.isPassword ? passwordVisibility ? <Eye size={18} /> : <EyeOff size={18} /> : undefined}
+              icon={getPasswordIcon(dt.isPassword ?? false)}
               iconOnClick={dt.isPassword ? () => setPasswordVisibility((prev) => !prev) : undefined}
-              key={i}
+              key={dt.name}
               label={dt.label}
               maxLength={dt.maxLength}
               onKeyDown={dt.onKeyDown}
-              type={dt.isPassword ? (passwordVisibility ? "text" : "password") : dt.type}
+              type={getInputType(dt.isPassword ?? false, dt.type)}
               {...register(dt.name)}
             />
           ))}

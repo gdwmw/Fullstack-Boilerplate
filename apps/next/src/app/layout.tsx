@@ -7,7 +7,7 @@ import { geistMono, geistSans, inter, roboto } from "./fonts";
 import "./globals.css";
 
 export const viewport: Viewport = {
-  initialScale: 1.0,
+  initialScale: 1,
   width: "device-width",
 };
 

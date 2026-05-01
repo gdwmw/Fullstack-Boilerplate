@@ -28,6 +28,7 @@ export const handlePrismaError = (
       set.status = 400;
       return ERROR_RESPONSE({ error, message: "the provided value is too long for this field" });
     case "P2001":
+    case "P2025":
       set.status = 404;
       return ERROR_RESPONSE({ error, message: responseMessage(label).notFound });
     case "P2002":
@@ -99,9 +100,6 @@ export const handlePrismaError = (
     case "P2024":
       set.status = 503;
       return ERROR_RESPONSE({ error, message: "timed out fetching a new connection from the connection pool" });
-    case "P2025":
-      set.status = 404;
-      return ERROR_RESPONSE({ error, message: responseMessage(label).notFound });
     case "P2026":
       set.status = 400;
       return ERROR_RESPONSE({ error, message: "the database provider does not support a feature used in this query" });
@@ -135,5 +133,8 @@ export const handlePrismaError = (
     case "P2037":
       set.status = 503;
       return ERROR_RESPONSE({ error, message: "too many database connections opened" });
+    default:
+      set.status = 500;
+      return ERROR_RESPONSE({ error, message: "an unexpected error occurred" });
   }
 };

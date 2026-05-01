@@ -30,10 +30,10 @@ type TCurrencyCode = keyof typeof CURRENCY_SETTINGS;
 export const currencyFormat = (amount: number | string, currency: TCurrencyCode): string => {
   const { fractionDigits, locale } = CURRENCY_SETTINGS[currency] || CURRENCY_SETTINGS.IDR;
 
-  const numericAmount = typeof amount === "string" ? parseFloat(amount) : amount;
+  const numericAmount = typeof amount === "string" ? Number.parseFloat(amount) : amount;
 
-  if (isNaN(numericAmount)) {
-    throw new Error("Invalid amount value");
+  if (Number.isNaN(numericAmount)) {
+    throw new TypeError("invalid amount value");
   }
 
   return new Intl.NumberFormat(locale, {

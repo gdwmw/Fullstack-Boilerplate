@@ -6,7 +6,7 @@ describe("useLocalStorage", () => {
   const key = "test-storage-key";
 
   beforeEach(() => {
-    window.localStorage.clear();
+    globalThis.localStorage.clear();
   });
 
   it("returns default value when storage is empty", () => {
@@ -16,7 +16,7 @@ describe("useLocalStorage", () => {
   });
 
   it("loads value from localStorage", () => {
-    window.localStorage.setItem(key, JSON.stringify(5));
+    globalThis.localStorage.setItem(key, JSON.stringify(5));
 
     const { result } = renderHook(() => useLocalStorage<number>(key, { defaultValue: 0 }));
     expect(result.current.value).toBe(5);
@@ -30,7 +30,7 @@ describe("useLocalStorage", () => {
     });
 
     expect(result.current.value).toBe(10);
-    expect(window.localStorage.getItem(key)).toBe("10");
+    expect(globalThis.localStorage.getItem(key)).toBe("10");
   });
 
   it("supports functional setValue", () => {
@@ -41,7 +41,7 @@ describe("useLocalStorage", () => {
     });
 
     expect(result.current.value).toBe(5);
-    expect(window.localStorage.getItem(key)).toBe("5");
+    expect(globalThis.localStorage.getItem(key)).toBe("5");
   });
 
   it("removes value and resets to default", () => {
@@ -53,6 +53,6 @@ describe("useLocalStorage", () => {
     });
 
     expect(result.current.value).toBe(7);
-    expect(window.localStorage.getItem(key)).toBeNull();
+    expect(globalThis.localStorage.getItem(key)).toBeNull();
   });
 });

@@ -30,14 +30,14 @@ const RefreshSessionGuard: FC = (): null | ReactElement => {
       return;
     }
 
-    const timeoutId = window.setTimeout(() => {
+    const timeoutId = globalThis.setTimeout(() => {
       signOut();
     }, sessionExpiresAt - Date.now());
 
     return () => {
-      window.clearTimeout(timeoutId);
+      globalThis.clearTimeout(timeoutId);
     };
-    // eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session.status]);
 
   return null;
@@ -89,12 +89,12 @@ const AccessTokenRefreshGuard: FC = (): null | ReactElement => {
       return;
     }
 
-    const timeoutId = window.setTimeout(refresh, delay);
+    const timeoutId = globalThis.setTimeout(refresh, delay);
 
     return () => {
-      window.clearTimeout(timeoutId);
+      globalThis.clearTimeout(timeoutId);
     };
-    // eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session.status]);
 
   return null;

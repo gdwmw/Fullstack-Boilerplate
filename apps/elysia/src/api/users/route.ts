@@ -23,7 +23,6 @@ export const usersRoutes = new Elysia({ prefix: "/users" })
     if (verifyResponse) {
       return verifyResponse;
     }
-    return;
   })
 
   .delete(

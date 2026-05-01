@@ -1,5 +1,5 @@
 export const parseDurationToMs = (value: string): number => {
-  const parsed = /^([0-9]+)(ms|s|m|h|d)$/i.exec(value.trim());
+  const parsed = /^(\d+)(ms|s|m|h|d)$/i.exec(value.trim());
 
   if (!parsed) {
     throw new Error("Invalid duration format. Use: 15m, 7d, 3600s");

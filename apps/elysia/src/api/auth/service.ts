@@ -50,7 +50,7 @@ export const service = {
       where: { id },
     });
 
-    if (!res || !res.password) return null;
+    if (!res?.password) return null;
 
     const isValidPassword = await Bun.password.verify(data.oldPassword, res.password);
     if (!isValidPassword) return null;
@@ -115,7 +115,7 @@ export const service = {
       where: data.method === "email" ? { email: data.identifier } : { username: data.identifier },
     });
 
-    if (!res || !res.password) return null;
+    if (!res?.password) return null;
 
     const isValidPassword = await Bun.password.verify(data.password, res.password);
     if (!isValidPassword) return null;

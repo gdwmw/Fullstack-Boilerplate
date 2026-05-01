@@ -27,7 +27,14 @@ export const ChangeThemeButton: FC<I> = ({ cookie, ...props }): ReactElement => 
   };
 
   const handleTheme = async () => {
-    const newTheme = theme === "light" ? "dark" : theme === "dark" ? "system" : "light";
+    let newTheme: string;
+    if (theme === "light") {
+      newTheme = "dark";
+    } else if (theme === "dark") {
+      newTheme = "system";
+    } else {
+      newTheme = "light";
+    }
     await setCookie({ name: "theme", value: newTheme });
     setTheme(newTheme);
   };
