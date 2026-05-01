@@ -26,7 +26,7 @@ export const useLocalStorage = <T>(key: string, options: IUseLocalStorageOptions
       const item = window.localStorage.getItem(key);
       return item ? deserialize(item) : (defaultValue as T);
     } catch (error) {
-      logTemplate.WARN(`Error reading localStorage key "${key}": ${String(error)}`, "localStorage");
+      logTemplate.WARN(`error reading localStorage key "${key}": ${String(error)}`, "local storage");
       return defaultValue as T;
     }
   });
@@ -43,7 +43,7 @@ export const useLocalStorage = <T>(key: string, options: IUseLocalStorageOptions
           window.localStorage.setItem(key, serialize(valueToStore));
         }
       } catch (error) {
-        logTemplate.WARN(`Error setting localStorage key "${key}": ${String(error)}`, "localStorage");
+        logTemplate.WARN(`error setting localStorage key "${key}": ${String(error)}`, "local storage");
       }
     },
     [key, serialize, value],
@@ -56,7 +56,7 @@ export const useLocalStorage = <T>(key: string, options: IUseLocalStorageOptions
         window.localStorage.removeItem(key);
       }
     } catch (error) {
-      logTemplate.WARN(`Error removing localStorage key "${key}": ${String(error)}`, "localStorage");
+      logTemplate.WARN(`error removing localStorage key "${key}": ${String(error)}`, "local storage");
     }
   }, [key, defaultValue]);
 

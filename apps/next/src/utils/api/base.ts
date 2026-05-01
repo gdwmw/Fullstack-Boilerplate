@@ -47,7 +47,7 @@ export const apiRequest = async <T>({ auth = true, ...props }: I): Promise<ISucc
     return res.data;
   } catch (error) {
     let statusCode: number | undefined;
-    let errorMessage = "Unknown error occurred";
+    let errorMessage = "unknown error occurred";
 
     if (axios.isAxiosError<IErrorResponse>(error)) {
       if (process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_DEBUG_MODE === "true") {
@@ -60,8 +60,8 @@ export const apiRequest = async <T>({ auth = true, ...props }: I): Promise<ISucc
     }
 
     logTemplate.ERROR(
-      `An error occurred while processing ${props.method} request for ${props.label} || Status Code: ${statusCode} || Message: ${errorMessage}`,
-      "apiRequest",
+      `an error occurred while processing ${props.method} request for ${props.label} || status Code: ${statusCode} || message: ${errorMessage}`,
+      "api request",
     );
 
     throw error;

@@ -17,7 +17,7 @@ export const verifyResponse = async ({
 
   if (!res) {
     return ERROR_RESPONSE({
-      message: responseMessage("Access token").required,
+      message: responseMessage("access token").required,
     });
   }
 
@@ -25,7 +25,7 @@ export const verifyResponse = async ({
 
   if (!decoded || typeof decoded !== "object") {
     return ERROR_RESPONSE({
-      message: responseMessage("Access token").invalid,
+      message: responseMessage("access token").invalid,
     });
   }
 
@@ -34,7 +34,7 @@ export const verifyResponse = async ({
     const blocked = await redis.exists(`blocklist:${jti}`);
     if (blocked === 1) {
       return ERROR_RESPONSE({
-        message: responseMessage("Access token").invalid,
+        message: responseMessage("access token").invalid,
       });
     }
   }

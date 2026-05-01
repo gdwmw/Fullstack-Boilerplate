@@ -5,7 +5,7 @@ export const P2003 = (meta: Record<string, unknown> | undefined): string => {
       ?.replace(/_/g, " ")
       .split(" ")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ") || "[Failed to extract field name from error meta]"
+      .join(" ") || "[failed to extract field name from error meta]"
   );
 };
 
@@ -18,6 +18,6 @@ export const P2002 = (message: string): string => {
       ?.replace(/_/g, " ")
       .split(" ")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ") || "[Failed to extract field name from error message]"
+      .join(" ") || "[failed to extract field name from error message]"
   );
 };

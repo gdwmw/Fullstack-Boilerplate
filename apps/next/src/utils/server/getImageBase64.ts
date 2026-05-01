@@ -3,8 +3,6 @@
 import { logTemplate } from "@repo/utils";
 import { getPlaiceholder } from "plaiceholder";
 
-// https://www.youtube.com/watch?v=Bz3No1RFXWY&t=18s
-
 export const getImageBase64 = async (imageUrl: string) => {
   try {
     const res = await fetch(imageUrl);
@@ -22,7 +20,7 @@ export const getImageBase64 = async (imageUrl: string) => {
     return base64;
   } catch (e) {
     if (e instanceof Error) {
-      logTemplate.ERROR(String(e.stack || e.message), "getImageBase64");
+      logTemplate.ERROR(String(e.stack || e.message), "get image base64");
     }
   }
 };
