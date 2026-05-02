@@ -3,6 +3,7 @@
 ![Next.js - Register](public/project/3.png)
 ![Elysia.js - Register](public/project/4.png)
 ![Elysia.js - Response](public/project/5.png)
+![SonarQube - Score [02/05/2026]](public/project/6.png)
 
 # 🚀 Fullstack Boilerplate (Turborepo + Next.js + Elysia.js)
 
