@@ -14,10 +14,5 @@
   "editor.guides.bracketPairs": "active",
   "highlight-matching-tag.highlightSelfClosing": true,
   "highlight-matching-tag.highlightFromContent": true,
-  "tailwindCSS.experimental.classRegex": [
-    ["twm\\(([^)]*)\\)", "\"([^\"]*)\""],
-    ["clsx\\(([^)]*)\\)", "\"([^\"]*)\""],
-    ["twm\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
-    ["clsx\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
-  ]
+  "tailwindCSS.experimental.classRegex": [["twm\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"], "(?<=:\\s*)[\"'`]([^\"'`]+)[\"'`]"]
 }
