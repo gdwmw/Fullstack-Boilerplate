@@ -9,7 +9,7 @@
       "@repo/eslint-config": ["../../packages/eslint-config/src/index.ts"],
       "@repo/utils": ["../../packages/utils/src/index.ts"]
     },
-    "types": ["bun-types"]
+    "types": ["bun-types", "vitest/globals"]
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules", "dist"]
