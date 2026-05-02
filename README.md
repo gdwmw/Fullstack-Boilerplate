@@ -3,7 +3,6 @@
 ![Next.js - Register](public/project/3.png)
 ![Elysia.js - Register](public/project/4.png)
 ![Elysia.js - Response](public/project/5.png)
-![SonarQube - Score [02/05/2026]](public/project/6.png)
 
 # 🚀 Fullstack Boilerplate (Turborepo + Next.js + Elysia.js)
 
@@ -16,6 +15,8 @@ Boilerplate by [Gede Dewo Wahyu M.W](https://github.com/gdwmw)
 ![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-blue)
 ![Redis](https://img.shields.io/badge/Cache-Redis-red)
 ![License](https://img.shields.io/badge/License-MIT-green)
+
+[![Quality gate](https://sonarqube.zettara.com/api/project_badges/quality_gate?project=turborepo&token=sqb_961e918314d7b8d25e2a76e45e79928eaf3a331b)](https://sonarqube.zettara.com/dashboard?id=turborepo)
 
 ---
 
