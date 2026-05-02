@@ -3,3 +3,4 @@ pnpm check-types
 pnpm vitest:run
 pnpm storybook:build
 pnpm build
+pnpm sonarqube

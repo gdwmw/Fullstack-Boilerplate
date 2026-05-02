@@ -17,7 +17,7 @@ describe("getBearerToken", () => {
   });
 
   it("should return null when authorization is undefined", () => {
-    expect(getBearerToken(undefined)).toBeNull();
+    expect(getBearerToken()).toBeNull();
   });
 
   it("should return null when authorization does not start with 'Bearer '", () => {

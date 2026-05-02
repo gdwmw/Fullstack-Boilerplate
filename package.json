@@ -16,9 +16,10 @@
     "lint:fix": "turbo run lint:fix",
     "prettier": "turbo run prettier",
     "check-types": "turbo run check-types",
-    "cpenv": "turbo run cpenv",
+    "cpenv": "turbo run cpenv && pnpm cp .env.example .env",
     "commit": "git-cz",
-    "prepare": "husky"
+    "prepare": "husky",
+    "sonarqube": "sonar -Dsonar.host.url=https://sonarqube.zettara.com -Dsonar.token=$SONAR_QUBE_TOKEN -Dsonar.projectKey=turborepo"
   },
   "config": {
     "commitizen": {
