@@ -1,4 +1,4 @@
-import { IAuthResponse, IUploadResponse } from "..";
+import { IAuthResponse, IUserResponse } from "..";
 import { ISuccessResponse, postApi } from "../base";
 
 export interface ILoginPayload {
@@ -7,22 +7,10 @@ export interface ILoginPayload {
   password: string;
 }
 
-interface IElysiaLoginData {
-  accessToken: string;
-  email: string;
-  id: number;
-  image: IUploadResponse | null;
-  imageId: null | number;
-  name: string;
-  phone: string;
-  role: "admin" | "user";
-  username: string;
-}
-
 const label = "Login";
 
 export const POSTLogin = async (payload: ILoginPayload): Promise<ISuccessResponse<IAuthResponse>> => {
-  const res = await postApi<IElysiaLoginData>({
+  const res = await postApi<{ status: string } & IUserResponse>({
     auth: false,
     data: payload,
     endpoint: "/auth/login",

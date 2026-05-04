@@ -1,4 +1,4 @@
-import { IAuthResponse } from "..";
+import { IAuthResponse, IUserResponse } from "..";
 import { ISuccessResponse, postApi } from "../base";
 
 export interface IRegisterPayload {
@@ -9,20 +9,10 @@ export interface IRegisterPayload {
   username: string;
 }
 
-interface IElysiaRegisterData {
-  accessToken: string;
-  email: string;
-  id: number;
-  name: string;
-  phone: string;
-  role: "admin" | "user";
-  username: string;
-}
-
 const label = "Register";
 
 export const POSTRegister = async (payload: IRegisterPayload): Promise<ISuccessResponse<IAuthResponse>> => {
-  const res = await postApi<IElysiaRegisterData>({
+  const res = await postApi<{ status: string } & IUserResponse>({
     auth: false,
     data: payload,
     endpoint: "/auth/register",
