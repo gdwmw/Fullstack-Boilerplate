@@ -10,10 +10,10 @@ export interface INextAuthResponse extends Partial<Omit<IUserResponse, "email" |
   accessToken?: string;
   accessTokenExpiresAt?: number;
   email?: null | string;
+  exp?: number;
+  iat?: number;
   image?: IUploadResponse | null;
   name?: null | string;
-  sessionExpiresAt?: number;
-  sessionStartedAt?: number;
   status?: string;
 }
 

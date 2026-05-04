@@ -9,7 +9,6 @@ const SESSION_EXPIRES_IN = process.env.NEXTAUTH_SESSION_EXPIRES_IN || "7d";
 const ACCESS_TOKEN_EXPIRES_IN = process.env.NEXT_PUBLIC_ACCESS_TOKEN_EXPIRES_IN || "15m";
 
 const parseDurationToSeconds = (value: string) => Math.floor(parseDurationToMs(value) / 1000);
-const getSessionExpiry = (startedAt: number) => startedAt + parseDurationToMs(SESSION_EXPIRES_IN);
 
 export const options: NextAuthOptions = {
   callbacks: {
@@ -18,8 +17,6 @@ export const options: NextAuthOptions = {
         return {
           ...token,
           ...session.user,
-          sessionExpiresAt: token.sessionExpiresAt,
-          sessionStartedAt: token.sessionStartedAt,
         };
       }
 
@@ -38,8 +35,6 @@ export const options: NextAuthOptions = {
           name: u.name,
           phone: u.phone,
           role: u.role,
-          sessionExpiresAt: getSessionExpiry(sessionStartedAt),
-          sessionStartedAt,
           status: u.status,
           updatedAt: u.updatedAt,
           username: u.username,

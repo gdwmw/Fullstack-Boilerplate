@@ -19,7 +19,7 @@ const RefreshSessionGuard: FC = (): null | ReactElement => {
       return;
     }
 
-    const sessionExpiresAt = session.data?.user?.sessionExpiresAt;
+    const sessionExpiresAt = (session.data?.user?.exp ?? 0) * 1000;
 
     if (!sessionExpiresAt) {
       return;
