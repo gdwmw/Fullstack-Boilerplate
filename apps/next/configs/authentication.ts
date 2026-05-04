@@ -25,14 +25,25 @@ export const options: NextAuthOptions = {
 
       if (user) {
         const sessionStartedAt = Date.now();
+        const u = user as unknown as IAuthResponse;
 
-        token.id = Number.parseInt(user.id);
-        token.accessTokenExpiresAt = sessionStartedAt + parseDurationToMs(ACCESS_TOKEN_EXPIRES_IN);
-        token.image = user.image as unknown as JWT["image"];
-        token.sessionExpiresAt = getSessionExpiry(sessionStartedAt);
-        token.sessionStartedAt = sessionStartedAt;
-
-        return { ...user, ...token } as JWT;
+        return {
+          id: Number.parseInt(user.id),
+          accessToken: u.accessToken,
+          accessTokenExpiresAt: sessionStartedAt + parseDurationToMs(ACCESS_TOKEN_EXPIRES_IN),
+          createdAt: u.createdAt,
+          email: u.email,
+          image: u.image ?? null,
+          imageId: u.imageId ?? null,
+          name: u.name,
+          phone: u.phone,
+          role: u.role,
+          sessionExpiresAt: getSessionExpiry(sessionStartedAt),
+          sessionStartedAt,
+          status: u.status,
+          updatedAt: u.updatedAt,
+          username: u.username,
+        } as JWT;
       }
 
       return token;

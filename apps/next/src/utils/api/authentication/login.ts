@@ -1,4 +1,4 @@
-import { IAuthResponse, IUserResponse } from "..";
+import { IAuthResponse } from "..";
 import { ISuccessResponse, postApi } from "../base";
 
 export interface ILoginPayload {
@@ -10,7 +10,7 @@ export interface ILoginPayload {
 const label = "Login";
 
 export const POSTLogin = async (payload: ILoginPayload): Promise<ISuccessResponse<IAuthResponse>> => {
-  const res = await postApi<{ status: string } & IUserResponse>({
+  const res = await postApi<IAuthResponse>({
     auth: false,
     data: payload,
     endpoint: "/auth/login",

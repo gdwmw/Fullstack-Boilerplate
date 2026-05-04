@@ -2,6 +2,7 @@ import { IUploadResponse } from "../upload";
 import { IUserResponse } from "../users";
 
 export interface IAuthResponse extends IUserResponse {
+  accessToken: string;
   status: string;
 }
 
