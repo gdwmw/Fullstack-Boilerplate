@@ -22,6 +22,7 @@ export const options: NextAuthOptions = {
 
       if (user) {
         const sessionStartedAt = Date.now();
+        const sessionExpiresAt = sessionStartedAt + parseDurationToMs(SESSION_EXPIRES_IN);
         const u = user as unknown as IAuthResponse;
 
         return {
@@ -35,6 +36,8 @@ export const options: NextAuthOptions = {
           name: u.name,
           phone: u.phone,
           role: u.role,
+          sessionExpiresAt,
+          sessionStartedAt,
           status: u.status,
           updatedAt: u.updatedAt,
           username: u.username,

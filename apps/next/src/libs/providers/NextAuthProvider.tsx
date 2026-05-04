@@ -19,7 +19,7 @@ const RefreshSessionGuard: FC = (): null | ReactElement => {
       return;
     }
 
-    const sessionExpiresAt = (session.data?.user?.exp ?? 0) * 1000;
+    const sessionExpiresAt = session.data?.user?.sessionExpiresAt;
 
     if (!sessionExpiresAt) {
       return;
@@ -77,6 +77,8 @@ const AccessTokenRefreshGuard: FC = (): null | ReactElement => {
             ...session.data?.user,
             accessToken: newAccessToken,
             accessTokenExpiresAt: newExpiresAt,
+            sessionExpiresAt: session.data?.user?.sessionExpiresAt,
+            sessionStartedAt: session.data?.user?.sessionStartedAt,
           },
         });
       } catch {

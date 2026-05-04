@@ -14,6 +14,8 @@ export interface INextAuthResponse extends Partial<Omit<IUserResponse, "email" |
   iat?: number;
   image?: IUploadResponse | null;
   name?: null | string;
+  sessionExpiresAt?: number;
+  sessionStartedAt?: number;
   status?: string;
 }
 
