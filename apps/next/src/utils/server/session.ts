@@ -8,7 +8,7 @@ import { IUploadResponse } from "../api";
 
 type T = keyof User;
 
-export const getSession = async (props: T): Promise<boolean | IUploadResponse | null | number | string | undefined> => {
+export const getSession = async (props: T): Promise<Date | IUploadResponse | null | number | string | undefined> => {
   const session = await getServerSession(options);
   return session?.user?.[props];
 };

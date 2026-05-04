@@ -1,21 +1,5 @@
 import { deleteApi, getApi, ISuccessResponse, putApi } from "./base";
-
-export interface IImageFile {
-  createdAt: Date;
-  dominantColor: null | string;
-  filename: string;
-  formats: null | Record<string, unknown>;
-  height: null | number;
-  id: number;
-  mimetype: string;
-  originalFilename: string;
-  path: string;
-  placeholder: null | string;
-  size: number;
-  updatedAt: Date;
-  url: string;
-  width: null | number;
-}
+import { IUploadResponse } from "./upload";
 
 export interface IUserPayload {
   email: string;
@@ -30,7 +14,7 @@ export interface IUserResponse {
   createdAt: Date;
   email: string;
   id: number;
-  image?: IImageFile;
+  image?: IUploadResponse | null;
   imageId?: null | number;
   name: string;
   phone: string;
