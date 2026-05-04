@@ -9,7 +9,6 @@
     "start": "turbo run start",
     "generate": "turbo run generate",
     "migrate": "turbo run migrate",
-    "reset": "turbo run reset",
     "storybook:build": "turbo run storybook:build",
     "vitest:run": "turbo run vitest:run",
     "lint": "turbo run lint",
