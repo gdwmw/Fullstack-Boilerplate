@@ -3,7 +3,7 @@ import { NextAuthOptions, Session, User } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-import { ILoginPayload, IUploadResponse, POSTLogin } from "@/src/utils";
+import { IAuthResponse, ILoginPayload, POSTLogin } from "@/src/utils";
 
 const SESSION_EXPIRES_IN = process.env.NEXTAUTH_SESSION_EXPIRES_IN || "7d";
 const ACCESS_TOKEN_EXPIRES_IN = process.env.NEXT_PUBLIC_ACCESS_TOKEN_EXPIRES_IN || "15m";
@@ -13,7 +13,7 @@ const getSessionExpiry = (startedAt: number) => startedAt + parseDurationToMs(SE
 
 export const options: NextAuthOptions = {
   callbacks: {
-    async jwt({ session, token, trigger, user }: { session?: Session; token: JWT; trigger?: "signIn" | "signUp" | "update"; user?: User }) {
+    async jwt({ session, token, trigger, user }) {
       if (trigger === "update" && session?.user) {
         return {
           ...token,
@@ -27,20 +27,12 @@ export const options: NextAuthOptions = {
         const sessionStartedAt = Date.now();
 
         token.id = Number.parseInt(user.id);
-        token.email = user.email;
-        token.name = user.name;
-        token.username = user.username;
-        token.phone = user.phone;
-        token.role = user.role;
-        token.accessToken = user.accessToken;
         token.accessTokenExpiresAt = sessionStartedAt + parseDurationToMs(ACCESS_TOKEN_EXPIRES_IN);
-        token.image = user.image as IUploadResponse | null;
-        token.imageId = user.imageId;
+        token.image = user.image as unknown as JWT["image"];
         token.sessionExpiresAt = getSessionExpiry(sessionStartedAt);
         token.sessionStartedAt = sessionStartedAt;
-        token.status = user.status;
 
-        return token;
+        return { ...user, ...token } as JWT;
       }
 
       return token;
@@ -51,21 +43,7 @@ export const options: NextAuthOptions = {
     },
 
     async session({ session, token }: { session: Session; token: JWT }) {
-      session.user = {
-        id: token.id,
-        accessToken: token.accessToken,
-        accessTokenExpiresAt: token.accessTokenExpiresAt,
-        email: token.email,
-        image: token.image,
-        imageId: token.imageId,
-        name: token.name,
-        phone: token.phone,
-        role: token.role,
-        sessionExpiresAt: token.sessionExpiresAt,
-        sessionStartedAt: token.sessionStartedAt,
-        status: token.status,
-        username: token.username,
-      };
+      session.user = { ...token };
       return session;
     },
   },
@@ -76,17 +54,17 @@ export const options: NextAuthOptions = {
 
   providers: [
     CredentialsProvider({
-      async authorize(credentials: Record<never, string> | undefined): Promise<null | User> {
+      async authorize(credentials: Record<string, string> | undefined): Promise<null | User> {
         if (!credentials) {
           return null;
         }
 
-        const { identifier, method, password } = credentials as ILoginPayload;
+        const { identifier, method, password } = credentials as unknown as ILoginPayload;
 
         try {
           const res = await POSTLogin({ identifier, method: method === "email" ? "email" : "username", password });
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          return res.data as any;
+
+          return res.data as IAuthResponse & User;
         } catch {
           return null;
         }
