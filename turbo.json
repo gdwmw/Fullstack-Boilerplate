@@ -43,9 +43,6 @@
     "migrate": {
       "dependsOn": ["^migrate"]
     },
-    "reset": {
-      "dependsOn": ["^reset"]
-    },
     "storybook:build": {
       "dependsOn": ["^vitest:run"],
       "outputs": ["storybook-static/**"]
