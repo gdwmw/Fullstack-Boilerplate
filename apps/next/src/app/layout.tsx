@@ -47,7 +47,7 @@ if (!process.env.NEXT_PUBLIC_BASE_API_URL) {
   throw new Error("Please check your environment variables. NEXT_PUBLIC_BASE_API_URL is not defined.");
 }
 
-if (!process.env.NEXT_PUBLIC_DEBUG_MODE) {
+if (process.env.NEXT_PUBLIC_DEBUG_MODE === undefined) {
   throw new Error("Please check your environment variables. NEXT_PUBLIC_DEBUG_MODE is not defined.");
 }
 
@@ -62,7 +62,7 @@ const RootLayout: FC<T> = (props): ReactElement => (
         <ReactQueryProvider>
           <NextAuthProvider>
             {props.children}
-            {(process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_DEBUG_MODE === "true") && <APIConnectionChecker />}
+            {(process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_DEBUG_MODE) && <APIConnectionChecker />}
           </NextAuthProvider>
         </ReactQueryProvider>
       </NextThemesProvider>

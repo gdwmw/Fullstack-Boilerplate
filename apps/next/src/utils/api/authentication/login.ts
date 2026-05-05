@@ -7,7 +7,7 @@ export interface ILoginPayload {
   password: string;
 }
 
-const label = "Login";
+const label = "login";
 
 export const POSTLogin = async (payload: ILoginPayload): Promise<ISuccessResponse<IAuthResponse>> => {
   const res = await postApi<IAuthResponse>({

@@ -6,7 +6,7 @@ export interface IPasswordPayload {
   oldPassword: string;
 }
 
-const label = "Change Password";
+const label = "change password";
 
 export const POSTChangePassword = async (payload: IPasswordPayload): Promise<ISuccessResponse<IUserResponse>> =>
   postApi<IUserResponse>({

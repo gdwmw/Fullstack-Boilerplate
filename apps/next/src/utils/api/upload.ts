@@ -33,7 +33,7 @@ export interface IUploadResponse {
 
 type TQueryParams = Record<string, unknown>;
 
-const label = "Upload";
+const label = "upload";
 
 export const GETUpload = async (params?: TQueryParams): Promise<ISuccessResponse<IUploadResponse[]>> =>
   getApi<IUploadResponse[]>({

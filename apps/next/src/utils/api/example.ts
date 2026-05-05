@@ -15,7 +15,7 @@ export interface IExampleResponse extends IExampleCommon {}
 
 type TQueryParams = Record<string, unknown>;
 
-const label = "Example";
+const label = "example";
 
 export const GETExample = async (params?: TQueryParams): Promise<ISuccessResponse<IExampleResponse[]>> =>
   getApi<IExampleResponse[]>({

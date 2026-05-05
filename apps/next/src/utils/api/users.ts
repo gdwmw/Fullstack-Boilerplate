@@ -25,7 +25,7 @@ export interface IUserResponse {
 
 type TQueryParams = Record<string, unknown>;
 
-const label = "Users";
+const label = "users";
 
 export const GETUsers = async (params?: TQueryParams): Promise<ISuccessResponse<IUserResponse[]>> =>
   getApi<IUserResponse[]>({

@@ -4,7 +4,7 @@ export interface IRefreshResponse {
   accessToken: string;
 }
 
-const label = "Refresh Token";
+const label = "refresh token";
 
 export const POSTRefresh = async (): Promise<ISuccessResponse<IRefreshResponse>> =>
   postApi<IRefreshResponse>({

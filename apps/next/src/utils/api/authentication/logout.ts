@@ -1,6 +1,6 @@
 import { ISuccessResponse, postApi } from "../base";
 
-const label = "Logout";
+const label = "logout";
 
 export const POSTLogout = async (): Promise<ISuccessResponse<null>> =>
   postApi<null>({

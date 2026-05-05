@@ -9,7 +9,7 @@ export interface IRegisterPayload {
   username: string;
 }
 
-const label = "Register";
+const label = "register";
 
 export const POSTRegister = async (payload: IRegisterPayload): Promise<ISuccessResponse<IAuthResponse>> => {
   const res = await postApi<IAuthResponse>({

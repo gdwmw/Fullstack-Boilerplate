@@ -50,8 +50,8 @@ export const apiRequest = async <T>({ auth = true, ...props }: I): Promise<ISucc
     let errorMessage = "an unknown error occurred";
 
     if (axios.isAxiosError<IErrorResponse>(error)) {
-      if (process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_DEBUG_MODE === "true") {
-        logTemplate.ERROR(JSON.stringify(error.response), "axios");
+      if (process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_DEBUG_MODE) {
+        console.error(error.response);
       }
       statusCode = error.response?.status;
       errorMessage = error.response?.data?.message ?? error.message;
