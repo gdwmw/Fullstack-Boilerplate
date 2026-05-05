@@ -17,7 +17,7 @@ const LABEL = "authentication";
 const REFRESH_COOKIE_NAME = process.env.JWT_REFRESH_COOKIE_NAME || "refreshToken";
 const REFRESH_COOKIE_PATH = process.env.JWT_REFRESH_COOKIE_PATH || "/auth";
 const REFRESH_COOKIE_SAME_SITE = process.env.JWT_REFRESH_COOKIE_SAME_SITE || "Lax";
-const REFRESH_COOKIE_SECURE = process.env.JWT_REFRESH_COOKIE_SECURE !== "false";
+const REFRESH_COOKIE_SECURE = process.env.JWT_REFRESH_COOKIE_SECURE === "true";
 
 type THeadersMap = Record<string, string | undefined>;
 type TJwtPayload = null | Record<string, unknown> | undefined;
