@@ -41,6 +41,10 @@ export const Main: FC = async (): Promise<ReactElement> => {
               <Link className={ExampleATWM({ className: "grow", color: "gray", size: "sm", variant: "solid" })} href={"/admin-example"}>
                 ADMIN
               </Link>
+
+              <Link className={ExampleATWM({ className: "grow", color: "blue", size: "sm", variant: "solid" })} href={"/audit"}>
+                AUDIT
+              </Link>
             </div>
           ) : (
             <Link className={ExampleATWM({ className: "w-full", color: "black", size: "sm", variant: "solid" })} href={"/authentication/login"}>

@@ -6,6 +6,10 @@ export default withAuth(function proxy(request: NextRequestWithAuth) {
     return NextResponse.rewrite(new URL("/denied", request.url));
   }
 
+  if (request.nextUrl.pathname.startsWith("/audit") && request.nextauth.token?.role !== "admin") {
+    return NextResponse.rewrite(new URL("/denied", request.url));
+  }
+
   if (request.nextUrl.pathname.startsWith("/example/")) {
     const path = request.nextUrl.pathname.split("/").filter(Boolean);
     if (path[1] !== request.nextauth.token?.username) {
@@ -15,5 +19,5 @@ export default withAuth(function proxy(request: NextRequestWithAuth) {
 });
 
 export const config = {
-  matcher: ["/user-example/:path*", "/admin-example/:path*", "/profile/:path*", "/password/:path*"],
+  matcher: ["/user-example/:path*", "/admin-example/:path*", "/audit/:path*", "/profile/:path*", "/password/:path*"],
 };

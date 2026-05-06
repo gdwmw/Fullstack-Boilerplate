@@ -64,7 +64,7 @@ export const ExampleATWM = ({ className, color, disabled, size, variant }: IExam
   twm(
     "flex items-center gap-2 font-semibold",
     variant !== "ghost" && "justify-center rounded-md",
-    disabled ? "cursor-not-allowed" : "active:scale-95",
+    disabled ? "cursor-not-allowed" : "cursor-pointer active:scale-95",
     !disabled && colorMap[variant]?.[color],
     disabled && disabledMap[variant],
     sizeMap[variant]?.[size],

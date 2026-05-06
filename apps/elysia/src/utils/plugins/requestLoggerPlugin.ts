@@ -149,6 +149,16 @@ export const getErrorMessage = (error: unknown) => {
   return String(error);
 };
 
+const shouldWriteSuccessRequestLog = ({ method, pathname }: { method: string; pathname: string }) => {
+  if (pathname === "/audit" || pathname === "/auth/refresh") {
+    return false;
+  }
+
+  return method !== "GET";
+};
+
+const shouldWriteErrorRequestLog = (pathname: string) => pathname !== "/audit" && pathname !== "/auth/refresh";
+
 export const requestLoggerPlugin = new Elysia({ name: "request-logger" })
   .trace({ as: "global" }, ({ context }) => {
     requestStartTimes.set(context.request, performance.now());
@@ -160,20 +170,23 @@ export const requestLoggerPlugin = new Elysia({ name: "request-logger" })
     const startedAt = requestStartTimes.get(request) ?? performance.now();
     const durationMs = Math.round(performance.now() - startedAt);
     const statusCode = getStatusCode(set.status);
-    const line = `${statusCode} | ${request.method} | ${new URL(request.url).pathname} | ${durationMs}ms`;
+    const pathname = new URL(request.url).pathname;
+    const line = `${statusCode} | ${request.method} | ${pathname} | ${durationMs}ms`;
 
     logger.info(line);
-    writeRequestLog({
-      durationMs,
-      ip: getRequestIp(request, server),
-      level: "INFO",
-      method: request.method,
-      path: new URL(request.url).pathname,
-      requestId,
-      statusCode,
-      ts: new Date().toISOString(),
-      userAgent: request.headers.get("user-agent") || "unknown",
-    });
+    if (shouldWriteSuccessRequestLog({ method: request.method, pathname })) {
+      writeRequestLog({
+        durationMs,
+        ip: getRequestIp(request, server),
+        level: "INFO",
+        method: request.method,
+        path: pathname,
+        requestId,
+        statusCode,
+        ts: new Date().toISOString(),
+        userAgent: request.headers.get("user-agent") || "unknown",
+      });
+    }
   })
 
   .onError({ as: "global" }, ({ error, request, server, set }) => {
@@ -181,20 +194,23 @@ export const requestLoggerPlugin = new Elysia({ name: "request-logger" })
     const startedAt = requestStartTimes.get(request) ?? performance.now();
     const durationMs = Math.round(performance.now() - startedAt);
     const statusCode = resolveErrorStatusCode(set.status, error);
-    const line = `${statusCode} | ${request.method} | ${new URL(request.url).pathname} | ${durationMs}ms`;
+    const pathname = new URL(request.url).pathname;
+    const line = `${statusCode} | ${request.method} | ${pathname} | ${durationMs}ms`;
     const errorMessage = getErrorMessage(error);
 
     logger.error({ message: errorMessage }, line);
-    writeRequestLog({
-      durationMs,
-      error: errorMessage,
-      ip: getRequestIp(request, server),
-      level: "ERROR",
-      method: request.method,
-      path: new URL(request.url).pathname,
-      requestId,
-      statusCode,
-      ts: new Date().toISOString(),
-      userAgent: request.headers.get("user-agent") || "unknown",
-    });
+    if (shouldWriteErrorRequestLog(pathname)) {
+      writeRequestLog({
+        durationMs,
+        error: errorMessage,
+        ip: getRequestIp(request, server),
+        level: "ERROR",
+        method: request.method,
+        path: pathname,
+        requestId,
+        statusCode,
+        ts: new Date().toISOString(),
+        userAgent: request.headers.get("user-agent") || "unknown",
+      });
+    }
   });
