@@ -3,6 +3,7 @@ import { readdir, rm, stat } from "node:fs/promises";
 import { join } from "node:path";
 
 import { logger } from "@/src/libs";
+import { getLogDirectory, isRequestLogFileName } from "@/src/utils";
 
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_RETENTION_DAYS = 365;
@@ -16,8 +17,6 @@ const toInt = (value: string | undefined, fallback: number) => {
 
   return parsed;
 };
-
-const getLogDirectory = () => process.env.LOG_DIR?.trim() || join(process.cwd(), "backups", "logs");
 
 const getLogRetentionDays = () => toInt(process.env.LOG_RETENTION_DAYS, DEFAULT_RETENTION_DAYS);
 
@@ -38,7 +37,7 @@ export const cleanupLogsWorker = async () => {
   let count = 0;
 
   for (const entry of entries) {
-    if (!entry.startsWith("elysia-req-") || !entry.endsWith(".log")) {
+    if (!isRequestLogFileName(entry)) {
       continue;
     }
 

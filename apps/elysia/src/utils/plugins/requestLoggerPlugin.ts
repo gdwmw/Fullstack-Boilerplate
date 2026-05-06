@@ -1,40 +1,50 @@
-import { format } from "date-fns";
 import { Elysia } from "elysia";
 import { randomUUID } from "node:crypto";
 import { createWriteStream, mkdirSync, type WriteStream } from "node:fs";
 import { join } from "node:path";
 
 import { logger } from "@/src/libs";
-import { getPrismaErrorMessage } from "@/src/utils/handle-prisma-error";
+import { compressArchivedLogFiles, compressLogFile, getLogDirectory, getPrismaErrorMessage, getRequestLogFileName } from "@/src/utils";
 
 export const requestStartTimes = new WeakMap<Request, number>();
 
-const getLogDirectory = () => process.env.LOG_DIR?.trim() || join(process.cwd(), "backups", "logs");
-
 let activeLogDate = "";
 let activeLogStream: null | WriteStream = null;
+let activeLogPath = "";
 const requestIds = new WeakMap<Request, string>();
 
 const getRequestLogStream = () => {
   const now = new Date();
-  const dateKey = format(now, "yyyy-MM-dd");
+  const dateKey = now.toISOString().slice(0, 10);
 
   if (activeLogStream && activeLogDate === dateKey) {
     return activeLogStream;
   }
 
   if (activeLogStream) {
-    activeLogStream.end();
+    const previousLogPath = activeLogPath;
+    const stream = activeLogStream;
+
+    activeLogStream = null;
+    activeLogPath = "";
+
+    stream.end(() => {
+      if (previousLogPath) {
+        void compressLogFile(previousLogPath);
+      }
+    });
   }
 
   const logDirectory = getLogDirectory();
+  const fileName = getRequestLogFileName(now);
 
   mkdirSync(logDirectory, { recursive: true });
-
-  const fileName = `elysia-req-${format(now, "dd-MM-yyyy")}.log`;
   const filePath = join(logDirectory, fileName);
 
+  void compressArchivedLogFiles({ currentFileName: fileName, directory: logDirectory });
+
   activeLogDate = dateKey;
+  activeLogPath = filePath;
   activeLogStream = createWriteStream(filePath, { flags: "a" });
 
   return activeLogStream;

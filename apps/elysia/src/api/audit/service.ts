@@ -1,9 +1,9 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 
-import { ILogEntry, TQuerySchema } from "./type";
+import { decompressLogFileToTemp, getLogDirectory, getRequestLogFileName, isCompressedRequestLogFileName, isRequestLogFileName } from "@/src/utils";
 
-const getLogDirectory = () => process.env.LOG_DIR?.trim() || join(process.cwd(), "backups", "logs");
+import { ILogEntry, TQuerySchema } from "./type";
 
 const parseDateTimeFilter = (value?: string): Date | undefined => {
   if (!value) {
@@ -38,18 +38,29 @@ const parseLogFile = async (filePath: string): Promise<ILogEntry[]> => {
   return entries;
 };
 
+const parseCompressedLogFile = async (filePath: string): Promise<ILogEntry[]> => {
+  const { cleanup, outputFilePath } = await decompressLogFileToTemp(filePath);
+
+  try {
+    return await parseLogFile(outputFilePath);
+  } finally {
+    await cleanup();
+  }
+};
+
 export const service = {
   async getAll({ dateTime, level, limit, method, page, path, statusCode }: TQuerySchema) {
     const logDir = getLogDirectory();
     const selectedDateTime = parseDateTimeFilter(dateTime);
     const selectedDate = dateTime?.split(" ")[0];
+    const selectedFileName = selectedDate ? getRequestLogFileName(new Date(selectedDate.split("-").reverse().join("-"))) : undefined;
 
     let files: string[];
     try {
       const all = await readdir(logDir);
       files = all
-        .filter((f) => f.startsWith("elysia-req-") && f.endsWith(".log"))
-        .filter((f) => (selectedDate ? f === `elysia-req-${selectedDate}.log` : true))
+        .filter((f) => isRequestLogFileName(f))
+        .filter((f) => (selectedFileName ? f === selectedFileName || f === `${selectedFileName}.zst` : true))
         .sort()
         .reverse(); // most recent first
     } catch {
@@ -59,7 +70,8 @@ export const service = {
     const allEntries: ILogEntry[] = [];
 
     for (const file of files) {
-      const entries = await parseLogFile(join(logDir, file));
+      const filePath = join(logDir, file);
+      const entries = isCompressedRequestLogFileName(file) ? await parseCompressedLogFile(filePath) : await parseLogFile(filePath);
       allEntries.push(...entries);
     }
 
