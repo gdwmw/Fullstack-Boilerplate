@@ -1,8 +1,8 @@
 import { vi } from "vitest";
 
-vi.mock("@repo/utils", () => ({
-  logTemplate: {
-    ERROR: vi.fn(),
+vi.mock("@/src/libs", () => ({
+  logger: {
+    error: vi.fn(),
   },
 }));
 
