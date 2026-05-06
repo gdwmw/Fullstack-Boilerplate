@@ -45,5 +45,8 @@ package-lock.json
 # prisma
 /src/generated/prisma
 
+# backups
+/backups
+
 # uploads
 /uploads

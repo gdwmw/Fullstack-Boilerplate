@@ -1,9 +1,9 @@
-import { logTemplate } from "@repo/utils";
 import { HTTPHeaders, StatusMap } from "elysia";
 import { ElysiaCookie } from "elysia/dist/cookies";
 
 import { ERROR_RESPONSE, responseMessage } from "@/src/constants";
 import { Prisma } from "@/src/generated/prisma/client";
+import { logger } from "@/src/libs";
 
 import { P2002, P2003 } from "./extract";
 
@@ -12,7 +12,7 @@ type TPrismaErrorMap = (label: string) => Record<string, { message: ((e: Prisma.
 const PRISMA_ERROR_MAP: TPrismaErrorMap = (label: string) => ({
   P2000: { message: "the provided value is too long for this field", status: 400 },
   P2001: { message: () => responseMessage(label).notFound, status: 404 },
-  P2002: { message: () => responseMessage(P2002(label)).alreadyExists, status: 409 },
+  P2002: { message: (e) => responseMessage(P2002(e.message)).alreadyExists, status: 409 },
   P2003: { message: (e) => `foreign key constraint failed on field: ${P2003(e.meta)}`, status: 400 },
   P2004: { message: "a constraint failed on the database", status: 400 },
   P2005: { message: "invalid value stored in the database for this field", status: 400 },
@@ -49,6 +49,20 @@ const PRISMA_ERROR_MAP: TPrismaErrorMap = (label: string) => ({
   P2037: { message: "too many database connections opened", status: 503 },
 });
 
+export const getPrismaErrorMessage = (error: unknown): null | string => {
+  if (!(error instanceof Prisma.PrismaClientKnownRequestError)) return null;
+
+  const entry = PRISMA_ERROR_MAP("resource")[error.code];
+
+  if (!entry) return "an unexpected database error occurred";
+
+  if (typeof entry.message === "function") {
+    return entry.message(error);
+  }
+
+  return entry.message;
+};
+
 export const handlePrismaError = (
   label: string,
   error: unknown,
@@ -64,7 +78,7 @@ export const handlePrismaError = (
   const splitedRawMessage = error.message.split("\n");
   const lastLine = splitedRawMessage[splitedRawMessage.length - 1];
 
-  logTemplate.ERROR(lastLine.toLowerCase(), error.code);
+  logger.error({ code: error.code, scope: "prisma" }, lastLine.toLowerCase());
 
   const entry = PRISMA_ERROR_MAP(label)[error.code];
 

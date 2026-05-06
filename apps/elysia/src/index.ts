@@ -3,12 +3,36 @@ import { join } from "path";
 
 import { authRoutes, uploadRoutes, usersRoutes } from "./api";
 import { logger } from "./libs";
-import { cleanupSessionsWorker, corsPlugin, requestLoggerPlugin, swaggerPlugin } from "./utils";
+import { cleanupLogsWorker, cleanupSessionsWorker, corsPlugin, databaseBackupWorker, requestLoggerPlugin, swaggerPlugin } from "./utils";
 
 const ELYSIA_PORT = process.env.ELYSIA_PORT;
 
 if (!process.env.ELYSIA_PORT) {
   throw new Error("Please check your environment variables. ELYSIA_PORT is not defined.");
+}
+
+if (!process.env.DATABASE_URL) {
+  throw new Error("Please check your environment variables. DATABASE_URL is not defined.");
+}
+
+if (!process.env.DB_BACKUP_DIR) {
+  throw new Error("Please check your environment variables. DB_BACKUP_DIR is not defined.");
+}
+
+if (!process.env.DB_BACKUP_RETENTION_DAYS) {
+  throw new Error("Please check your environment variables. DB_BACKUP_RETENTION_DAYS is not defined.");
+}
+
+if (!process.env.LOG_LEVEL) {
+  throw new Error("Please check your environment variables. LOG_LEVEL is not defined.");
+}
+
+if (!process.env.LOG_DIR) {
+  throw new Error("Please check your environment variables. LOG_DIR is not defined.");
+}
+
+if (!process.env.LOG_RETENTION_DAYS) {
+  throw new Error("Please check your environment variables. LOG_RETENTION_DAYS is not defined.");
 }
 
 if (!process.env.JWT_ACCESS_SECRET) {
@@ -17,6 +41,34 @@ if (!process.env.JWT_ACCESS_SECRET) {
 
 if (!process.env.JWT_REFRESH_SECRET) {
   throw new Error("Please check your environment variables. JWT_REFRESH_SECRET is not defined.");
+}
+
+if (!process.env.JWT_ACCESS_EXPIRES_IN) {
+  throw new Error("Please check your environment variables. JWT_ACCESS_EXPIRES_IN is not defined.");
+}
+
+if (!process.env.JWT_REFRESH_EXPIRES_IN) {
+  throw new Error("Please check your environment variables. JWT_REFRESH_EXPIRES_IN is not defined.");
+}
+
+if (!process.env.JWT_REFRESH_COOKIE_NAME) {
+  throw new Error("Please check your environment variables. JWT_REFRESH_COOKIE_NAME is not defined.");
+}
+
+if (!process.env.JWT_REFRESH_COOKIE_PATH) {
+  throw new Error("Please check your environment variables. JWT_REFRESH_COOKIE_PATH is not defined.");
+}
+
+if (!process.env.JWT_REFRESH_COOKIE_SAME_SITE) {
+  throw new Error("Please check your environment variables. JWT_REFRESH_COOKIE_SAME_SITE is not defined.");
+}
+
+if (process.env.JWT_REFRESH_COOKIE_SECURE === undefined) {
+  throw new Error("Please check your environment variables. JWT_REFRESH_COOKIE_SECURE is not defined.");
+}
+
+if (!process.env.CORS_ORIGINS) {
+  throw new Error("Please check your environment variables. CORS_ORIGINS is not defined.");
 }
 
 if (!process.env.REDIS_URL) {
@@ -47,4 +99,12 @@ logger.info(
 
 Bun.cron("0 0 */4 * *", async () => {
   await cleanupSessionsWorker();
+});
+
+Bun.cron("0 9,12,15,18 * * *", async () => {
+  await databaseBackupWorker();
+});
+
+Bun.cron("0 1 * * *", async () => {
+  await cleanupLogsWorker();
 });

@@ -1,8 +1,114 @@
+import { format } from "date-fns";
 import { Elysia } from "elysia";
+import { randomUUID } from "node:crypto";
+import { createWriteStream, mkdirSync, type WriteStream } from "node:fs";
+import { join } from "node:path";
 
 import { logger } from "@/src/libs";
+import { getPrismaErrorMessage } from "@/src/utils/handle-prisma-error";
 
 export const requestStartTimes = new WeakMap<Request, number>();
+
+const getLogDirectory = () => process.env.LOG_DIR?.trim() || join(process.cwd(), "backups", "logs");
+
+let activeLogDate = "";
+let activeLogStream: null | WriteStream = null;
+const requestIds = new WeakMap<Request, string>();
+
+const getRequestLogStream = () => {
+  const now = new Date();
+  const dateKey = format(now, "yyyy-MM-dd");
+
+  if (activeLogStream && activeLogDate === dateKey) {
+    return activeLogStream;
+  }
+
+  if (activeLogStream) {
+    activeLogStream.end();
+  }
+
+  const logDirectory = getLogDirectory();
+
+  mkdirSync(logDirectory, { recursive: true });
+
+  const fileName = `elysia-req-${format(now, "dd-MM-yyyy")}.log`;
+  const filePath = join(logDirectory, fileName);
+
+  activeLogDate = dateKey;
+  activeLogStream = createWriteStream(filePath, { flags: "a" });
+
+  return activeLogStream;
+};
+
+const writeRequestLog = (payload: Record<string, unknown>) => {
+  const stream = getRequestLogStream();
+  stream.write(`${JSON.stringify(payload)}\n`);
+};
+
+const getHeaderIp = (request: Request) => {
+  const candidates = [
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim(),
+    request.headers.get("x-real-ip")?.trim(),
+    request.headers.get("cf-connecting-ip")?.trim(),
+    request.headers.get("true-client-ip")?.trim(),
+    request.headers.get("x-client-ip")?.trim(),
+    request.headers.get("fly-client-ip")?.trim(),
+  ];
+
+  const forwarded = request.headers.get("forwarded")?.trim();
+
+  if (forwarded) {
+    const match = forwarded.match(/for=(?:"?\[?)([^;\],"]+)/i);
+
+    if (match?.[1]) {
+      candidates.push(match[1].trim());
+    }
+  }
+
+  for (const candidate of candidates) {
+    if (candidate) {
+      return candidate;
+    }
+  }
+
+  return null;
+};
+
+const getSocketIp = (request: Request, server?: unknown) => {
+  if (!server || typeof server !== "object") {
+    return null;
+  }
+
+  const serverWithIp = server as {
+    requestIP?: (request: Request) => { address?: string } | null;
+  };
+
+  if (typeof serverWithIp.requestIP !== "function") {
+    return null;
+  }
+
+  return serverWithIp.requestIP(request)?.address ?? null;
+};
+
+const getRequestIp = (request: Request, server?: unknown) => getHeaderIp(request) || getSocketIp(request, server) || "unknown";
+
+const resolveErrorStatusCode = (status: number | string | undefined, error: unknown) => {
+  const statusFromSet = getStatusCode(status, 500);
+
+  if (statusFromSet >= 400) {
+    return statusFromSet;
+  }
+
+  if (error && typeof error === "object" && "status" in error) {
+    const errorStatus = Number((error as { status?: unknown }).status);
+
+    if (!Number.isNaN(errorStatus) && errorStatus >= 400) {
+      return errorStatus;
+    }
+  }
+
+  return 500;
+};
 
 export const getStatusCode = (status: number | string | undefined, fallback = 200) => {
   if (typeof status === "number") {
@@ -30,6 +136,12 @@ export const getRequestLogger = (request: Request) => {
 };
 
 export const getErrorMessage = (error: unknown) => {
+  const prismaMessage = getPrismaErrorMessage(error);
+
+  if (prismaMessage) {
+    return prismaMessage;
+  }
+
   if (error instanceof Error) {
     return error.message;
   }
@@ -38,35 +150,51 @@ export const getErrorMessage = (error: unknown) => {
 };
 
 export const requestLoggerPlugin = new Elysia({ name: "request-logger" })
-  .onRequest(({ request }) => {
-    const requestLog = getRequestLogger(request);
-
-    requestStartTimes.set(request, performance.now());
-    requestLog.info("incoming request");
+  .trace({ as: "global" }, ({ context }) => {
+    requestStartTimes.set(context.request, performance.now());
+    requestIds.set(context.request, randomUUID());
   })
 
-  .onAfterHandle(({ request, set }) => {
-    const requestLog = getRequestLogger(request);
+  .onAfterHandle({ as: "global" }, ({ request, server, set }) => {
+    const requestId = requestIds.get(request) ?? randomUUID();
     const startedAt = requestStartTimes.get(request) ?? performance.now();
     const durationMs = Math.round(performance.now() - startedAt);
     const statusCode = getStatusCode(set.status);
+    const line = `${statusCode} | ${request.method} | ${new URL(request.url).pathname} | ${durationMs}ms`;
 
-    requestLog.info({ durationMs, statusCode }, "request completed");
+    logger.info(line);
+    writeRequestLog({
+      durationMs,
+      ip: getRequestIp(request, server),
+      level: "INFO",
+      method: request.method,
+      path: new URL(request.url).pathname,
+      requestId,
+      statusCode,
+      ts: new Date().toISOString(),
+      userAgent: request.headers.get("user-agent") || "unknown",
+    });
   })
 
-  .onError(({ code, error, request, set }) => {
-    const requestLog = getRequestLogger(request);
+  .onError({ as: "global" }, ({ error, request, server, set }) => {
+    const requestId = requestIds.get(request) ?? randomUUID();
     const startedAt = requestStartTimes.get(request) ?? performance.now();
     const durationMs = Math.round(performance.now() - startedAt);
-    const statusCode = getStatusCode(set.status, 500);
+    const statusCode = resolveErrorStatusCode(set.status, error);
+    const line = `${statusCode} | ${request.method} | ${new URL(request.url).pathname} | ${durationMs}ms`;
+    const errorMessage = getErrorMessage(error);
 
-    requestLog.error(
-      {
-        code,
-        durationMs,
-        error: getErrorMessage(error),
-        statusCode,
-      },
-      "request failed",
-    );
+    logger.error({ message: errorMessage }, line);
+    writeRequestLog({
+      durationMs,
+      error: errorMessage,
+      ip: getRequestIp(request, server),
+      level: "ERROR",
+      method: request.method,
+      path: new URL(request.url).pathname,
+      requestId,
+      statusCode,
+      ts: new Date().toISOString(),
+      userAgent: request.headers.get("user-agent") || "unknown",
+    });
   });

@@ -20,6 +20,7 @@
     "gruntfuggly.todo-tree",
     "pedrohenrique-ql.regex-match",
     "rangav.vscode-thunder-client",
-    "prisma.prisma"
+    "prisma.prisma",
+    "cweijan.vscode-postgresql-client2"
   ]
 }
