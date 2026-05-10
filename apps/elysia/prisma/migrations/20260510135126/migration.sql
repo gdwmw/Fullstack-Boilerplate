@@ -62,6 +62,9 @@ CREATE UNIQUE INDEX "sessions_token_hash_key" ON "sessions"("token_hash");
 CREATE INDEX "auth_sessions_user_id_idx" ON "sessions"("user_id");
 
 -- CreateIndex
+CREATE INDEX "auth_sessions_user_id_expires_at_idx" ON "sessions"("user_id", "expires_at");
+
+-- CreateIndex
 CREATE INDEX "auth_sessions_family_id_idx" ON "sessions"("family_id");
 
 -- CreateIndex

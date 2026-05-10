@@ -161,6 +161,18 @@ pg_restore --clean --if-exists --no-owner --dbname "$DATABASE_URL" backup.dump
 
 ---
 
+## 🧱 Prisma Notes (Elysia)
+
+* `apps/elysia/prisma/schema.prisma` intentionally omits `datasource db.url`.
+* `DATABASE_URL` is supplied from `apps/elysia/prisma.config.ts` using Prisma's `defineConfig`.
+* To keep split schema files under `apps/elysia/prisma/models` consistently formatted, run:
+
+```bash
+pnpm -C apps/elysia format
+```
+
+---
+
 ## 📜 Important Scripts
 
 * ▶️ `pnpm dev` - run all apps in development mode

@@ -1,16 +1,16 @@
 model Users {
-  id        Int      @id @default(autoincrement())
-  imageId   Int?     @unique @map("image_id")
+  id        Int        @id @default(autoincrement())
+  imageId   Int?       @unique @map("image_id")
   name      String
-  username  String   @unique
-  email     String   @unique
-  phone     String   @unique
-  role      String   @default("user")
-  image     Files?   @relation(fields: [imageId], references: [id], onDelete: SetNull)
-  sessions  sessions[]
+  username  String     @unique
+  email     String     @unique
+  phone     String     @unique
+  role      String     @default("user")
+  image     Files?     @relation(fields: [imageId], references: [id], onDelete: SetNull)
+  sessions  Sessions[]
   password  String?
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
 
   @@map("users")
 }

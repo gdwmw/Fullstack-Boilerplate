@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "bun run --watch src/index.ts",
     "generate": "prisma generate",
+    "format": "prisma format --schema prisma",
     "migrate": "prisma migrate dev",
     "reset": "prisma migrate reset",
     "vitest": "vitest",
