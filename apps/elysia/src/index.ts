@@ -2,7 +2,7 @@ import { Elysia } from "elysia";
 import { normalize, resolve, sep } from "path";
 
 import { auditRoutes, authRoutes, uploadRoutes, usersRoutes } from "./api";
-import { env } from "./config/env";
+import { env } from "./environment";
 import { logger } from "./libs";
 import {
   checkZstdAvailability,

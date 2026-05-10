@@ -2,8 +2,8 @@ import { Metadata, Viewport } from "next";
 import { FC, PropsWithChildren, ReactElement } from "react";
 
 import { APIConnectionChecker } from "../components";
-import { clientEnv } from "../config/env.client";
-import "../config/env.server";
+import { clientEnv } from "../environments/env.client";
+import "../environments/env.server";
 import { NextAuthProvider, NextThemesProvider, ReactQueryProvider } from "../libs";
 import { geistMono, geistSans, inter, roboto } from "./fonts";
 import "./globals.css";

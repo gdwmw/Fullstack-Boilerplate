@@ -11,7 +11,7 @@ import { FC, HTMLInputTypeAttribute, KeyboardEvent, ReactElement, useEffect, use
 import { SubmitHandler, useForm } from "react-hook-form";
 
 import { Avatar, Container, ExampleATWM, ExampleInput, SubmitButton } from "@/src/components";
-import { clientEnv } from "@/src/environments";
+import { clientEnv } from "@/src/environments/env.client";
 import { ReactQueryProvider } from "@/src/libs";
 import { DELETEUpload, GETMe, IErrorResponse, inputValidations, POSTUpload, PUTUsers } from "@/src/utils";
 

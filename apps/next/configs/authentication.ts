@@ -3,8 +3,8 @@ import { NextAuthOptions, Session, User } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-import { clientEnv } from "@/src/environments";
-import { serverEnv } from "@/src/environments";
+import { clientEnv } from "@/src/environments/env.client";
+import { serverEnv } from "@/src/environments/env.server";
 import { IAuthResponse, ILoginPayload, POSTLogin } from "@/src/utils";
 
 const SESSION_EXPIRES_IN = serverEnv.NEXTAUTH_SESSION_EXPIRES_IN;
