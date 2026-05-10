@@ -5,7 +5,7 @@ import { getPlaiceholder } from "plaiceholder";
 import sharp from "sharp";
 
 import { Prisma } from "@/src/generated/prisma/client";
-import { prisma } from "@/src/libs";
+import { logger, prisma } from "@/src/libs";
 
 import { ImageFormat, UploadResponse } from "./type";
 
@@ -20,50 +20,63 @@ const IMAGE_FORMATS: { name: string; width: number }[] = [
 
 const IMAGE_MIME_TYPES = new Set(["image/avif", "image/gif", "image/jpeg", "image/png", "image/tiff", "image/webp"]);
 
-async function processImage(buffer: Buffer, mimeType: string, originalWidth: number): Promise<Record<string, ImageFormat>> {
-  const formats: Record<string, ImageFormat> = {};
-  for (const format of IMAGE_FORMATS) {
-    if (originalWidth <= format.width) continue;
-    const filename = `${randomUUID()}.webp`;
-    const filePath = join(UPLOAD_DIR, filename);
-    const relativePath = `uploads/${filename}`;
-    const { data, info } = await sharp(buffer)
-      .resize({ width: format.width, withoutEnlargement: true })
-      .webp({ quality: 80 })
-      .toBuffer({ resolveWithObject: true });
-    await writeFile(filePath, data);
-    formats[format.name] = {
-      filename,
-      height: info.height,
-      mimetype: "image/webp",
-      path: relativePath,
-      size: info.size,
-      url: `/${relativePath}`,
-      width: info.width,
-    };
+async function processImage(buffer: Buffer, originalWidth: number): Promise<Record<string, ImageFormat>> {
+  const processedFormats = await Promise.all(
+    IMAGE_FORMATS.filter((format) => originalWidth > format.width).map(async (format) => {
+      const filename = `${randomUUID()}.webp`;
+      const filePath = join(UPLOAD_DIR, filename);
+      const relativePath = `uploads/${filename}`;
+      const { data, info } = await sharp(buffer)
+        .resize({ width: format.width, withoutEnlargement: true })
+        .webp({ quality: 80 })
+        .toBuffer({ resolveWithObject: true });
+
+      await writeFile(filePath, data);
+
+      return [
+        format.name,
+        {
+          filename,
+          height: info.height,
+          mimetype: "image/webp",
+          path: relativePath,
+          size: info.size,
+          url: `/${relativePath}`,
+          width: info.width,
+        },
+      ] as const;
+    }),
+  );
+
+  return Object.fromEntries(processedFormats);
+}
+
+async function removeUploadedFile(filename: string) {
+  try {
+    await unlink(join(UPLOAD_DIR, filename));
+  } catch (error) {
+    logger.warn(
+      {
+        error,
+        filename,
+        scope: "upload",
+      },
+      "failed to delete uploaded file from disk",
+    );
   }
-  return formats;
 }
 
 export const service = {
   async delete(fileId: number) {
-    const fileRecord = await prisma.files.findUnique({ where: { id: fileId } });
-    if (!fileRecord) {
-      throw new Error("File not found");
-    }
-    await prisma.files.delete({ where: { id: fileId } });
-    const deleteFile = async (filename: string) => {
-      try {
-        await unlink(join(UPLOAD_DIR, filename));
-      } catch {
-        // The file may already be missing from disk
-      }
-    };
-    await deleteFile(fileRecord.filename);
+    const fileRecord = await prisma.files.delete({ where: { id: fileId } });
+
+    await removeUploadedFile(fileRecord.filename);
+
     if (fileRecord.formats) {
       const formats = fileRecord.formats as unknown as Record<string, ImageFormat>;
-      await Promise.all(Object.values(formats).map((f) => deleteFile(f.filename)));
+      await Promise.all(Object.values(formats).map((file) => removeUploadedFile(file.filename)));
     }
+
     return fileRecord;
   },
 
@@ -96,10 +109,7 @@ export const service = {
       width = metadata.width ?? null;
       height = metadata.height ?? null;
       if (width && height) {
-        const [{ base64, color }, processedFormats] = await Promise.all([
-          getPlaiceholder(buffer, { size: 32 }),
-          processImage(buffer, file.type, width),
-        ]);
+        const [{ base64, color }, processedFormats] = await Promise.all([getPlaiceholder(buffer, { size: 32 }), processImage(buffer, width)]);
         placeholder = base64;
         dominantColor = color.hex;
         formats = processedFormats;
