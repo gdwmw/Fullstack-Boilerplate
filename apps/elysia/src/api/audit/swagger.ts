@@ -9,9 +9,7 @@ export const docs = (label: string): Record<"getAll" | "getArchives", DocumentDe
   const auditLogUserSchema = {
     nullable: true,
     properties: {
-      id: { example: 1, type: "integer" },
       email: { example: "user@example.com", nullable: true, type: "string" },
-      imageId: { example: 42, nullable: true, type: "integer" },
       name: { example: "John Doe", nullable: true, type: "string" },
       phone: { example: "+6281234567890", nullable: true, type: "string" },
       role: { example: "user", nullable: true, type: "string" },

@@ -4,8 +4,14 @@ import { createWriteStream, mkdirSync, type WriteStream } from "node:fs";
 import { join } from "node:path";
 
 import { logger, prisma } from "@/src/libs";
-import { compressArchivedLogFiles, compressLogFile, getLogDirectory, getPrismaErrorMessage, getRequestLogFileName } from "@/src/utils";
-import { getBearerToken } from "@/src/utils";
+import {
+  compressArchivedLogFiles,
+  compressLogFile,
+  getBearerToken,
+  getLogDirectory,
+  getPrismaErrorMessage,
+  getRequestLogFileName,
+} from "@/src/utils";
 
 export const requestStartTimes = new WeakMap<Request, number>();
 
@@ -29,8 +35,6 @@ const SENSITIVE_FIELD_NAMES = new Set([
 
 type TAuditLogUser = {
   email: null | string;
-  id: number;
-  imageId: null | number;
   name: null | string;
   phone: null | string;
   role: null | string;
@@ -119,9 +123,7 @@ const resolveRequestUser = async (request: Request) => {
 
     return await prisma.users.findUnique({
       select: {
-        id: true,
         email: true,
-        imageId: true,
         name: true,
         phone: true,
         role: true,

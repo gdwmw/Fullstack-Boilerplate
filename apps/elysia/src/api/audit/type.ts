@@ -12,8 +12,6 @@ export interface IArchiveEntry {
 
 interface IAuditLogUser {
   email: null | string;
-  id: number;
-  imageId: null | number;
   name: null | string;
   phone: null | string;
   role: null | string;
