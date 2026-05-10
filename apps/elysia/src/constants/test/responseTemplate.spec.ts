@@ -18,12 +18,23 @@ import { Prisma } from "@/src/generated/prisma/client";
 describe("SUCCESS_RESPONSE", () => {
   it("should return success true with data and message", () => {
     const result = SUCCESS_RESPONSE({ data: { id: 1 }, message: "ok" });
-    expect(result).toEqual({ data: { id: 1 }, message: "ok", success: true });
+    expect(result).toEqual({ data: { id: 1 }, message: "ok", meta: null, success: true });
+  });
+
+  it("should include provided meta when supplied", () => {
+    const result = SUCCESS_RESPONSE({
+      data: [{ id: 1 }],
+      message: "ok",
+      meta: { page: 1, pageSize: 50, total: 120, totalPages: 3 },
+    });
+
+    expect(result.meta).toEqual({ page: 1, pageSize: 50, total: 120, totalPages: 3 });
   });
 
   it("should return null for data when data is falsy", () => {
     const result = SUCCESS_RESPONSE({ data: null, message: null });
     expect(result.data).toBeNull();
+    expect(result.meta).toBeNull();
   });
 
   it("should return null for message when message is null", () => {
