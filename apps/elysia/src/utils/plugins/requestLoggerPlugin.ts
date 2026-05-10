@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { createWriteStream, mkdirSync, type WriteStream } from "node:fs";
 import { join } from "node:path";
 
-import { env } from "@/src/config/env";
+import { env } from "@/src/environment";
 import { logger, prisma } from "@/src/libs";
 import {
   compressArchivedLogFiles,

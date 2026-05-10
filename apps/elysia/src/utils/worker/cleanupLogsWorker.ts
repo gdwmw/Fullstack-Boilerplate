@@ -2,7 +2,7 @@ import { format } from "date-fns";
 import { readdir, rm, stat } from "node:fs/promises";
 import { join } from "node:path";
 
-import { env } from "@/src/config/env";
+import { env } from "@/src/environment";
 import { logger } from "@/src/libs";
 import { getLogDirectory, isRequestLogFileName } from "@/src/utils";
 

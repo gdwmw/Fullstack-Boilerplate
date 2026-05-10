@@ -1,6 +1,6 @@
 import IORedis from "ioredis";
 
-import { env } from "@/src/config/env";
+import { env } from "@/src/environment";
 
 import { logger } from "./pino";
 

@@ -1,7 +1,7 @@
 import { parseDurationToMs } from "@repo/utils";
 
-import { env } from "@/src/config/env";
 import { AUTH_OMIT_FIELDS } from "@/src/constants";
+import { env } from "@/src/environment";
 import { prisma, redis } from "@/src/libs";
 
 import { TChangePasswordSchema, TLoginSchema, TRegisterSchema } from "./type";

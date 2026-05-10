@@ -287,7 +287,7 @@ export const accessJwtPlugin = jwt({
 If `JWT_ACCESS_SECRET` is missing, this signs JWTs with the empty string. The `index.ts` validator catches it at boot, but only when `index.ts` is the entrypoint — tests, scripts, and Vitest setup that import `jwtPlugin` directly bypass the check. Fail loud at the plugin level too:
 
 ```ts
-import { env } from "@/src/config/env";
+import { env } from "@/src/environment";
 export const accessJwtPlugin = jwt({ exp: env.JWT_ACCESS_EXPIRES_IN, name: "accessJwt", secret: env.JWT_ACCESS_SECRET });
 ```
 

@@ -4,7 +4,7 @@ import axios from "axios";
 import { Check, Server, X } from "lucide-react";
 import { FC, ReactElement, useEffect, useState } from "react";
 
-import { clientEnv } from "@/src/config/env.client";
+import { clientEnv } from "@/src/environments";
 import { useToggle } from "@/src/hooks";
 
 import { ExampleA } from "../elements";

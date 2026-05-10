@@ -4,7 +4,7 @@ import { parseDurationToMs } from "@repo/utils";
 import { SessionProvider, signOut, useSession } from "next-auth/react";
 import { FC, PropsWithChildren, ReactElement, useEffect } from "react";
 
-import { clientEnv } from "@/src/config/env.client";
+import { clientEnv } from "@/src/environments";
 import { POSTRefresh } from "@/src/utils";
 
 type T = Readonly<PropsWithChildren>;

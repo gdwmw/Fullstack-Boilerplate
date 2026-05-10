@@ -1,7 +1,7 @@
 import Elysia, { HTTPHeaders, StatusMap } from "elysia";
 
-import { env } from "@/src/config/env";
 import { ERROR_RESPONSE, responseMessage, SUCCESS_RESPONSE } from "@/src/constants";
+import { env } from "@/src/environment";
 import { accessJwtPlugin, getBearerToken, handlePrismaError, refreshJwtPlugin, verifyAccessToken } from "@/src/utils";
 
 import { changePasswordSchema, loginSchema, registerSchema } from "./schema";

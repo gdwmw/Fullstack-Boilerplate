@@ -1,6 +1,6 @@
 import pino, { type LoggerOptions } from "pino";
 
-import { env } from "@/src/config/env";
+import { env } from "@/src/environment";
 
 const loggerOptions: LoggerOptions = {
   level: env.LOG_LEVEL,

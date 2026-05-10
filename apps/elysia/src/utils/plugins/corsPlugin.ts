@@ -1,6 +1,6 @@
 import { cors } from "@elysiajs/cors";
 
-import { env } from "@/src/config/env";
+import { env } from "@/src/environment";
 
 const ALLOWED_ORIGINS = new Set(env.CORS_ORIGINS);
 

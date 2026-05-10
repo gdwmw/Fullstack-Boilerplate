@@ -1,6 +1,6 @@
 import { jwt } from "@elysiajs/jwt";
 
-import { env } from "@/src/config/env";
+import { env } from "@/src/environment";
 
 export const accessJwtPlugin = jwt({
   exp: env.JWT_ACCESS_EXPIRES_IN,
