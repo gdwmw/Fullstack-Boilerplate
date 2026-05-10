@@ -5,7 +5,7 @@ import { Check, Server, X } from "lucide-react";
 import { FC, ReactElement, useEffect, useState } from "react";
 
 import { clientEnv } from "@/src/environments/env.client";
-import { useToggle } from "@/src/hooks";
+import { useModal } from "@/src/hooks";
 
 import { ExampleA } from "../elements";
 
@@ -13,8 +13,12 @@ const ENVIRONMENT_DATA_VARIABLES = ["NEXT_PUBLIC_BASE_API_URL"];
 const ENVIRONMENT_DATA_VALUES = [clientEnv.NEXT_PUBLIC_BASE_API_URL];
 
 export const APIConnectionChecker: FC = (): ReactElement => {
-  const { toggle, value } = useToggle();
+  const { close, isOpen, open } = useModal();
   const [connection, setConnection] = useState<boolean[]>(() => ENVIRONMENT_DATA_VALUES.map(() => false));
+
+  const handleOpen = () => open();
+
+  const handleClose = () => close();
 
   useEffect(() => {
     const handleSetArray = (value: boolean, index: number) => {
@@ -37,7 +41,7 @@ export const APIConnectionChecker: FC = (): ReactElement => {
     };
 
     const handleCheckConnection = () => {
-      if (!value) {
+      if (!isOpen) {
         return;
       }
       const tasks = ENVIRONMENT_DATA_VALUES.map((url, i) => {
@@ -53,16 +57,16 @@ export const APIConnectionChecker: FC = (): ReactElement => {
     handleCheckConnection();
     const interval = setInterval(handleCheckConnection, 30000);
     return () => clearInterval(interval);
-  }, [value]);
+  }, [isOpen]);
 
   return (
     <section className="fixed right-5 bottom-5 z-50 w-[calc(100%-40px)] max-w-full sm:w-auto sm:max-w-sm">
       <div className="flex flex-col items-end">
-        {value && (
+        {isOpen && (
           <div className="flex max-h-[70vh] w-full flex-col gap-2 overflow-y-auto rounded-lg border border-gray-200 bg-white p-4 shadow-xs shadow-black/50 sm:w-auto sm:p-5 dark:border-gray-600 dark:bg-gray-800 dark:shadow-white/70">
             <div className="flex items-center justify-between gap-3 sm:gap-5">
               <h1 className="truncate text-base font-semibold sm:text-lg dark:text-white">API Connection Checker</h1>
-              <ExampleA className="-mb-0.5" color="blue" onClick={() => toggle()} size="sm" variant="ghost">
+              <ExampleA className="-mb-0.5" color="blue" onClick={handleClose} size="sm" variant="ghost">
                 <X size={20} />
               </ExampleA>
             </div>
@@ -98,8 +102,8 @@ export const APIConnectionChecker: FC = (): ReactElement => {
           </div>
         )}
 
-        {!value && (
-          <ExampleA className="min-w-10" color="blue" onClick={() => toggle()} size="sm" variant="solid">
+        {!isOpen && (
+          <ExampleA className="min-w-10" color="blue" onClick={handleOpen} size="sm" variant="solid">
             <Server size={18} />
           </ExampleA>
         )}

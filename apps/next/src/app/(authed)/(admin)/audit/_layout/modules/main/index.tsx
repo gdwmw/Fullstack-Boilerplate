@@ -6,6 +6,7 @@ import { FC, ReactElement, useEffect, useMemo, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 
 import { Container, ExampleA, ExampleDatePicker, ExampleInput, ExampleSelect, Header } from "@/src/components";
+import { useModal } from "@/src/hooks";
 import { GETAuditArchives, GETAuditLogs, IAuditArchiveEntry, IAuditLogEntry } from "@/src/utils";
 
 import { AuditDetailModal } from "./batches";
@@ -74,6 +75,7 @@ export const Main: FC<I> = (props): ReactElement => {
   const { control, handleSubmit, register, reset } = useForm<IFilterFormValues>({
     defaultValues: FILTER_DEFAULT_VALUES,
   });
+  const detailModal = useModal();
   const [page, setPage] = useState(1);
   const [selectedDateKey, setSelectedDateKey] = useState<null | string>(null);
   const [selectedLogRequestId, setSelectedLogRequestId] = useState<null | string>(null);
@@ -247,7 +249,15 @@ export const Main: FC<I> = (props): ReactElement => {
     setPage(1);
   };
 
-  const closeModal = () => setSelectedLogRequestId(null);
+  const closeModal = () => {
+    detailModal.close();
+    setSelectedLogRequestId(null);
+  };
+
+  const openModal = (requestId: string) => {
+    setSelectedLogRequestId(requestId);
+    detailModal.open();
+  };
 
   const selectArchive = (archive: IAuditArchiveEntry) => {
     setSelectedDateKey(archive.dateKey);
@@ -347,6 +357,7 @@ export const Main: FC<I> = (props): ReactElement => {
                   setArchiveMonth(newMonth);
                   setSelectedDateKey(null);
                   setSelectedLogRequestId(null);
+                  detailModal.close();
                   setPage(1);
                 }}
                 onSelect={selectArchive}
@@ -354,6 +365,7 @@ export const Main: FC<I> = (props): ReactElement => {
                   setArchiveYear(newYear);
                   setSelectedDateKey(null);
                   setSelectedLogRequestId(null);
+                  detailModal.close();
                   setPage(1);
                 }}
                 resolvedSelectedDateKey={resolvedSelectedDateKey}
@@ -364,7 +376,7 @@ export const Main: FC<I> = (props): ReactElement => {
                 <AuditTable
                   isLoading={auditQuery.isLoading}
                   logs={logs as IAuditLogEntry[]}
-                  onDetailClick={setSelectedLogRequestId}
+                  onDetailClick={openModal}
                   resolvedSelectedDateKey={resolvedSelectedDateKey}
                 />
 
@@ -383,7 +395,7 @@ export const Main: FC<I> = (props): ReactElement => {
           </div>
         </div>
 
-        <AuditDetailModal onClose={closeModal} selectedLog={selectedLog} />
+        <AuditDetailModal onClose={closeModal} selectedLog={detailModal.isOpen ? selectedLog : null} />
       </Container>
     </main>
   );
