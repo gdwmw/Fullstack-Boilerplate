@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { logTemplate } from "@repo/utils";
 import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { ArrowLeftRight, Eye, EyeOff } from "lucide-react";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
@@ -12,7 +11,6 @@ import { FC, ReactElement, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 
 import { Container, ExampleATWM, ExampleInput, SubmitButton } from "@/src/components";
-import { IErrorResponse, POSTLogin } from "@/src/utils";
 
 import { loginSchema, TLoginSchema } from "../schema";
 
@@ -34,7 +32,6 @@ export const Main: FC = (): ReactElement => {
   const loginMutation = useMutation({
     mutationFn: async (dt: TLoginSchema) => {
       const method = loginWithEmail ? "email" : "username";
-      await POSTLogin({ identifier: dt.identifier, method, password: dt.password });
 
       const res = await signIn("credentials", {
         identifier: dt.identifier,
@@ -44,14 +41,13 @@ export const Main: FC = (): ReactElement => {
       });
 
       if (!res?.ok) {
-        throw new Error("authentication failed. please try again.");
+        throw new Error(res?.error || "authentication failed. please try again.");
       }
 
       return true;
     },
     onError: (error) => {
-      const axiosError = error as AxiosError<IErrorResponse>;
-      setErrorMessage(axiosError.response?.data?.message ?? "login failed. please try again.");
+      setErrorMessage(error instanceof Error ? error.message : "login failed. please try again.");
       logTemplate.WARN("login failed!", "auth/login");
     },
     onSuccess: () => {

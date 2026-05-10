@@ -1,4 +1,5 @@
 import { parseDurationToMs } from "@repo/utils";
+import axios from "axios";
 import { NextAuthOptions, Session, User } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -65,19 +66,48 @@ export const options: NextAuthOptions = {
 
   providers: [
     CredentialsProvider({
-      async authorize(credentials: Record<string, string> | undefined): Promise<null | User> {
+      async authorize(credentials: Record<string, string> | undefined, req): Promise<null | User> {
         if (!credentials) {
           return null;
         }
 
         const { identifier, method, password } = credentials as unknown as ILoginPayload;
 
+        const reqHeaders = (req?.headers ?? {}) as Record<string, string | string[] | undefined>;
+        const pickHeader = (key: string): string | undefined => {
+          const value = reqHeaders[key];
+          if (Array.isArray(value)) {
+            return value[0];
+          }
+          return value;
+        };
+
+        const forwardedHeaders: Record<string, string> = {};
+        const userAgent = pickHeader("user-agent");
+        if (userAgent) {
+          forwardedHeaders["user-agent"] = userAgent;
+        }
+
+        const forwardedFor = pickHeader("x-forwarded-for");
+        if (forwardedFor) {
+          forwardedHeaders["x-forwarded-for"] = forwardedFor;
+        }
+
+        const realIp = pickHeader("x-real-ip");
+        if (realIp) {
+          forwardedHeaders["x-real-ip"] = realIp;
+        }
+
         try {
-          const res = await POSTLogin({ identifier, method: method === "email" ? "email" : "username", password });
+          const res = await POSTLogin({ identifier, method: method === "email" ? "email" : "username", password }, forwardedHeaders);
 
           return res.data as IAuthResponse & User;
-        } catch {
-          return null;
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            const message = error.response?.data?.message ?? error.message ?? "login failed";
+            throw new Error(message);
+          }
+          throw error instanceof Error ? error : new Error("login failed");
         }
       },
       credentials: {},
