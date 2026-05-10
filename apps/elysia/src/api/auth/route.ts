@@ -1,5 +1,4 @@
 import Elysia, { HTTPHeaders, StatusMap } from "elysia";
-import { ElysiaCookie } from "elysia/dist/cookies";
 
 import { env } from "@/src/config/env";
 import { ERROR_RESPONSE, responseMessage, SUCCESS_RESPONSE } from "@/src/constants";
@@ -23,7 +22,7 @@ const REFRESH_COOKIE_SECURE = env.JWT_REFRESH_COOKIE_SECURE;
 type THeadersMap = Record<string, string | undefined>;
 type TJwtPayload = null | Record<string, unknown> | undefined;
 interface IResponseSet {
-  cookie?: Record<string, ElysiaCookie>;
+  cookie?: Record<string, unknown>;
   headers: HTTPHeaders;
   redirect?: string;
   status?: keyof StatusMap | number;
@@ -134,7 +133,7 @@ const getAuthenticatedUserId = async ({
   headers,
   set,
 }: {
-  accessJwt: { verify(token: string): Promise<TJwtPayload> };
+  accessJwt: { verify(token: string): Promise<unknown> };
   headers: { authorization?: string };
   set: IResponseSet;
 }) => {
@@ -145,7 +144,8 @@ const getAuthenticatedUserId = async ({
 
   const bearerToken = getBearerToken(headers.authorization)!;
   const decoded = await accessJwt.verify(bearerToken);
-  const userId = parseSubjectToUserId(decoded?.sub);
+  const sub = decoded && typeof decoded === "object" && "sub" in decoded ? decoded.sub : undefined;
+  const userId = parseSubjectToUserId(sub);
 
   if (!userId) {
     return {
@@ -380,7 +380,15 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
       if (bearerToken) {
         // [6.4.3] Blocklist the currently active access token so it can't be used again.
         const decodedAccess = await accessJwt.verify(bearerToken);
-        if (decodedAccess?.jti && decodedAccess.exp) {
+
+        if (
+          decodedAccess &&
+          typeof decodedAccess === "object" &&
+          "jti" in decodedAccess &&
+          typeof decodedAccess.jti === "string" &&
+          "exp" in decodedAccess &&
+          typeof decodedAccess.exp === "number"
+        ) {
           await service.addToBlocklist(decodedAccess.jti, new Date(decodedAccess.exp * 1000));
         }
       }

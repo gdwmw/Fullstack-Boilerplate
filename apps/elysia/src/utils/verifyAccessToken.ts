@@ -1,5 +1,4 @@
 import { HTTPHeaders, StatusMap } from "elysia";
-import { ElysiaCookie } from "elysia/dist/cookies";
 
 import { ERROR_RESPONSE, responseMessage } from "@/src/constants";
 import { redis } from "@/src/libs";
@@ -50,7 +49,7 @@ export const verifyAccessToken = async ({
   accessJwt: { verify(token: string): Promise<unknown> };
   headers: { authorization?: string };
   set: {
-    cookie?: Record<string, ElysiaCookie>;
+    cookie?: Record<string, unknown>;
     headers: HTTPHeaders;
     redirect?: string;
     status?: keyof StatusMap | number;

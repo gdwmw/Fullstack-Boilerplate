@@ -5,8 +5,15 @@ export const parseDurationToMs = (value: string): number => {
     throw new Error("Invalid duration format. Use: 15m, 7d, 3600s");
   }
 
-  const amount = Number(parsed[1]);
-  const unit = parsed[2].toLowerCase();
+  const amountRaw = parsed[1];
+  const unitRaw = parsed[2];
+
+  if (!amountRaw || !unitRaw) {
+    throw new Error("Invalid duration format. Use: 15m, 7d, 3600s");
+  }
+
+  const amount = Number(amountRaw);
+  const unit = unitRaw.toLowerCase();
 
   const multiplierByUnit: Record<string, number> = {
     d: 24 * 60 * 60 * 1000,
@@ -16,5 +23,11 @@ export const parseDurationToMs = (value: string): number => {
     s: 1000,
   };
 
-  return amount * multiplierByUnit[unit];
+  const multiplier = multiplierByUnit[unit];
+
+  if (!multiplier) {
+    throw new Error("Invalid duration unit. Use: ms, s, m, h, d");
+  }
+
+  return amount * multiplier;
 };

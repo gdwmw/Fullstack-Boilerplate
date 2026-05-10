@@ -39,7 +39,9 @@ describe("useToast", () => {
       result.current.info("Info");
     });
 
-    const id = result.current.toasts[0].id;
+    const toast = result.current.toasts[0];
+    expect(toast).toBeDefined();
+    const id = toast!.id;
 
     act(() => {
       result.current.hideToast(id);

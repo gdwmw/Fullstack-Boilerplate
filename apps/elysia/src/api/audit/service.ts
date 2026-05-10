@@ -11,7 +11,14 @@ const parseTimeFilter = (value?: string): { hours: number; minutes: number } | u
     return undefined;
   }
 
-  const [hours, minutes] = value.split(":").map(Number);
+  const [hoursRaw, minutesRaw] = value.split(":");
+
+  if (hoursRaw === undefined || minutesRaw === undefined) {
+    return undefined;
+  }
+
+  const hours = Number(hoursRaw);
+  const minutes = Number(minutesRaw);
 
   if ([hours, minutes].some((part) => Number.isNaN(part))) {
     return undefined;
@@ -28,7 +35,25 @@ const parseArchiveDateFromFileName = (fileName: string): null | string => {
     return null;
   }
 
-  const [day, month, year] = matchedDate[1].split("-").map(Number);
+  const dateToken = matchedDate[1];
+  if (!dateToken) {
+    return null;
+  }
+
+  const [dayRaw, monthRaw, yearRaw] = dateToken.split("-");
+
+  if (dayRaw === undefined || monthRaw === undefined || yearRaw === undefined) {
+    return null;
+  }
+
+  const day = Number(dayRaw);
+  const month = Number(monthRaw);
+  const year = Number(yearRaw);
+
+  if ([day, month, year].some((part) => Number.isNaN(part))) {
+    return null;
+  }
+
   const parsedDate = new Date(year, month - 1, day);
 
   if (Number.isNaN(parsedDate.getTime())) {

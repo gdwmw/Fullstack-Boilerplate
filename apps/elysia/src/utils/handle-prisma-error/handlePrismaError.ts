@@ -1,5 +1,4 @@
 import { HTTPHeaders, StatusMap } from "elysia";
-import { ElysiaCookie } from "elysia/dist/cookies";
 
 import { ERROR_RESPONSE, responseMessage } from "@/src/constants";
 import { Prisma } from "@/src/generated/prisma/client";
@@ -67,7 +66,7 @@ export const handlePrismaError = (
   label: string,
   error: unknown,
   set: {
-    cookie?: Record<string, ElysiaCookie>;
+    cookie?: Record<string, unknown>;
     headers: HTTPHeaders;
     redirect?: string;
     status?: keyof StatusMap | number;
@@ -78,7 +77,7 @@ export const handlePrismaError = (
   const splitedRawMessage = error.message.split("\n");
   const lastLine = splitedRawMessage[splitedRawMessage.length - 1];
 
-  logger.error({ code: error.code, scope: "prisma" }, lastLine.toLowerCase());
+  logger.error({ code: error.code, scope: "prisma" }, (lastLine ?? error.message).toLowerCase());
 
   const entry = PRISMA_ERROR_MAP(label)[error.code];
 
