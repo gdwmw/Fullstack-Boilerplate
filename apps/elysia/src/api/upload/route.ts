@@ -1,7 +1,7 @@
 import Elysia from "elysia";
 
 import { responseMessage, SUCCESS_RESPONSE } from "@/src/constants";
-import { accessJwtPlugin, handlePrismaError, verifyAccessToken } from "@/src/utils";
+import { protectedRoutePlugin } from "@/src/utils";
 
 import { paramSchema, uploadSchema } from "./schema";
 import { service } from "./service";
@@ -10,20 +10,7 @@ import { docs } from "./swagger";
 const LABEL = "upload";
 
 export const uploadRoutes = new Elysia({ prefix: "/upload" })
-  .use(accessJwtPlugin)
-
-  .onError(({ error, set }) => handlePrismaError(LABEL, error, set))
-
-  .onBeforeHandle(async ({ accessJwt, headers, set }) => {
-    const verifyResponse = await verifyAccessToken({
-      accessJwt,
-      headers,
-      set,
-    });
-    if (verifyResponse) {
-      return verifyResponse;
-    }
-  })
+  .use(protectedRoutePlugin(LABEL))
 
   .delete(
     "/:id",
