@@ -1,28 +1,23 @@
 {
   "apps/next/**/*.{js,jsx,ts,tsx,mjs,cjs}": [
-    "bash -c 'cd apps/next && eslint --fix'",
-    "bash -c 'cd apps/next && eslint --no-warn-ignored --max-warnings 0'",
+    "eslint --fix --max-warnings 0 --config apps/next/eslint.config.mjs",
     "prettier --write"
   ],
   "apps/elysia/**/*.{js,ts,mjs,cjs}": [
-    "bash -c 'cd apps/elysia && eslint --fix'",
-    "bash -c 'cd apps/elysia && eslint --no-warn-ignored --max-warnings 0'",
+    "eslint --fix --max-warnings 0 --config apps/elysia/eslint.config.mjs",
     "prettier --write"
   ],
   "packages/constants/**/*.{js,jsx,ts,tsx,mjs,cjs}": [
-    "bash -c 'cd packages/constants && eslint --fix'",
-    "bash -c 'cd packages/constants && eslint --no-warn-ignored --max-warnings 0'",
+    "eslint --fix --max-warnings 0 --config packages/constants/eslint.config.mjs",
     "prettier --write"
   ],
   "packages/eslint-config/**/*.{js,jsx,ts,tsx,mjs,cjs}": [
-    "bash -c 'cd packages/eslint-config && eslint --fix'",
-    "bash -c 'cd packages/eslint-config && eslint --no-warn-ignored --max-warnings 0'",
+    "eslint --fix --max-warnings 0 --config packages/eslint-config/eslint.config.mjs",
     "prettier --write"
   ],
   "packages/utils/**/*.{js,jsx,ts,tsx,mjs,cjs}": [
-    "bash -c 'cd packages/utils && eslint --fix'",
-    "bash -c 'cd packages/utils && eslint --no-warn-ignored --max-warnings 0'",
+    "eslint --fix --max-warnings 0 --config packages/utils/eslint.config.mjs",
     "prettier --write"
   ],
-  "*.{json,css}": ["prettier --write"]
+  "*.{json,css,md}": ["prettier --write"]
 }
