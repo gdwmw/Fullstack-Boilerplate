@@ -32,7 +32,6 @@ export const nextConfig = defineConfig([
       "better-tailwindcss": eslintPluginBetterTailwindcss,
     },
     rules: {
-      // "better-tailwindcss/enforce-consistent-class-order": ["warn", { order: "official" }],
       "@tanstack/query/mutation-property-order": "off",
       "better-tailwindcss/enforce-consistent-important-position": ["warn", { position: "recommended" }],
       "better-tailwindcss/enforce-consistent-variable-syntax": ["warn", { syntax: "shorthand" }],
@@ -49,14 +48,12 @@ export const nextConfig = defineConfig([
       curly: ["warn"],
       "react/display-name": "warn",
       "react/jsx-fragments": "warn",
-      "react/jsx-no-undef": "warn",
+      "react/jsx-no-undef": "off",
       "react/jsx-no-useless-fragment": "warn",
       "react/no-children-prop": "warn",
       "react/no-danger": "warn",
-      // "react/no-multi-comp": "warn",
       "react/no-unstable-nested-components": "warn",
       "react/no-unused-prop-types": "warn",
-      // "react/prefer-read-only-props": "warn",
       "react/react-in-jsx-scope": "off",
     },
     settings: {
