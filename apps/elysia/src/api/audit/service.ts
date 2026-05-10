@@ -1,24 +1,56 @@
+import { format } from "date-fns";
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { decompressLogFileToTemp, getLogDirectory, getRequestLogFileName, isCompressedRequestLogFileName, isRequestLogFileName } from "@/src/utils";
 
-import { ILogEntry, TQuerySchema } from "./type";
+import { IArchiveEntry, ILogEntry, TArchiveQuerySchema, TQuerySchema } from "./type";
 
-const parseDateTimeFilter = (value?: string): Date | undefined => {
+const parseTimeFilter = (value?: string): { hours: number; minutes: number } | undefined => {
   if (!value) {
     return undefined;
   }
 
-  const [datePart, timePart] = value.split(" ");
-  const [day, month, year] = datePart.split("-").map(Number);
-  const [hours, minutes] = timePart.split(":").map(Number);
+  const [hours, minutes] = value.split(":").map(Number);
 
-  if ([day, month, year, hours, minutes].some((part) => Number.isNaN(part))) {
+  if ([hours, minutes].some((part) => Number.isNaN(part))) {
     return undefined;
   }
 
-  return new Date(year, month - 1, day, hours, minutes);
+  return { hours, minutes };
+};
+
+const parseArchiveDateFromFileName = (fileName: string): null | string => {
+  const normalizedFileName = fileName.replace(/\.zst$/, "");
+  const matchedDate = normalizedFileName.match(/^(?:elysia-req-)(\d{2}-\d{2}-\d{4})\.log$/);
+
+  if (!matchedDate) {
+    return null;
+  }
+
+  const [day, month, year] = matchedDate[1].split("-").map(Number);
+  const parsedDate = new Date(year, month - 1, day);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return null;
+  }
+
+  return format(parsedDate, "yyyy-MM-dd");
+};
+
+const parseArchiveDate = (dateKey: string): Date => new Date(dateKey);
+
+const getArchiveLabel = (dateKey: string) => format(new Date(dateKey), "dd MMM yyyy");
+const getActorSearchValues = (entry: ILogEntry): string[] => {
+  const user = entry.users;
+
+  if (!user) {
+    return [];
+  }
+
+  return [user.name, user.username, user.email, user.phone, user.role]
+    .filter((value) => value !== null && value !== undefined)
+    .map((value) => String(value).toLowerCase());
 };
 
 const parseLogFile = async (filePath: string): Promise<ILogEntry[]> => {
@@ -49,11 +81,12 @@ const parseCompressedLogFile = async (filePath: string): Promise<ILogEntry[]> =>
 };
 
 export const service = {
-  async getAll({ dateTime, level, limit, method, page, path, statusCode }: TQuerySchema) {
+  async getAll({ actor, archiveDate, level, limit, method, page, path, statusCode, time }: TQuerySchema) {
     const logDir = getLogDirectory();
-    const selectedDateTime = parseDateTimeFilter(dateTime);
-    const selectedDate = dateTime?.split(" ")[0];
-    const selectedFileName = selectedDate ? getRequestLogFileName(new Date(selectedDate.split("-").reverse().join("-"))) : undefined;
+    const selectedTime = parseTimeFilter(time);
+    const normalizedActor = actor?.trim().toLowerCase();
+    const selectedFileDate = archiveDate ? new Date(archiveDate) : undefined;
+    const selectedFileName = selectedFileDate ? getRequestLogFileName(selectedFileDate) : undefined;
 
     let files: string[];
     try {
@@ -79,11 +112,18 @@ export const service = {
     allEntries.sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime());
 
     const filtered = allEntries.filter((entry) => {
-      if (selectedDateTime) {
-        const entryTimestamp = new Date(entry.ts).getTime();
-        const filterTimestamp = selectedDateTime.getTime();
+      if (selectedTime) {
+        const entryDate = new Date(entry.ts);
 
-        if (entryTimestamp < filterTimestamp || entryTimestamp >= filterTimestamp + 60_000) {
+        if (entryDate.getHours() !== selectedTime.hours || entryDate.getMinutes() !== selectedTime.minutes) {
+          return false;
+        }
+      }
+
+      if (normalizedActor) {
+        const actorValues = getActorSearchValues(entry);
+
+        if (!actorValues.some((value) => value.includes(normalizedActor))) {
           return false;
         }
       }
@@ -108,5 +148,50 @@ export const service = {
         totalPages: Math.ceil(total / limit),
       },
     };
+  },
+
+  async getArchives({ month, year }: TArchiveQuerySchema): Promise<IArchiveEntry[]> {
+    const logDir = getLogDirectory();
+
+    let files: string[];
+    try {
+      files = (await readdir(logDir))
+        .filter((file) => isRequestLogFileName(file))
+        .sort()
+        .reverse();
+    } catch {
+      return [];
+    }
+
+    const archiveMap = new Map<string, IArchiveEntry>();
+
+    for (const file of files) {
+      const dateKey = parseArchiveDateFromFileName(file);
+
+      if (!dateKey) {
+        continue;
+      }
+
+      if (archiveMap.has(dateKey)) {
+        continue;
+      }
+
+      const archiveDate = parseArchiveDate(dateKey);
+
+      if (year && archiveDate.getFullYear() !== year) {
+        continue;
+      }
+
+      if (month && archiveDate.getMonth() + 1 !== month) {
+        continue;
+      }
+
+      archiveMap.set(dateKey, {
+        dateKey,
+        label: getArchiveLabel(dateKey),
+      });
+    }
+
+    return Array.from(archiveMap.values()).sort((left, right) => right.dateKey.localeCompare(left.dateKey));
   },
 };

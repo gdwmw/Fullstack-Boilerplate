@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { FC, ReactElement } from "react";
 
-import { FormContainer } from "@/src/components";
+import { Container, Header } from "@/src/components";
 import { getAllSession } from "@/src/utils";
 
 export const metadata: Metadata = {
@@ -13,17 +13,18 @@ const AdminPage: FC = async (): Promise<ReactElement> => {
 
   return (
     <main>
-      <FormContainer className={{ innerContainer: "h-159.75 w-full max-w-108.75 flex-col items-center gap-3" }} href="/" label="Home">
-        <header>
-          <h1 className="text-center text-2xl font-semibold text-blue-500">Admin Page</h1>
-          <p className="text-center text-sm tracking-wide">This is the admin page of the application</p>
-        </header>
-        <div className="min-h-0 w-full flex-1 overflow-hidden rounded-lg border border-blue-500">
-          <div className="size-full overflow-auto p-2">
-            <pre className="min-w-max text-sm">session: {JSON.stringify(session, null, 2)}</pre>
-          </div>
+      <Container className={{ innerContainer: "h-159.75 w-full max-w-108.75 items-center gap-3" }} href="/" label="Home">
+        <Header
+          className={{ description: "text-center", label: "text-center" }}
+          description="This is the admin page of the application"
+          label="Admin Page"
+        />
+        <div className="w-full flex-1 overflow-hidden rounded-lg border border-blue-500">
+          <pre className="size-full flex-1 overflow-auto rounded-md border border-black/10 bg-black/5 p-3 font-mono text-xs leading-relaxed text-black/90 dark:border-white/10 dark:bg-white/5 dark:text-white/90">
+            {JSON.stringify(session, null, 2)}
+          </pre>
         </div>
-      </FormContainer>
+      </Container>
     </main>
   );
 };

@@ -9,7 +9,7 @@ import { signOut } from "next-auth/react";
 import { FC, HTMLInputTypeAttribute, ReactElement, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 
-import { ExampleInput, FormContainer, SubmitButton } from "@/src/components";
+import { Container, ExampleInput, SubmitButton } from "@/src/components";
 import { IErrorResponse, POSTChangePassword, POSTLogout } from "@/src/utils";
 
 import { changePasswordSchema, TChangePasswordSchema } from "../schema";
@@ -93,7 +93,7 @@ export const Main: FC = (): ReactElement => {
 
   return (
     <main>
-      <FormContainer className={{ innerContainer: "max-w-87.5" }} href={"/profile"} label={"Back"}>
+      <Container className={{ innerContainer: "max-w-87.5" }} href={"/profile"} label={"Back"}>
         <form className="flex w-full flex-col gap-3 overflow-y-auto" onSubmit={handleSubmit(onSubmit)}>
           {FORM_FIELDS_DATA.map((dt) => (
             <ExampleInput
@@ -114,7 +114,7 @@ export const Main: FC = (): ReactElement => {
 
           <SubmitButton color="black" disabled={loading} label="UPDATE" size="sm" variant="solid" />
         </form>
-      </FormContainer>
+      </Container>
     </main>
   );
 };

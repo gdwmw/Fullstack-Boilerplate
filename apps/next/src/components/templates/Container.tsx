@@ -17,11 +17,11 @@ interface I extends Omit<LinkProps, "href"> {
   label: string;
 }
 
-export const FormContainer: FC<I> = ({ children, className, href, label, ...props }): ReactElement => (
+export const Container: FC<I> = ({ children, className, href, label, ...props }): ReactElement => (
   <section className={twm("container mx-auto flex h-dvh items-center justify-center p-5", className?.container)}>
     <div
       className={twm(
-        "relative flex max-h-full w-full rounded-xl border border-gray-200 bg-white px-5 pt-15 pb-5 shadow-xs shadow-black/50 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:shadow-white/70",
+        "relative flex max-h-full w-full flex-col rounded-xl border border-gray-200 bg-white px-5 pt-15 pb-5 shadow-xs shadow-black/50 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:shadow-white/70",
         !href && "p-5",
         className?.innerContainer,
       )}

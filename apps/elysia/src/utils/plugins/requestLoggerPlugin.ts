@@ -3,8 +3,9 @@ import { randomUUID } from "node:crypto";
 import { createWriteStream, mkdirSync, type WriteStream } from "node:fs";
 import { join } from "node:path";
 
-import { logger } from "@/src/libs";
+import { logger, prisma } from "@/src/libs";
 import { compressArchivedLogFiles, compressLogFile, getLogDirectory, getPrismaErrorMessage, getRequestLogFileName } from "@/src/utils";
+import { getBearerToken } from "@/src/utils";
 
 export const requestStartTimes = new WeakMap<Request, number>();
 
@@ -12,6 +13,191 @@ let activeLogDate = "";
 let activeLogStream: null | WriteStream = null;
 let activeLogPath = "";
 const requestIds = new WeakMap<Request, string>();
+const requestUsers = new WeakMap<Request, Promise<null | TAuditLogUser>>();
+
+const SENSITIVE_FIELD_NAMES = new Set([
+  "accessToken",
+  "authorization",
+  "confirmPassword",
+  "currentPassword",
+  "newPassword",
+  "oldPassword",
+  "password",
+  "refreshToken",
+  "token",
+]);
+
+type TAuditLogUser = {
+  email: null | string;
+  id: number;
+  imageId: null | number;
+  name: null | string;
+  phone: null | string;
+  role: null | string;
+  username: null | string;
+};
+
+const textEncoder = new TextEncoder();
+
+const base64UrlToUint8Array = (value: string) => {
+  const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+  const decoded = Buffer.from(padded, "base64");
+
+  return new Uint8Array(decoded);
+};
+
+const decodeBase64UrlJson = (value: string) => JSON.parse(Buffer.from(base64UrlToUint8Array(value)).toString("utf-8")) as Record<string, unknown>;
+
+const verifyAccessTokenPayload = async (token: string) => {
+  const secret = process.env.JWT_ACCESS_SECRET;
+
+  if (!secret) {
+    return null;
+  }
+
+  const [encodedHeader, encodedPayload, encodedSignature] = token.split(".");
+
+  if (!encodedHeader || !encodedPayload || !encodedSignature) {
+    return null;
+  }
+
+  try {
+    const header = decodeBase64UrlJson(encodedHeader);
+
+    if (header.alg !== "HS256") {
+      return null;
+    }
+
+    const cryptoKey = await crypto.subtle.importKey("raw", textEncoder.encode(secret), { hash: "SHA-256", name: "HMAC" }, false, ["verify"]);
+    const isValid = await crypto.subtle.verify(
+      "HMAC",
+      cryptoKey,
+      base64UrlToUint8Array(encodedSignature),
+      textEncoder.encode(`${encodedHeader}.${encodedPayload}`),
+    );
+
+    if (!isValid) {
+      return null;
+    }
+
+    const payload = decodeBase64UrlJson(encodedPayload);
+    const exp = typeof payload.exp === "number" ? payload.exp : null;
+    const nbf = typeof payload.nbf === "number" ? payload.nbf : null;
+    const now = Math.floor(Date.now() / 1000);
+
+    if ((exp !== null && exp <= now) || (nbf !== null && nbf > now)) {
+      return null;
+    }
+
+    return payload;
+  } catch {
+    return null;
+  }
+};
+
+const resolveRequestUser = async (request: Request) => {
+  const cachedUser = requestUsers.get(request);
+
+  if (cachedUser) {
+    return cachedUser;
+  }
+
+  const userPromise = (async () => {
+    const token = getBearerToken(request.headers.get("authorization") || undefined);
+
+    if (!token) {
+      return null;
+    }
+
+    const payload = await verifyAccessTokenPayload(token);
+    const userId = Number.parseInt(String(payload?.sub ?? ""), 10);
+
+    if (Number.isNaN(userId)) {
+      return null;
+    }
+
+    return await prisma.users.findUnique({
+      select: {
+        id: true,
+        email: true,
+        imageId: true,
+        name: true,
+        phone: true,
+        role: true,
+        username: true,
+      },
+      where: { id: userId },
+    });
+  })();
+
+  requestUsers.set(request, userPromise);
+  return userPromise;
+};
+
+const sanitizePayload = (value: unknown, seen = new WeakSet<object>()): unknown => {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  if (typeof value === "bigint") {
+    return value.toString();
+  }
+
+  if (typeof value === "boolean" || typeof value === "number" || typeof value === "string") {
+    return value;
+  }
+
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  if (value instanceof File) {
+    return {
+      name: value.name,
+      size: value.size,
+      type: value.type,
+    };
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => sanitizePayload(item, seen));
+  }
+
+  if (value instanceof FormData) {
+    return Object.fromEntries(Array.from(value.entries()).map(([key, entryValue]) => [key, sanitizePayload(entryValue, seen)]));
+  }
+
+  if (typeof value !== "object") {
+    return String(value);
+  }
+
+  if (seen.has(value)) {
+    return "[Circular]";
+  }
+
+  seen.add(value);
+
+  return Object.fromEntries(
+    Object.entries(value).map(([key, entryValue]) => {
+      if (SENSITIVE_FIELD_NAMES.has(key)) {
+        return [key, "[REDACTED]"];
+      }
+
+      return [key, sanitizePayload(entryValue, seen)];
+    }),
+  );
+};
+
+const getAuditPayload = (body: unknown) => {
+  const sanitizedPayload = sanitizePayload(body);
+
+  if (sanitizedPayload === null) {
+    return null;
+  }
+
+  return sanitizedPayload;
+};
 
 const getRequestLogStream = () => {
   const now = new Date();
@@ -175,7 +361,7 @@ export const requestLoggerPlugin = new Elysia({ name: "request-logger" })
     requestIds.set(context.request, randomUUID());
   })
 
-  .onAfterHandle({ as: "global" }, ({ request, server, set }) => {
+  .onAfterHandle({ as: "global" }, async ({ body, request, server, set }) => {
     const requestId = requestIds.get(request) ?? randomUUID();
     const startedAt = requestStartTimes.get(request) ?? performance.now();
     const durationMs = Math.round(performance.now() - startedAt);
@@ -185,21 +371,26 @@ export const requestLoggerPlugin = new Elysia({ name: "request-logger" })
 
     logger.info(line);
     if (shouldWriteSuccessRequestLog({ method: request.method, pathname })) {
+      const payload = getAuditPayload(body);
+      const user = await resolveRequestUser(request);
+
       writeRequestLog({
         durationMs,
         ip: getRequestIp(request, server),
         level: "INFO",
         method: request.method,
         path: pathname,
+        payload,
         requestId,
         statusCode,
         ts: new Date().toISOString(),
         userAgent: request.headers.get("user-agent") || "unknown",
+        users: user,
       });
     }
   })
 
-  .onError({ as: "global" }, ({ error, request, server, set }) => {
+  .onError({ as: "global" }, async ({ body, error, request, server, set }) => {
     const requestId = requestIds.get(request) ?? randomUUID();
     const startedAt = requestStartTimes.get(request) ?? performance.now();
     const durationMs = Math.round(performance.now() - startedAt);
@@ -210,6 +401,9 @@ export const requestLoggerPlugin = new Elysia({ name: "request-logger" })
 
     logger.error({ message: errorMessage }, line);
     if (shouldWriteErrorRequestLog(pathname)) {
+      const payload = getAuditPayload(body);
+      const user = await resolveRequestUser(request);
+
       writeRequestLog({
         durationMs,
         error: errorMessage,
@@ -217,10 +411,12 @@ export const requestLoggerPlugin = new Elysia({ name: "request-logger" })
         level: "ERROR",
         method: request.method,
         path: pathname,
+        payload,
         requestId,
         statusCode,
         ts: new Date().toISOString(),
         userAgent: request.headers.get("user-agent") || "unknown",
+        users: user,
       });
     }
   });

@@ -1,7 +1,7 @@
 import { dehydrate, QueryClient } from "@tanstack/react-query";
 import { ReactElement } from "react";
 
-import { GETAuditLogs } from "@/src/utils";
+import { GETAuditArchives } from "@/src/utils";
 
 import { Main } from "./modules";
 
@@ -12,10 +12,10 @@ const AuditLayout = async (): Promise<ReactElement> => {
 
   await queryClient.prefetchQuery({
     queryFn: async () => {
-      const res = await GETAuditLogs({ limit, page: 1 });
+      const res = await GETAuditArchives();
       return res.data;
     },
-    queryKey: ["audit-logs", { dateTime: undefined, level: undefined, limit, method: undefined, page: 1, path: undefined }],
+    queryKey: ["audit-archives"],
   });
 
   const dehydratedState = dehydrate(queryClient);
