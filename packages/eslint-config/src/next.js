@@ -48,7 +48,7 @@ export const nextConfig = defineConfig([
       curly: ["warn"],
       "react/display-name": "warn",
       "react/jsx-fragments": "warn",
-      "react/jsx-no-undef": "off",
+      "react/jsx-no-undef": "warn",
       "react/jsx-no-useless-fragment": "warn",
       "react/no-children-prop": "warn",
       "react/no-danger": "warn",
