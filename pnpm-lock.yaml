@@ -285,6 +285,9 @@ importers:
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@types/node':
+        specifier: ^25.6.2
+        version: 25.6.2
 
 packages:
 
