@@ -8,6 +8,7 @@ const API_URL = process.env.NEXT_PUBLIC_BASE_API_URL;
 export interface ISuccessResponse<T> {
   data: T;
   message: string;
+  meta?: { page: number; pageSize: number; total: number; totalPages?: number } | null;
   success: true;
 }
 

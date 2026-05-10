@@ -43,7 +43,6 @@ const FORM_FIELDS_DATA: IFormField[] = [
 export const Main: FC = (): ReactElement => {
   const [passwordVisibility, setPasswordVisibility] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>("");
-  const [loading, setLoading] = useState(false);
 
   const {
     formState: { errors },
@@ -67,12 +66,6 @@ export const Main: FC = (): ReactElement => {
       const axiosError = error as AxiosError<IErrorResponse>;
       setErrorMessage(axiosError.response?.data?.message ?? "failed to change password");
       logTemplate.WARN("change password failed!", "auth/change-password");
-    },
-    onMutate: () => {
-      setLoading(true);
-    },
-    onSettled: () => {
-      setLoading(false);
     },
     onSuccess: () => {
       logTemplate.SUCCESS("change password success!", "auth/change-password");
@@ -98,7 +91,7 @@ export const Main: FC = (): ReactElement => {
           {FORM_FIELDS_DATA.map((dt) => (
             <ExampleInput
               color="default"
-              disabled={loading}
+              disabled={changePasswordMutation.isPending}
               errorMessage={errors[dt.name]?.message}
               icon={passwordVisibility ? <Eye size={18} /> : <EyeOff size={18} />}
               iconOnClick={() => setPasswordVisibility((prev) => !prev)}
@@ -112,7 +105,7 @@ export const Main: FC = (): ReactElement => {
 
           <span className="text-center text-xs text-red-600">{errorMessage}</span>
 
-          <SubmitButton color="black" disabled={loading} label="UPDATE" size="sm" variant="solid" />
+          <SubmitButton color="black" disabled={changePasswordMutation.isPending} label="UPDATE" size="sm" variant="solid" />
         </form>
       </Container>
     </main>

@@ -70,7 +70,6 @@ export const Main: FC = (): ReactElement => {
   const router = useRouter();
   const [passwordVisibility, setPasswordVisibility] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>("");
-  const [loading, setLoading] = useState(false);
 
   const {
     formState: { errors },
@@ -92,12 +91,6 @@ export const Main: FC = (): ReactElement => {
       const axiosError = error as AxiosError<IErrorResponse>;
       setErrorMessage(axiosError.response?.data?.message ?? "registration failed. please try again.");
       logTemplate.WARN("register failed!", "auth/register");
-    },
-    onMutate: () => {
-      setLoading(true);
-    },
-    onSettled: () => {
-      setLoading(false);
     },
     onSuccess: () => {
       logTemplate.SUCCESS("register success!", "auth/register");
@@ -138,7 +131,7 @@ export const Main: FC = (): ReactElement => {
           {FORM_FIELDS_DATA.map((dt) => (
             <ExampleInput
               color="default"
-              disabled={loading}
+              disabled={registerMutation.isPending}
               errorMessage={errors[dt.name]?.message}
               icon={getPasswordIcon(dt.isPassword ?? false)}
               iconOnClick={dt.isPassword ? () => setPasswordVisibility((prev) => !prev) : undefined}
@@ -153,7 +146,7 @@ export const Main: FC = (): ReactElement => {
 
           <span className="text-center text-xs text-red-600">{errorMessage}</span>
 
-          <SubmitButton color="black" disabled={loading} label="REGISTER" size="sm" variant="solid" />
+          <SubmitButton color="black" disabled={registerMutation.isPending} label="REGISTER" size="sm" variant="solid" />
 
           <div className="mx-auto text-center">
             <span className="text-xs">Already have an account? </span>
@@ -161,13 +154,13 @@ export const Main: FC = (): ReactElement => {
               className={ExampleATWM({
                 className: "inline text-xs",
                 color: "blue",
-                disabled: loading,
+                disabled: registerMutation.isPending,
                 size: "sm",
                 variant: "ghost",
               })}
               href={"/authentication/login"}
               onClick={(e) => {
-                if (loading) {
+                if (registerMutation.isPending) {
                   e.preventDefault();
                 } else {
                   setPasswordVisibility(false);

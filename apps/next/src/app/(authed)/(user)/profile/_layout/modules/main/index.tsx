@@ -76,7 +76,6 @@ const MainContent: FC = (): ReactElement => {
   const queryClient = useQueryClient();
   const [errorMessage, setErrorMessage] = useState<string | undefined>("");
   const [previewImage, setPreviewImage] = useState<null | string>(null);
-  const [loading, setLoading] = useState(false);
 
   const meQuery = useQuery({
     queryFn: async () => {
@@ -163,12 +162,6 @@ const MainContent: FC = (): ReactElement => {
       setErrorMessage(axiosError.response?.data?.message ?? "failed to update profile");
       logTemplate.WARN("update profile failed!", "auth/profile");
     },
-    onMutate: () => {
-      setLoading(true);
-    },
-    onSettled: () => {
-      setLoading(false);
-    },
     onSuccess: async (updatedUser) => {
       await session.update({
         user: {
@@ -207,7 +200,7 @@ const MainContent: FC = (): ReactElement => {
           {FORM_FIELDS_DATA.map((dt) => (
             <ExampleInput
               color="default"
-              disabled={loading}
+              disabled={updateProfileMutation.isPending}
               errorMessage={errors[dt.name]?.message as string | undefined}
               key={dt.name}
               label={dt.label}
@@ -223,10 +216,16 @@ const MainContent: FC = (): ReactElement => {
           <div className="mx-auto text-center">
             <span className="text-xs">Do you want to change your password? </span>
             <Link
-              className={ExampleATWM({ className: "inline text-xs", color: "blue", disabled: loading, size: "sm", variant: "ghost" })}
+              className={ExampleATWM({
+                className: "inline text-xs",
+                color: "blue",
+                disabled: updateProfileMutation.isPending,
+                size: "sm",
+                variant: "ghost",
+              })}
               href={"/password/change"}
               onClick={(e) => {
-                if (loading) {
+                if (updateProfileMutation.isPending) {
                   e.preventDefault();
                 }
               }}
@@ -235,7 +234,7 @@ const MainContent: FC = (): ReactElement => {
             </Link>
           </div>
 
-          <SubmitButton color="black" disabled={loading} label="UPDATE" size="sm" variant="solid" />
+          <SubmitButton color="black" disabled={updateProfileMutation.isPending} label="UPDATE" size="sm" variant="solid" />
         </form>
       </Container>
     </main>

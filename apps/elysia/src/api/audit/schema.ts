@@ -8,13 +8,6 @@ export const querySchema = z.object({
     .regex(/^\d{4}-\d{2}-\d{2}$/, { message: "archiveDate must be in YYYY-MM-DD format" })
     .optional(),
   level: z.enum(["INFO", "ERROR"], { message: schemaMessage.string.enum("level") }).optional(),
-  limit: z.coerce
-    .number()
-    .int({ message: schemaMessage.number.int("limit") })
-    .positive({ message: schemaMessage.number.positive("limit") })
-    .max(100, { message: schemaMessage.number.max("limit", 100) })
-    .optional()
-    .default(20),
   method: z.enum(["DELETE", "GET", "PATCH", "POST", "PUT"], { message: schemaMessage.string.enum("method") }).optional(),
   page: z.coerce
     .number()
@@ -22,6 +15,13 @@ export const querySchema = z.object({
     .positive({ message: schemaMessage.number.positive("page") })
     .optional()
     .default(1),
+  pageSize: z.coerce
+    .number()
+    .int({ message: schemaMessage.number.int("pageSize") })
+    .positive({ message: schemaMessage.number.positive("pageSize") })
+    .max(100, { message: schemaMessage.number.max("pageSize", 100) })
+    .optional()
+    .default(50),
   path: z.string().optional(),
   statusCode: z.coerce
     .number()

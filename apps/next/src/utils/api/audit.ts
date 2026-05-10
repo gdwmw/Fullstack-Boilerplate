@@ -31,10 +31,10 @@ export interface IAuditArchiveEntry {
 }
 
 export interface IAuditLogMeta {
-  limit: number;
   page: number;
+  pageSize: number;
   total: number;
-  totalPages: number;
+  totalPages?: number;
 }
 
 export interface IAuditLogListResponse {
@@ -51,9 +51,9 @@ type TQueryParams = {
   actor?: string;
   archiveDate?: string;
   level?: "ERROR" | "INFO";
-  limit?: number;
   method?: "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
   page?: number;
+  pageSize?: number;
   path?: string;
   statusCode?: number;
   time?: string;

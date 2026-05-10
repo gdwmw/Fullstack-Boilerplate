@@ -6,7 +6,7 @@ import { GETAuditArchives } from "@/src/utils";
 import { Main } from "./modules";
 
 const AuditLayout = async (): Promise<ReactElement> => {
-  const limit = 50;
+  const defaultPageSize = 50;
 
   const queryClient = new QueryClient();
 
@@ -20,7 +20,7 @@ const AuditLayout = async (): Promise<ReactElement> => {
 
   const dehydratedState = dehydrate(queryClient);
 
-  return <Main dehydratedState={dehydratedState} limit={limit} />;
+  return <Main defaultPageSize={defaultPageSize} dehydratedState={dehydratedState} />;
 };
 
 export default AuditLayout;

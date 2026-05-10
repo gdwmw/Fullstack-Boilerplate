@@ -1,8 +1,9 @@
 "use client";
 
 import { DehydratedState, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format, isValid, parse } from "date-fns";
+import { format } from "date-fns";
 import { FC, ReactElement, useEffect, useMemo, useState } from "react";
+import { Controller, useForm, useWatch } from "react-hook-form";
 
 import { Container, ExampleA, ExampleDatePicker, ExampleInput, ExampleSelect, Header } from "@/src/components";
 import { ReactQueryProvider } from "@/src/libs";
@@ -36,56 +37,78 @@ const formatTimeForQuery = (value: Date | null): string | undefined => {
   return format(value, "HH:mm");
 };
 
-const parseQueryTime = (value?: string): Date | null => {
-  if (!value) {
-    return null;
-  }
-
-  const parsedDate = parse(value, "HH:mm", new Date());
-
-  if (!isValid(parsedDate)) {
-    return null;
-  }
-
-  return parsedDate;
-};
-
 interface I {
+  defaultPageSize: number;
   dehydratedState: DehydratedState;
-  limit: number;
 }
 
 export const Main: FC<I> = (props): ReactElement => (
   <ReactQueryProvider dehydratedState={props.dehydratedState}>
-    <MainContent limit={props.limit} />
+    <MainContent defaultPageSize={props.defaultPageSize} />
   </ReactQueryProvider>
 );
 
 interface IMainContent {
-  limit: number;
+  defaultPageSize: number;
 }
+
+interface IFilterFormValues {
+  actor: string;
+  level: "" | "ERROR" | "INFO";
+  method: "" | "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
+  path: string;
+  statusCode: string;
+  time: Date | null;
+}
+
+interface IAppliedFilters {
+  actor?: string;
+  level?: "ERROR" | "INFO";
+  method?: "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
+  path?: string;
+  statusCode?: number;
+  time?: string;
+}
+
+const FILTER_DEFAULT_VALUES: IFilterFormValues = {
+  actor: "",
+  level: "",
+  method: "",
+  path: "",
+  statusCode: "",
+  time: null,
+};
 
 const MainContent: FC<IMainContent> = (props): ReactElement => {
   const queryClient = useQueryClient();
   const currentYear = new Date().getFullYear();
   const yearOptions = useMemo(() => Array.from({ length: 5 }, (_, index) => currentYear - index), [currentYear]);
+  const { control, handleSubmit, register, reset } = useForm<IFilterFormValues>({
+    defaultValues: FILTER_DEFAULT_VALUES,
+  });
   const [page, setPage] = useState(1);
   const [selectedDateKey, setSelectedDateKey] = useState<null | string>(null);
   const [selectedLogRequestId, setSelectedLogRequestId] = useState<null | string>(null);
   const [archiveMonth, setArchiveMonth] = useState<number | undefined>(undefined);
   const [archiveYear, setArchiveYear] = useState<number | undefined>(currentYear);
-  const [actor, setActor] = useState<string | undefined>(undefined);
-  const [level, setLevel] = useState<"ERROR" | "INFO" | undefined>(undefined);
-  const [method, setMethod] = useState<"DELETE" | "GET" | "PATCH" | "POST" | "PUT" | undefined>(undefined);
-  const [path, setPath] = useState<string | undefined>(undefined);
-  const [statusCode, setStatusCode] = useState<number | undefined>(undefined);
-  const [time, setTime] = useState<string | undefined>(undefined);
-  const [appliedActor, setAppliedActor] = useState<string | undefined>(undefined);
-  const [appliedLevel, setAppliedLevel] = useState<"ERROR" | "INFO" | undefined>(undefined);
-  const [appliedMethod, setAppliedMethod] = useState<"DELETE" | "GET" | "PATCH" | "POST" | "PUT" | undefined>(undefined);
-  const [appliedPath, setAppliedPath] = useState<string | undefined>(undefined);
-  const [appliedStatusCode, setAppliedStatusCode] = useState<number | undefined>(undefined);
-  const [appliedTime, setAppliedTime] = useState<string | undefined>(undefined);
+  const [pageSize, setPageSize] = useState<number>(props.defaultPageSize);
+  const [appliedFilters, setAppliedFilters] = useState<IAppliedFilters>({});
+
+  const filterValues = useWatch({ control });
+  const draftFilters = useMemo<IAppliedFilters>(() => {
+    const normalizedActor = (filterValues.actor ?? "").trim();
+    const normalizedPath = (filterValues.path ?? "").trim();
+    const parsedStatusCode = filterValues.statusCode ? Number(filterValues.statusCode) : undefined;
+
+    return {
+      actor: normalizedActor || undefined,
+      level: filterValues.level || undefined,
+      method: filterValues.method || undefined,
+      path: normalizedPath || undefined,
+      statusCode: parsedStatusCode !== undefined && Number.isNaN(parsedStatusCode) ? undefined : parsedStatusCode,
+      time: formatTimeForQuery(filterValues.time ?? null),
+    };
+  }, [filterValues]);
 
   const archiveQuery = useQuery({
     queryFn: async () => {
@@ -110,15 +133,15 @@ const MainContent: FC<IMainContent> = (props): ReactElement => {
   const queryKey = [
     "audit-logs",
     {
-      actor: appliedActor,
+      actor: appliedFilters.actor,
       archiveDate: resolvedSelectedDateKey,
-      level: appliedLevel,
-      limit: props.limit,
-      method: appliedMethod,
+      level: appliedFilters.level,
+      method: appliedFilters.method,
       page,
-      path: appliedPath,
-      statusCode: appliedStatusCode,
-      time: appliedTime,
+      pageSize,
+      path: appliedFilters.path,
+      statusCode: appliedFilters.statusCode,
+      time: appliedFilters.time,
     },
   ];
 
@@ -126,15 +149,15 @@ const MainContent: FC<IMainContent> = (props): ReactElement => {
     enabled: Boolean(resolvedSelectedDateKey),
     queryFn: async () => {
       const res = await GETAuditLogs({
-        actor: appliedActor,
+        actor: appliedFilters.actor,
         archiveDate: resolvedSelectedDateKey ?? undefined,
-        level: appliedLevel,
-        limit: props.limit,
-        method: appliedMethod,
+        level: appliedFilters.level,
+        method: appliedFilters.method,
         page,
-        path: appliedPath,
-        statusCode: appliedStatusCode,
-        time: appliedTime,
+        pageSize,
+        path: appliedFilters.path,
+        statusCode: appliedFilters.statusCode,
+        time: appliedFilters.time,
       });
 
       return res.data;
@@ -144,6 +167,13 @@ const MainContent: FC<IMainContent> = (props): ReactElement => {
 
   const logs = useMemo(() => auditQuery.data?.data ?? [], [auditQuery.data?.data]);
   const meta = auditQuery.data?.meta;
+  const totalPages = useMemo(() => {
+    if (!meta) {
+      return 0;
+    }
+
+    return meta.totalPages ?? Math.max(1, Math.ceil(meta.total / meta.pageSize));
+  }, [meta]);
   const selectedLog = useMemo(() => {
     if (!selectedLogRequestId) {
       return null;
@@ -151,18 +181,22 @@ const MainContent: FC<IMainContent> = (props): ReactElement => {
 
     return logs.find((log) => log.requestId === selectedLogRequestId) ?? null;
   }, [logs, selectedLogRequestId]);
-  const hasActiveFilters = Boolean(appliedActor || appliedLevel || appliedMethod || appliedPath || appliedStatusCode || appliedTime);
-  const hasDraftFilters = Boolean(actor || level || method || path || statusCode || time);
+  const hasActiveFilters = Boolean(
+    appliedFilters.actor || appliedFilters.level || appliedFilters.method || appliedFilters.path || appliedFilters.statusCode || appliedFilters.time,
+  );
+  const hasDraftFilters = Boolean(
+    draftFilters.actor || draftFilters.level || draftFilters.method || draftFilters.path || draftFilters.statusCode || draftFilters.time,
+  );
   const hasPendingFilterChanges =
-    actor !== appliedActor ||
-    time !== appliedTime ||
-    level !== appliedLevel ||
-    method !== appliedMethod ||
-    path !== appliedPath ||
-    statusCode !== appliedStatusCode;
+    draftFilters.actor !== appliedFilters.actor ||
+    draftFilters.time !== appliedFilters.time ||
+    draftFilters.level !== appliedFilters.level ||
+    draftFilters.method !== appliedFilters.method ||
+    draftFilters.path !== appliedFilters.path ||
+    draftFilters.statusCode !== appliedFilters.statusCode;
 
   useEffect(() => {
-    if (!resolvedSelectedDateKey || !meta || page >= meta.totalPages) {
+    if (!resolvedSelectedDateKey || !meta || page >= totalPages) {
       return;
     }
 
@@ -171,15 +205,15 @@ const MainContent: FC<IMainContent> = (props): ReactElement => {
     void queryClient.prefetchQuery({
       queryFn: async () => {
         const res = await GETAuditLogs({
-          actor: appliedActor,
+          actor: appliedFilters.actor,
           archiveDate: resolvedSelectedDateKey,
-          level: appliedLevel,
-          limit: props.limit,
-          method: appliedMethod,
+          level: appliedFilters.level,
+          method: appliedFilters.method,
           page: nextPage,
-          path: appliedPath,
-          statusCode: appliedStatusCode,
-          time: appliedTime,
+          pageSize,
+          path: appliedFilters.path,
+          statusCode: appliedFilters.statusCode,
+          time: appliedFilters.time,
         });
 
         return res.data;
@@ -187,55 +221,41 @@ const MainContent: FC<IMainContent> = (props): ReactElement => {
       queryKey: [
         "audit-logs",
         {
-          actor: appliedActor,
+          actor: appliedFilters.actor,
           archiveDate: resolvedSelectedDateKey,
-          level: appliedLevel,
-          limit: props.limit,
-          method: appliedMethod,
+          level: appliedFilters.level,
+          method: appliedFilters.method,
           page: nextPage,
-          path: appliedPath,
-          statusCode: appliedStatusCode,
-          time: appliedTime,
+          pageSize,
+          path: appliedFilters.path,
+          statusCode: appliedFilters.statusCode,
+          time: appliedFilters.time,
         },
       ],
     });
   }, [
-    appliedActor,
-    appliedLevel,
-    appliedMethod,
-    appliedPath,
-    appliedStatusCode,
-    appliedTime,
+    appliedFilters.actor,
+    appliedFilters.level,
+    appliedFilters.method,
+    appliedFilters.path,
+    appliedFilters.statusCode,
+    appliedFilters.time,
     meta,
     page,
-    props.limit,
+    pageSize,
     queryClient,
     resolvedSelectedDateKey,
+    totalPages,
   ]);
 
-  const applyFilters = () => {
-    setAppliedActor(actor);
-    setAppliedLevel(level);
-    setAppliedMethod(method);
-    setAppliedPath(path);
-    setAppliedStatusCode(statusCode);
-    setAppliedTime(time);
+  const applyFilters = handleSubmit(() => {
+    setAppliedFilters(draftFilters);
     setPage(1);
-  };
+  });
 
   const resetFilters = () => {
-    setActor(undefined);
-    setLevel(undefined);
-    setMethod(undefined);
-    setPath(undefined);
-    setStatusCode(undefined);
-    setTime(undefined);
-    setAppliedActor(undefined);
-    setAppliedLevel(undefined);
-    setAppliedMethod(undefined);
-    setAppliedPath(undefined);
-    setAppliedStatusCode(undefined);
-    setAppliedTime(undefined);
+    reset(FILTER_DEFAULT_VALUES);
+    setAppliedFilters({});
     setPage(1);
   };
 
@@ -256,31 +276,29 @@ const MainContent: FC<IMainContent> = (props): ReactElement => {
           <div className="flex size-full min-h-172.5 min-w-235 flex-col gap-3">
             <section className="flex flex-col gap-3">
               <div className="flex gap-1">
-                <ExampleDatePicker
-                  className={{ container: "w-full" }}
-                  color="default"
-                  dateFormat="HH:mm"
-                  label="Time"
-                  onChange={(selectedDate: Date | null) => {
-                    setTime(formatTimeForQuery(selectedDate));
-                  }}
-                  placeholderText="HH:mm"
-                  selected={parseQueryTime(time)}
-                  showTimeSelect
-                  showTimeSelectOnly
-                  timeFormat="HH:mm"
-                  timeIntervals={5}
+                <Controller
+                  control={control}
+                  name="time"
+                  render={({ field }) => (
+                    <ExampleDatePicker
+                      className={{ container: "w-full" }}
+                      color="default"
+                      dateFormat="HH:mm"
+                      label="Time"
+                      onChange={(selectedDate: Date | null) => {
+                        field.onChange(selectedDate);
+                      }}
+                      placeholderText="HH:mm"
+                      selected={field.value}
+                      showTimeSelect
+                      showTimeSelectOnly
+                      timeFormat="HH:mm"
+                      timeIntervals={5}
+                    />
+                  )}
                 />
 
-                <ExampleSelect
-                  className={{ container: "w-full" }}
-                  color="default"
-                  label="Level"
-                  onChange={(e) => {
-                    setLevel((e.target.value as "ERROR" | "INFO") || undefined);
-                  }}
-                  value={level ?? ""}
-                >
+                <ExampleSelect className={{ container: "w-full" }} color="default" label="Level" {...register("level")}>
                   <option className="text-black" value="">
                     All Levels
                   </option>
@@ -291,15 +309,7 @@ const MainContent: FC<IMainContent> = (props): ReactElement => {
                   ))}
                 </ExampleSelect>
 
-                <ExampleSelect
-                  className={{ container: "w-full" }}
-                  color="default"
-                  label="Method"
-                  onChange={(e) => {
-                    setMethod((e.target.value as "DELETE" | "GET" | "PATCH" | "POST" | "PUT") || undefined);
-                  }}
-                  value={method ?? ""}
-                >
+                <ExampleSelect className={{ container: "w-full" }} color="default" label="Method" {...register("method")}>
                   <option className="text-black" value="">
                     All Methods
                   </option>
@@ -310,27 +320,9 @@ const MainContent: FC<IMainContent> = (props): ReactElement => {
                   ))}
                 </ExampleSelect>
 
-                <ExampleInput
-                  className={{ container: "w-full" }}
-                  color="default"
-                  label="Actor"
-                  onChange={(e) => {
-                    setActor(e.target.value || undefined);
-                  }}
-                  placeholder="Search..."
-                  value={actor ?? ""}
-                />
+                <ExampleInput className={{ container: "w-full" }} color="default" label="Actor" placeholder="Search..." {...register("actor")} />
 
-                <ExampleInput
-                  className={{ container: "w-full" }}
-                  color="default"
-                  label="Path"
-                  onChange={(e) => {
-                    setPath(e.target.value || undefined);
-                  }}
-                  placeholder="/api/users"
-                  value={path ?? ""}
-                />
+                <ExampleInput className={{ container: "w-full" }} color="default" label="Path" placeholder="/api/users" {...register("path")} />
 
                 <ExampleInput
                   className={{ container: "w-full" }}
@@ -338,12 +330,9 @@ const MainContent: FC<IMainContent> = (props): ReactElement => {
                   label="Status"
                   max={599}
                   min={100}
-                  onChange={(e) => {
-                    setStatusCode(e.target.value ? Number(e.target.value) : undefined);
-                  }}
                   placeholder="200"
                   type="number"
-                  value={statusCode ?? ""}
+                  {...register("statusCode")}
                 />
               </div>
 
@@ -391,8 +380,15 @@ const MainContent: FC<IMainContent> = (props): ReactElement => {
                   resolvedSelectedDateKey={resolvedSelectedDateKey}
                 />
 
-                {resolvedSelectedDateKey && meta && meta.totalPages > 1 && (
-                  <AuditPagination meta={{ page: meta.page, totalPages: meta.totalPages }} onPageChange={setPage} />
+                {resolvedSelectedDateKey && meta && (
+                  <AuditPagination
+                    meta={{ page: meta.page, pageSize: meta.pageSize, total: meta.total, totalPages: meta.totalPages }}
+                    onPageChange={setPage}
+                    onPageSizeChange={(nextPageSize) => {
+                      setPageSize(nextPageSize);
+                      setPage(1);
+                    }}
+                  />
                 )}
               </div>
             </section>

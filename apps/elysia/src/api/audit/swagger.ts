@@ -38,10 +38,10 @@ export const docs = (label: string): Record<"getAll" | "getArchives", DocumentDe
 
   const auditLogMetaSchema = {
     properties: {
-      limit: { example: 20, type: "integer" },
       page: { example: 1, type: "integer" },
+      pageSize: { example: 50, type: "integer" },
       total: { example: 42, type: "integer" },
-      totalPages: { example: 3, type: "integer" },
+      totalPages: { example: 1, type: "integer" },
     },
     type: "object",
   };
@@ -112,8 +112,8 @@ export const docs = (label: string): Record<"getAll" | "getArchives", DocumentDe
         {
           description: "Maximum number of audit log entries to return per page.",
           in: "query",
-          name: "limit",
-          schema: { default: 20, example: 20, maximum: 100, minimum: 1, type: "integer" },
+          name: "pageSize",
+          schema: { default: 50, example: 50, maximum: 100, minimum: 1, type: "integer" },
         },
         {
           description: "Search actor snapshot by name, username, email, phone, or role.",

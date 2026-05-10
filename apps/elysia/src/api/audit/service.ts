@@ -81,7 +81,7 @@ const parseCompressedLogFile = async (filePath: string): Promise<ILogEntry[]> =>
 };
 
 export const service = {
-  async getAll({ actor, archiveDate, level, limit, method, page, path, statusCode, time }: TQuerySchema) {
+  async getAll({ actor, archiveDate, level, method, page, pageSize, path, statusCode, time }: TQuerySchema) {
     const logDir = getLogDirectory();
     const selectedTime = parseTimeFilter(time);
     const normalizedActor = actor?.trim().toLowerCase();
@@ -97,7 +97,7 @@ export const service = {
         .sort()
         .reverse();
     } catch {
-      return { data: [], meta: { limit, page, total: 0, totalPages: 0 } };
+      return { data: [], meta: { page, pageSize: pageSize, total: 0, totalPages: 0 } };
     }
 
     const allEntries: ILogEntry[] = [];
@@ -135,16 +135,16 @@ export const service = {
     });
 
     const total = filtered.length;
-    const skip = (page - 1) * limit;
-    const data = filtered.slice(skip, skip + limit);
+    const skip = (page - 1) * pageSize;
+    const data = filtered.slice(skip, skip + pageSize);
 
     return {
       data,
       meta: {
-        limit,
         page,
+        pageSize: pageSize,
         total,
-        totalPages: Math.ceil(total / limit),
+        totalPages: Math.ceil(total / pageSize),
       },
     };
   },

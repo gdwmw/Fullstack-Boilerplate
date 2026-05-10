@@ -1,8 +1,17 @@
 import { Prisma } from "../generated/prisma/client";
 
-export const SUCCESS_RESPONSE = ({ data, message = null }: { data: unknown; message: null | string }) => ({
+export const SUCCESS_RESPONSE = ({
+  data,
+  message = null,
+  meta = null,
+}: {
+  data: unknown;
+  message: null | string;
+  meta?: { page: number; pageSize: number; total: number; totalPages?: number } | null;
+}) => ({
   data: data || null,
   message: message,
+  meta: meta || null,
   success: true,
 });
 

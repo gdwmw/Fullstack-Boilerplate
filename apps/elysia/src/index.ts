@@ -83,13 +83,13 @@ if (!process.env.REDIS_URL) {
   throw new Error("Please check your environment variables. REDIS_URL is not defined.");
 }
 
-void checkZstdAvailability().then((isAvailable) => {
+checkZstdAvailability().then((isAvailable) => {
   if (isAvailable) {
     logger.info("zstd binary detected. Audit log compression is enabled.");
     return;
   }
 
-  logger.error("zstd binary is not available in PATH. Audit log compression/decompression may fail.");
+  logger.error("zstd binary is not available in PATH. audit log compression/decompression may fail.");
 });
 
 const app = new Elysia()
