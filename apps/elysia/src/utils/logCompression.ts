@@ -11,6 +11,8 @@ const REQUEST_LOG_PREFIX = "elysia-req-";
 const RAW_LOG_EXTENSION = ".log";
 const COMPRESSED_LOG_EXTENSION = ".log.zst";
 
+let zstdAvailabilityPromise: null | Promise<boolean> = null;
+
 export const getLogDirectory = () => process.env.LOG_DIR?.trim() || join(process.cwd(), "backups", "logs");
 
 export const getRequestLogFileName = (date = new Date()) => `${REQUEST_LOG_PREFIX}${format(date, "dd-MM-yyyy")}${RAW_LOG_EXTENSION}`;
@@ -20,6 +22,16 @@ export const isRawRequestLogFileName = (entry: string) => entry.startsWith(REQUE
 export const isCompressedRequestLogFileName = (entry: string) => entry.startsWith(REQUEST_LOG_PREFIX) && entry.endsWith(COMPRESSED_LOG_EXTENSION);
 
 export const isRequestLogFileName = (entry: string) => isRawRequestLogFileName(entry) || isCompressedRequestLogFileName(entry);
+
+export const checkZstdAvailability = async (): Promise<boolean> => {
+  if (!zstdAvailabilityPromise) {
+    zstdAvailabilityPromise = execFileAsync("zstd", ["--version"])
+      .then(() => true)
+      .catch(() => false);
+  }
+
+  return zstdAvailabilityPromise;
+};
 
 export const compressLogFile = async (filePath: string) => {
   await execFileAsync("zstd", ["-q", "--rm", "-f", filePath, "-o", `${filePath}.zst`]);

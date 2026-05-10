@@ -7,7 +7,7 @@ import { createPortal } from "react-dom";
 import { Container, ExampleA, Header } from "@/src/components";
 import { IAuditLogEntry } from "@/src/utils";
 
-import { durationClassName, levelClassName, methodClassName, statusClassName } from "../../components";
+import { durationClassName, getBrowserName, getDisplayIp, levelClassName, methodClassName, statusClassName } from "../../components";
 
 interface IAuditDetailModal {
   onClose: () => void;
@@ -50,6 +50,8 @@ export const AuditDetailModal: FC<IAuditDetailModal> = ({ onClose, selectedLog }
     return null;
   }
 
+  const selectedLogBrowser = getBrowserName(selectedLog.userAgent ?? "");
+  const selectedLogIp = getDisplayIp(selectedLog.ip ?? "");
   const selectedLogPayload = stringifyLogValue((selectedLog as { payload?: TAuditPayload } & IAuditLogEntry).payload ?? null);
   const selectedLogUser = stringifyLogValue((selectedLog as { users?: TAuditUser } & IAuditLogEntry).users ?? null);
 
@@ -112,8 +114,8 @@ export const AuditDetailModal: FC<IAuditDetailModal> = ({ onClose, selectedLog }
               <section className="flex flex-col gap-2 overflow-hidden text-xs">
                 <div className="grid grid-cols-3 gap-2">
                   <DetailMetaItem label="TIMESTAMP" value={selectedLog.ts} />
-                  <DetailMetaItem label="USER AGENT" value={selectedLog.userAgent} />
-                  <DetailMetaItem label="IP ADDRESS" value={selectedLog.ip} />
+                  <DetailMetaItem label="BROWSER" value={selectedLogBrowser} />
+                  <DetailMetaItem label="IP ADDRESS" value={selectedLogIp} />
                 </div>
 
                 <DetailBlock title="USER SNAPSHOT">{selectedLogUser}</DetailBlock>

@@ -95,7 +95,7 @@ export const service = {
         .filter((f) => isRequestLogFileName(f))
         .filter((f) => (selectedFileName ? f === selectedFileName || f === `${selectedFileName}.zst` : true))
         .sort()
-        .reverse(); // most recent first
+        .reverse();
     } catch {
       return { data: [], meta: { limit, page, total: 0, totalPages: 0 } };
     }
@@ -108,7 +108,6 @@ export const service = {
       allEntries.push(...entries);
     }
 
-    // sort descending by timestamp
     allEntries.sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime());
 
     const filtered = allEntries.filter((entry) => {

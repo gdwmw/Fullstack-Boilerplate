@@ -3,7 +3,15 @@ import { join } from "path";
 
 import { auditRoutes, authRoutes, uploadRoutes, usersRoutes } from "./api";
 import { logger } from "./libs";
-import { cleanupLogsWorker, cleanupSessionsWorker, corsPlugin, databaseBackupWorker, requestLoggerPlugin, swaggerPlugin } from "./utils";
+import {
+  checkZstdAvailability,
+  cleanupLogsWorker,
+  cleanupSessionsWorker,
+  corsPlugin,
+  databaseBackupWorker,
+  requestLoggerPlugin,
+  swaggerPlugin,
+} from "./utils";
 
 const ELYSIA_PORT = process.env.ELYSIA_PORT;
 
@@ -74,6 +82,15 @@ if (!process.env.CORS_ORIGINS) {
 if (!process.env.REDIS_URL) {
   throw new Error("Please check your environment variables. REDIS_URL is not defined.");
 }
+
+void checkZstdAvailability().then((isAvailable) => {
+  if (isAvailable) {
+    logger.info("zstd binary detected. Audit log compression is enabled.");
+    return;
+  }
+
+  logger.error("zstd binary is not available in PATH. Audit log compression/decompression may fail.");
+});
 
 const app = new Elysia()
   .use(corsPlugin)

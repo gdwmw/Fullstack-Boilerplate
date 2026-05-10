@@ -1,3 +1,4 @@
+import { format, isValid } from "date-fns";
 import { FC, ReactElement } from "react";
 
 import { ExampleA } from "@/src/components";
@@ -16,14 +17,66 @@ interface ILogEntry {
 
 const formatLogTimestamp = (value: string): string => {
   const date = new Date(value);
-  return date.toLocaleString("en-GB", {
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    month: "short",
-    second: "2-digit",
-    year: "numeric",
-  });
+
+  if (!isValid(date)) {
+    return value;
+  }
+
+  return format(date, "dd MMM yyyy, HH:mm:ss");
+};
+
+export const getBrowserName = (userAgent: string): string => {
+  const ua = userAgent.toLowerCase();
+
+  if (!ua || ua === "unknown") {
+    return "Unknown";
+  }
+
+  if (ua.includes("edg/") || ua.includes("edge/")) {
+    return "Edge";
+  }
+
+  if (ua.includes("opr/") || ua.includes("opera")) {
+    return "Opera";
+  }
+
+  if (ua.includes("firefox/") || ua.includes("fxios/")) {
+    return "Firefox";
+  }
+
+  if (ua.includes("crios/") || ua.includes("chrome/")) {
+    return "Chrome";
+  }
+
+  if (ua.includes("safari/") && !ua.includes("chrome/") && !ua.includes("crios/")) {
+    return "Safari";
+  }
+
+  if (ua.includes("msie") || ua.includes("trident/")) {
+    return "Internet Explorer";
+  }
+
+  return "Other";
+};
+
+export const getDisplayIp = (ip: string): string => {
+  const rawIp = ip.trim();
+
+  if (!rawIp || rawIp.toLowerCase() === "unknown") {
+    return "Unknown";
+  }
+
+  const firstForwardedIp = rawIp.includes(",") ? rawIp.split(",")[0]?.trim() : rawIp;
+
+  if (!firstForwardedIp) {
+    return "Unknown";
+  }
+
+  if (firstForwardedIp.startsWith("::ffff:")) {
+    return firstForwardedIp.replace("::ffff:", "");
+  }
+
+  return firstForwardedIp;
 };
 
 export const levelClassName = (level: ILogEntry["level"]): string => {
@@ -147,7 +200,7 @@ export const AuditTable: FC<I> = (props): ReactElement => (
               </td>
               <td className="max-w-64 min-w-64">
                 <p className="truncate">{log.path}</p>
-                <p className="truncate text-xs text-gray-500 dark:text-gray-400">{log.userAgent}</p>
+                <p className="truncate text-xs text-gray-500 dark:text-gray-400">{getBrowserName(log.userAgent)}</p>
               </td>
               <td className="max-w-18 min-w-18 text-center">
                 <span className={["block rounded-full px-2 py-0.5 text-xs font-semibold", statusClassName(log.statusCode)].join(" ")}>
@@ -155,7 +208,7 @@ export const AuditTable: FC<I> = (props): ReactElement => (
                 </span>
               </td>
               <td className="max-w-32 min-w-32 text-center">
-                <p className="truncate">{log.ip}</p>
+                <p className="truncate">{getDisplayIp(log.ip)}</p>
               </td>
               <td className="max-w-24 min-w-24 text-center">
                 <span className={["block rounded-full px-2 py-0.5 text-xs font-semibold", durationClassName(log.durationMs)].join(" ")}>
