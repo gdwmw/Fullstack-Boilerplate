@@ -172,7 +172,7 @@ It contains exactly one file (`schemaMessage.ts`). A package boundary adds publi
 
 Backend has `apps/elysia/src/api/auth/schema.ts` with `loginSchema`, `registerSchema`, `changePasswordSchema`. Frontend has `apps/next/src/app/authentication/login/_layout/modules/main/schema.ts` (a separate `loginSchema` referenced as `"../schema"`). They will drift. The whole point of `@repo/constants/schemaMessage` only matters if both ends use it; today only Elysia does.
 
-**Recommendation.** Move all input Zod schemas to `@repo/contracts` and import them on both sides. `react-hook-form`'s `zodResolver` and Elysia's `body.parse` will use the exact same source.
+**Recommendation.** Move all input Zod schemas to `@repo/schemas` and import them on both sides. `react-hook-form`'s `zodResolver` and Elysia's `body.parse` will use the exact same source.
 
 ---
 
