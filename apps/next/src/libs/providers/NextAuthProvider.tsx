@@ -55,7 +55,7 @@ const scheduleAt = (runAt: number, callback: () => void): (() => void) => {
   };
 };
 
-const tryAcquireRefreshLock = (): (() => void) | null => {
+const tryAcquireFallbackLock = (): (() => void) | null => {
   try {
     const now = Date.now();
     const current = globalThis.localStorage.getItem(AUTH_REFRESH_LOCK_KEY);
@@ -85,9 +85,40 @@ const tryAcquireRefreshLock = (): (() => void) | null => {
   }
 };
 
+const hasWebLocks = (): boolean => typeof globalThis.navigator !== "undefined" && typeof globalThis.navigator.locks?.request === "function";
+
+const withRefreshLock = async (run: () => Promise<void>): Promise<"locked" | "ran"> => {
+  if (hasWebLocks()) {
+    let outcome: "locked" | "ran" = "locked";
+    try {
+      await globalThis.navigator.locks.request(AUTH_REFRESH_LOCK_KEY, { ifAvailable: true }, async (lock) => {
+        if (!lock) {
+          return;
+        }
+        outcome = "ran";
+        await run();
+      });
+      return outcome;
+    } catch (error) {
+      logStorageWarning("lock", error);
+    }
+  }
+
+  const release = tryAcquireFallbackLock();
+  if (!release) {
+    return "locked";
+  }
+  try {
+    await run();
+  } finally {
+    release();
+  }
+  return "ran";
+};
+
 const notifyRefreshSync = () => {
   try {
-    globalThis.localStorage.setItem(AUTH_REFRESH_SYNC_KEY, String(Date.now()));
+    globalThis.localStorage.setItem(AUTH_REFRESH_SYNC_KEY, `${Date.now()}-${Math.random().toString(36).slice(2)}`);
   } catch (error) {
     logStorageWarning("sync", error);
   }
@@ -142,31 +173,19 @@ const AccessTokenRefreshGuard: FC = (): null | ReactElement => {
     };
   }, [status, update]);
 
+  const accessTokenExpiresAt = data?.user?.accessTokenExpiresAt;
+  const sessionExpiresAt = data?.user?.sessionExpiresAt;
+  const sessionStartedAt = data?.user?.sessionStartedAt;
+
   useEffect(() => {
-    if (status !== "authenticated") {
+    if (status !== "authenticated" || !accessTokenExpiresAt) {
       return;
     }
 
     let syncTimeoutId: TTimeoutId | undefined;
-    const currentUser = data?.user;
-    const accessTokenExpiresAt = currentUser?.accessTokenExpiresAt;
-
-    if (!accessTokenExpiresAt) {
-      return;
-    }
-
     const refreshAt = accessTokenExpiresAt - parseDurationToMs(REFRESH_BUFFER_MS);
 
-    const refresh = async () => {
-      const releaseLock = tryAcquireRefreshLock();
-
-      if (!releaseLock) {
-        syncTimeoutId = globalThis.setTimeout(() => {
-          void update();
-        }, REFRESH_SYNC_DELAY_MS);
-        return;
-      }
-
+    const runRefresh = async () => {
       try {
         const res = await POSTRefresh();
         const newAccessToken = res?.data?.accessToken;
@@ -180,18 +199,25 @@ const AccessTokenRefreshGuard: FC = (): null | ReactElement => {
 
         await update({
           user: {
-            ...currentUser,
             accessToken: newAccessToken,
             accessTokenExpiresAt: newExpiresAt,
-            sessionExpiresAt: currentUser?.sessionExpiresAt,
-            sessionStartedAt: currentUser?.sessionStartedAt,
+            sessionExpiresAt,
+            sessionStartedAt,
           },
         });
         notifyRefreshSync();
       } catch {
         signOut();
-      } finally {
-        releaseLock();
+      }
+    };
+
+    const refresh = async () => {
+      const outcome = await withRefreshLock(runRefresh);
+
+      if (outcome === "locked") {
+        syncTimeoutId = globalThis.setTimeout(() => {
+          void update();
+        }, REFRESH_SYNC_DELAY_MS);
       }
     };
 
@@ -205,7 +231,7 @@ const AccessTokenRefreshGuard: FC = (): null | ReactElement => {
         globalThis.clearTimeout(syncTimeoutId);
       }
     };
-  }, [data?.user, status, update]);
+  }, [accessTokenExpiresAt, sessionExpiresAt, sessionStartedAt, status, update]);
 
   return null;
 };
