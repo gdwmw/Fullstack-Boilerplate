@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { FC, HTMLInputTypeAttribute, KeyboardEvent, ReactElement, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 
-import { ExampleATWM, ExampleInput, FormContainer, SubmitButton } from "@/src/components";
+import { Container, ExampleATWM, ExampleInput, SubmitButton } from "@/src/components";
 import { IErrorResponse, inputValidations, POSTRegister } from "@/src/utils";
 
 import { registerSchema, TRegisterSchema } from "../schema";
@@ -133,8 +133,8 @@ export const Main: FC = (): ReactElement => {
 
   return (
     <main>
-      <FormContainer className={{ innerContainer: "max-w-112.5" }} href={"/"} label={"Home"}>
-        <form className="flex w-full flex-col gap-3 overflow-y-auto" onSubmit={handleSubmit(onSubmit)}>
+      <Container className={{ innerContainer: "max-w-112.5" }} href={"/"} label={"Home"}>
+        <form className="flex flex-1 flex-col gap-3 overflow-y-auto" onSubmit={handleSubmit(onSubmit)}>
           {FORM_FIELDS_DATA.map((dt) => (
             <ExampleInput
               color="default"
@@ -180,7 +180,7 @@ export const Main: FC = (): ReactElement => {
             </Link>
           </div>
         </form>
-      </FormContainer>
+      </Container>
     </main>
   );
 };

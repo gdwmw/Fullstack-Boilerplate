@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { FC, HTMLInputTypeAttribute, KeyboardEvent, ReactElement, useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 
-import { Avatar, ExampleATWM, ExampleInput, FormContainer, SubmitButton } from "@/src/components";
+import { Avatar, Container, ExampleATWM, ExampleInput, SubmitButton } from "@/src/components";
 import { ReactQueryProvider } from "@/src/libs";
 import { DELETEUpload, GETMe, IErrorResponse, inputValidations, POSTUpload, PUTUsers } from "@/src/utils";
 
@@ -195,7 +195,7 @@ const MainContent: FC = (): ReactElement => {
 
   return (
     <main>
-      <FormContainer className={{ innerContainer: "max-w-112.5" }} href={"/"} label={"Home"}>
+      <Container className={{ innerContainer: "max-w-112.5" }} href={"/"} label={"Home"}>
         <form className="flex w-full flex-col gap-3 overflow-y-auto" onSubmit={handleSubmit(onSubmit)}>
           <Avatar
             className="mx-auto min-h-32 min-w-32"
@@ -237,7 +237,7 @@ const MainContent: FC = (): ReactElement => {
 
           <SubmitButton color="black" disabled={loading} label="UPDATE" size="sm" variant="solid" />
         </form>
-      </FormContainer>
+      </Container>
     </main>
   );
 };

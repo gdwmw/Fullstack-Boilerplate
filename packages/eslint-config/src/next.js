@@ -2,7 +2,6 @@ import pluginQuery from "@tanstack/eslint-plugin-query";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import eslintPluginBetterTailwindcss from "eslint-plugin-better-tailwindcss";
-import jest from "eslint-plugin-jest";
 import reactPlugin from "eslint-plugin-react";
 import storybook from "eslint-plugin-storybook";
 import { defineConfig, globalIgnores } from "eslint/config";
@@ -15,7 +14,6 @@ export const nextConfig = defineConfig([
   reactPlugin.configs.flat.recommended,
   ...pluginQuery.configs["flat/recommended"],
   ...storybook.configs["flat/recommended"],
-  jest.configs["flat/recommended"],
   ...baseConfig,
   globalIgnores([
     ".next/**",

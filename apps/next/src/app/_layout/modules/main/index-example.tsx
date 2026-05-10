@@ -2,7 +2,7 @@ import { User } from "lucide-react";
 import Link from "next/link";
 import { FC, ReactElement } from "react";
 
-import { ChangeThemeButton, ExampleATWM, FormContainer, LogoutButton } from "@/src/components";
+import { ChangeThemeButton, Container, ExampleATWM, Header, LogoutButton } from "@/src/components";
 import { getCookie, getSession } from "@/src/utils";
 
 export const Main: FC = async (): Promise<ReactElement> => {
@@ -11,11 +11,12 @@ export const Main: FC = async (): Promise<ReactElement> => {
 
   return (
     <main>
-      <FormContainer className={{ innerContainer: "max-w-100 flex-col items-center gap-3" }} href="" label="">
-        <header>
-          <h1 className="text-center text-2xl font-semibold text-blue-500">Home Page</h1>
-          <p className="text-center text-sm tracking-wide">This is the home page of the application</p>
-        </header>
+      <Container className={{ innerContainer: "max-w-100 items-center gap-3" }} href="" label="">
+        <Header
+          className={{ description: "text-center", label: "text-center" }}
+          description="This is the home page of the application"
+          label="Home Page"
+        />
 
         <nav className={`w-full ${session ? "space-y-3" : "flex gap-3"}`}>
           {session ? (
@@ -52,7 +53,7 @@ export const Main: FC = async (): Promise<ReactElement> => {
             </Link>
           )}
         </nav>
-      </FormContainer>
+      </Container>
     </main>
   );
 };

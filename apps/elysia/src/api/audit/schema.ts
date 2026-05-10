@@ -2,9 +2,10 @@ import { schemaMessage } from "@repo/constants";
 import { z } from "zod";
 
 export const querySchema = z.object({
-  dateTime: z
+  actor: z.string().optional(),
+  archiveDate: z
     .string()
-    .regex(/^\d{2}-\d{2}-\d{4} \d{2}:\d{2}$/, { message: "dateTime must be in DD-MM-YYYY HH:mm format" })
+    .regex(/^\d{4}-\d{2}-\d{2}$/, { message: "archiveDate must be in YYYY-MM-DD format" })
     .optional(),
   level: z.enum(["INFO", "ERROR"], { message: schemaMessage.string.enum("level") }).optional(),
   limit: z.coerce
@@ -28,4 +29,13 @@ export const querySchema = z.object({
     .min(100)
     .max(599)
     .optional(),
+  time: z
+    .string()
+    .regex(/^\d{2}:\d{2}$/, { message: "time must be in HH:mm format" })
+    .optional(),
+});
+
+export const archiveQuerySchema = z.object({
+  month: z.coerce.number().int().min(1).max(12).optional(),
+  year: z.coerce.number().int().min(2000).max(9999).optional(),
 });

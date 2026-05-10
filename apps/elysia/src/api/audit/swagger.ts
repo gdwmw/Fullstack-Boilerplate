@@ -5,7 +5,21 @@ import { responseMessage } from "@/src/constants";
 type TContentResponse = Extract<NonNullable<NonNullable<DocumentDecoration["responses"]>[200]>, { content?: unknown }>;
 type TResponseSchema = NonNullable<NonNullable<NonNullable<TContentResponse["content"]>["application/json"]>["schema"]>;
 
-export const docs = (label: string): Record<"getAll", DocumentDecoration> => {
+export const docs = (label: string): Record<"getAll" | "getArchives", DocumentDecoration> => {
+  const auditLogUserSchema = {
+    nullable: true,
+    properties: {
+      id: { example: 1, type: "integer" },
+      email: { example: "user@example.com", nullable: true, type: "string" },
+      imageId: { example: 42, nullable: true, type: "integer" },
+      name: { example: "John Doe", nullable: true, type: "string" },
+      phone: { example: "+6281234567890", nullable: true, type: "string" },
+      role: { example: "user", nullable: true, type: "string" },
+      username: { example: "johndoe", nullable: true, type: "string" },
+    },
+    type: "object",
+  };
+
   const auditLogEntrySchema = {
     properties: {
       durationMs: { example: 128, type: "integer" },
@@ -14,10 +28,12 @@ export const docs = (label: string): Record<"getAll", DocumentDecoration> => {
       level: { enum: ["INFO", "ERROR"], type: "string" },
       method: { enum: ["GET", "POST", "PUT", "PATCH", "DELETE"], type: "string" },
       path: { example: "/auth/login", type: "string" },
+      payload: { example: { email: "user@example.com", method: "email" }, nullable: true, type: "object" },
       requestId: { example: "d290f1ee-6c54-4b01-90e6-d701748f0851", type: "string" },
       statusCode: { example: 200, type: "integer" },
       ts: { example: "2026-05-07T14:30:00.000Z", format: "date-time", type: "string" },
       userAgent: { example: "Mozilla/5.0", type: "string" },
+      users: auditLogUserSchema,
     },
     type: "object",
   };
@@ -28,6 +44,14 @@ export const docs = (label: string): Record<"getAll", DocumentDecoration> => {
       page: { example: 1, type: "integer" },
       total: { example: 42, type: "integer" },
       totalPages: { example: 3, type: "integer" },
+    },
+    type: "object",
+  };
+
+  const auditArchiveSchema = {
+    properties: {
+      dateKey: { example: "2026-05-07", type: "string" },
+      label: { example: "07 May 2026", type: "string" },
     },
     type: "object",
   };
@@ -50,6 +74,18 @@ export const docs = (label: string): Record<"getAll", DocumentDecoration> => {
     type: "object",
   };
 
+  const archiveSuccessResponseSchema = {
+    properties: {
+      data: {
+        items: auditArchiveSchema,
+        type: "array",
+      },
+      message: { example: responseMessage("audit archives").retrieved, nullable: true, type: "string" },
+      success: { example: true, type: "boolean" },
+    },
+    type: "object",
+  };
+
   const errorResponseSchema = {
     properties: {
       code: { example: null, nullable: true, type: "string" },
@@ -64,6 +100,12 @@ export const docs = (label: string): Record<"getAll", DocumentDecoration> => {
       description: "Get all audit logs from log files with optional filters",
       parameters: [
         {
+          description: "Load entries from a selected archive date using YYYY-MM-DD format.",
+          in: "query",
+          name: "archiveDate",
+          schema: { example: "2026-05-07", type: "string" },
+        },
+        {
           description: "Page number for pagination.",
           in: "query",
           name: "page",
@@ -76,10 +118,16 @@ export const docs = (label: string): Record<"getAll", DocumentDecoration> => {
           schema: { default: 20, example: 20, maximum: 100, minimum: 1, type: "integer" },
         },
         {
-          description: "Filter entries within the selected minute using DD-MM-YYYY HH:mm format.",
+          description: "Search actor snapshot by name, username, email, phone, or role.",
           in: "query",
-          name: "dateTime",
-          schema: { example: "07-05-2026 14:30", type: "string" },
+          name: "actor",
+          schema: { example: "admin", type: "string" },
+        },
+        {
+          description: "Filter entries within the selected minute using HH:mm format.",
+          in: "query",
+          name: "time",
+          schema: { example: "14:30", type: "string" },
         },
         {
           description: "Filter by log level.",
@@ -126,6 +174,44 @@ export const docs = (label: string): Record<"getAll", DocumentDecoration> => {
       },
       security: [{ bearerAuth: [] }],
       summary: "Get All",
+      tags: [label.toLowerCase()],
+    },
+    getArchives: {
+      description: "Get the available audit log archives grouped by date.",
+      parameters: [
+        {
+          description: "Optional month filter for archives.",
+          in: "query",
+          name: "month",
+          schema: { example: 5, maximum: 12, minimum: 1, type: "integer" },
+        },
+        {
+          description: "Optional year filter for archives.",
+          in: "query",
+          name: "year",
+          schema: { example: 2026, minimum: 2000, type: "integer" },
+        },
+      ],
+      responses: {
+        200: {
+          content: {
+            "application/json": {
+              schema: archiveSuccessResponseSchema as TResponseSchema,
+            },
+          },
+          description: "Audit archives retrieved successfully",
+        },
+        401: {
+          content: {
+            "application/json": {
+              schema: errorResponseSchema,
+            },
+          },
+          description: "Unauthorized",
+        },
+      },
+      security: [{ bearerAuth: [] }],
+      summary: "Get Archives",
       tags: [label.toLowerCase()],
     },
   };

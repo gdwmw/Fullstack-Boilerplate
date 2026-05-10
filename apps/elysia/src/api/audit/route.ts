@@ -3,11 +3,11 @@ import Elysia from "elysia";
 import { responseMessage, SUCCESS_RESPONSE } from "@/src/constants";
 import { accessJwtPlugin, handlePrismaError, verifyAccessToken } from "@/src/utils";
 
-import { querySchema } from "./schema";
+import { archiveQuerySchema, querySchema } from "./schema";
 import { service } from "./service";
 import { docs } from "./swagger";
 
-const LABEL = "audit logs";
+const LABEL = "audit";
 
 export const auditRoutes = new Elysia({ prefix: "/audit" })
   .use(accessJwtPlugin)
@@ -24,6 +24,16 @@ export const auditRoutes = new Elysia({ prefix: "/audit" })
       return verifyResponse;
     }
   })
+
+  .get(
+    "/archives",
+    async ({ query }) => {
+      const params = archiveQuerySchema.parse(query);
+      const res = await service.getArchives(params);
+      return SUCCESS_RESPONSE({ data: res, message: responseMessage("audit archives").retrieved });
+    },
+    { detail: docs(LABEL).getArchives },
+  )
 
   .get(
     "/",
