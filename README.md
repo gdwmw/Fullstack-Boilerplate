@@ -1,8 +1,10 @@
 ![Next.js - Home](public/project/1.png)
 ![Next.js - Login](public/project/2.png)
 ![Next.js - Register](public/project/3.png)
-![Elysia.js - Register](public/project/4.png)
-![Elysia.js - Response](public/project/5.png)
+![Next.js - Audit](public/project/4.png)
+![Next.js - Audit Detail](public/project/5.png)
+![Elysia.js - Register](public/project/6.png)
+![Elysia.js - Response](public/project/7.png)
 
 # 🚀 Fullstack Boilerplate (Turborepo + Next.js + Elysia.js)
 
