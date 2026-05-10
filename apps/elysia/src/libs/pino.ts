@@ -1,7 +1,9 @@
 import pino, { type LoggerOptions } from "pino";
 
+import { env } from "@/src/config/env";
+
 const loggerOptions: LoggerOptions = {
-  level: process.env.LOG_LEVEL ?? "info",
+  level: env.LOG_LEVEL,
 };
 
 loggerOptions.transport = {

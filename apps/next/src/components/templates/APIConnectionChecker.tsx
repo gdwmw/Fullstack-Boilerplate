@@ -4,12 +4,13 @@ import axios from "axios";
 import { Check, Server, X } from "lucide-react";
 import { FC, ReactElement, useEffect, useState } from "react";
 
+import { clientEnv } from "@/src/config/env.client";
 import { useToggle } from "@/src/hooks";
 
 import { ExampleA } from "../elements";
 
 const ENVIRONMENT_DATA_VARIABLES = ["NEXT_PUBLIC_BASE_API_URL"];
-const ENVIRONMENT_DATA_VALUES = [process.env.NEXT_PUBLIC_BASE_API_URL];
+const ENVIRONMENT_DATA_VALUES = [clientEnv.NEXT_PUBLIC_BASE_API_URL];
 
 export const APIConnectionChecker: FC = (): ReactElement => {
   const { toggle, value } = useToggle();

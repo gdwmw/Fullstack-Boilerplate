@@ -5,6 +5,8 @@ import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
 import { promisify } from "node:util";
 
+import { env } from "@/src/config/env";
+
 const execFileAsync = promisify(execFile);
 
 const REQUEST_LOG_PREFIX = "elysia-req-";
@@ -13,7 +15,7 @@ const COMPRESSED_LOG_EXTENSION = ".log.zst";
 
 let zstdAvailabilityPromise: null | Promise<boolean> = null;
 
-export const getLogDirectory = () => process.env.LOG_DIR?.trim() || join(process.cwd(), "backups", "logs");
+export const getLogDirectory = () => env.LOG_DIR;
 
 export const getRequestLogFileName = (date = new Date()) => `${REQUEST_LOG_PREFIX}${format(date, "dd-MM-yyyy")}${RAW_LOG_EXTENSION}`;
 

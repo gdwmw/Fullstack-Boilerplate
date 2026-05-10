@@ -1,13 +1,15 @@
 import { jwt } from "@elysiajs/jwt";
 
+import { env } from "@/src/config/env";
+
 export const accessJwtPlugin = jwt({
-  exp: process.env.JWT_ACCESS_EXPIRES_IN || "15m",
+  exp: env.JWT_ACCESS_EXPIRES_IN,
   name: "accessJwt",
-  secret: process.env.JWT_ACCESS_SECRET || "",
+  secret: env.JWT_ACCESS_SECRET,
 });
 
 export const refreshJwtPlugin = jwt({
-  exp: process.env.JWT_REFRESH_EXPIRES_IN || "7d",
+  exp: env.JWT_REFRESH_EXPIRES_IN,
   name: "refreshJwt",
-  secret: process.env.JWT_REFRESH_SECRET || "",
+  secret: env.JWT_REFRESH_SECRET,
 });

@@ -2,28 +2,18 @@ import { format } from "date-fns";
 import { mkdir, readdir, rm, stat } from "node:fs/promises";
 import { join } from "node:path";
 
+import { env } from "@/src/config/env";
 import { logger } from "@/src/libs";
 import { checkZstdAvailability, compressLogFile } from "@/src/utils/logCompression";
 
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
-const DEFAULT_RETENTION_DAYS = 365;
 const BACKUP_FILE_PREFIX = "postgres-";
 const RAW_BACKUP_EXTENSION = ".dump";
 const COMPRESSED_BACKUP_EXTENSION = ".dump.zst";
 
-const toInt = (value: string | undefined, fallback: number) => {
-  const parsed = Number.parseInt(value ?? "", 10);
+const getBackupDirectory = () => env.DB_BACKUP_DIR;
 
-  if (Number.isNaN(parsed) || parsed < 1) {
-    return fallback;
-  }
-
-  return parsed;
-};
-
-const getBackupDirectory = () => process.env.DB_BACKUP_DIR?.trim() || join(process.cwd(), "backups", "db");
-
-const getBackupRetentionDays = () => toInt(process.env.DB_BACKUP_RETENTION_DAYS, DEFAULT_RETENTION_DAYS);
+const getBackupRetentionDays = () => env.DB_BACKUP_RETENTION_DAYS;
 
 const sanitize = (value: string) => value.replace(/[^a-zA-Z0-9._-]/g, "_");
 
@@ -31,13 +21,7 @@ const isBackupFileName = (entry: string) =>
   entry.startsWith(BACKUP_FILE_PREFIX) && (entry.endsWith(RAW_BACKUP_EXTENSION) || entry.endsWith(COMPRESSED_BACKUP_EXTENSION));
 
 const getConnectionInfo = () => {
-  const databaseUrl = process.env.DATABASE_URL;
-
-  if (!databaseUrl) {
-    throw new Error("DATABASE_URL is required for database backup.");
-  }
-
-  const parsed = new URL(databaseUrl);
+  const parsed = new URL(env.DATABASE_URL);
   const database = parsed.pathname.replace(/^\//, "");
 
   return {

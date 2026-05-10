@@ -1,9 +1,10 @@
 import { logTemplate } from "@repo/utils";
 import axios, { AxiosRequestHeaders, AxiosResponse, Method } from "axios";
 
+import { clientEnv } from "@/src/config/env.client";
 import { getSession } from "@/src/utils";
 
-const API_URL = process.env.NEXT_PUBLIC_BASE_API_URL;
+const API_URL = clientEnv.NEXT_PUBLIC_BASE_API_URL;
 
 export interface ISuccessResponse<T> {
   data: T;
@@ -51,7 +52,7 @@ export const apiRequest = async <T>({ auth = true, ...props }: I): Promise<ISucc
     let errorMessage = "an unknown error occurred";
 
     if (axios.isAxiosError<IErrorResponse>(error)) {
-      if (process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_DEBUG_MODE === "true") {
+      if (process.env.NODE_ENV === "development" || clientEnv.NEXT_PUBLIC_DEBUG_MODE) {
         console.error(error.response);
       }
       statusCode = error.response?.status;

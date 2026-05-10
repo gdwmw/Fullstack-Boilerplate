@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { createWriteStream, mkdirSync, type WriteStream } from "node:fs";
 import { join } from "node:path";
 
+import { env } from "@/src/config/env";
 import { logger, prisma } from "@/src/libs";
 import {
   compressArchivedLogFiles,
@@ -54,11 +55,7 @@ const base64UrlToUint8Array = (value: string) => {
 const decodeBase64UrlJson = (value: string) => JSON.parse(Buffer.from(base64UrlToUint8Array(value)).toString("utf-8")) as Record<string, unknown>;
 
 const verifyAccessTokenPayload = async (token: string) => {
-  const secret = process.env.JWT_ACCESS_SECRET;
-
-  if (!secret) {
-    return null;
-  }
+  const secret = env.JWT_ACCESS_SECRET;
 
   const [encodedHeader, encodedPayload, encodedSignature] = token.split(".");
 

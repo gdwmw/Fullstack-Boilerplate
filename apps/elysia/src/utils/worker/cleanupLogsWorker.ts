@@ -2,23 +2,13 @@ import { format } from "date-fns";
 import { readdir, rm, stat } from "node:fs/promises";
 import { join } from "node:path";
 
+import { env } from "@/src/config/env";
 import { logger } from "@/src/libs";
 import { getLogDirectory, isRequestLogFileName } from "@/src/utils";
 
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
-const DEFAULT_RETENTION_DAYS = 365;
 
-const toInt = (value: string | undefined, fallback: number) => {
-  const parsed = Number.parseInt(value ?? "", 10);
-
-  if (Number.isNaN(parsed) || parsed < 1) {
-    return fallback;
-  }
-
-  return parsed;
-};
-
-const getLogRetentionDays = () => toInt(process.env.LOG_RETENTION_DAYS, DEFAULT_RETENTION_DAYS);
+const getLogRetentionDays = () => env.LOG_RETENTION_DAYS;
 
 export const cleanupLogsWorker = async () => {
   const directory = getLogDirectory();

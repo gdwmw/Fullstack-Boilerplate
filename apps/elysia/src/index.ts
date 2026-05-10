@@ -1,7 +1,8 @@
 import { Elysia } from "elysia";
-import { join } from "path";
+import { normalize, resolve, sep } from "path";
 
 import { auditRoutes, authRoutes, uploadRoutes, usersRoutes } from "./api";
+import { env } from "./config/env";
 import { logger } from "./libs";
 import {
   checkZstdAvailability,
@@ -13,79 +14,31 @@ import {
   swaggerPlugin,
 } from "./utils";
 
-const ELYSIA_PORT = process.env.ELYSIA_PORT;
+const UPLOAD_DIR = resolve(process.cwd(), "uploads");
 
-if (!process.env.ELYSIA_PORT) {
-  throw new Error("Please check your environment variables. ELYSIA_PORT is not defined.");
-}
+const resolveUploadPath = (relative: string | undefined) => {
+  if (!relative) return null;
 
-if (!process.env.DATABASE_URL) {
-  throw new Error("Please check your environment variables. DATABASE_URL is not defined.");
-}
+  if (relative.includes("\0") || relative.startsWith("/") || relative.startsWith("\\")) {
+    return null;
+  }
 
-if (!process.env.DB_BACKUP_DIR) {
-  throw new Error("Please check your environment variables. DB_BACKUP_DIR is not defined.");
-}
+  const normalized = normalize(relative);
+  if (normalized.startsWith("..") || normalized.includes(`..${sep}`)) {
+    return null;
+  }
 
-if (!process.env.DB_BACKUP_RETENTION_DAYS) {
-  throw new Error("Please check your environment variables. DB_BACKUP_RETENTION_DAYS is not defined.");
-}
+  const absolute = resolve(UPLOAD_DIR, normalized);
+  if (absolute !== UPLOAD_DIR && !absolute.startsWith(`${UPLOAD_DIR}${sep}`)) {
+    return null;
+  }
 
-if (!process.env.LOG_LEVEL) {
-  throw new Error("Please check your environment variables. LOG_LEVEL is not defined.");
-}
-
-if (!process.env.LOG_DIR) {
-  throw new Error("Please check your environment variables. LOG_DIR is not defined.");
-}
-
-if (!process.env.LOG_RETENTION_DAYS) {
-  throw new Error("Please check your environment variables. LOG_RETENTION_DAYS is not defined.");
-}
-
-if (!process.env.JWT_ACCESS_SECRET) {
-  throw new Error("Please check your environment variables. JWT_ACCESS_SECRET is not defined.");
-}
-
-if (!process.env.JWT_REFRESH_SECRET) {
-  throw new Error("Please check your environment variables. JWT_REFRESH_SECRET is not defined.");
-}
-
-if (!process.env.JWT_ACCESS_EXPIRES_IN) {
-  throw new Error("Please check your environment variables. JWT_ACCESS_EXPIRES_IN is not defined.");
-}
-
-if (!process.env.JWT_REFRESH_EXPIRES_IN) {
-  throw new Error("Please check your environment variables. JWT_REFRESH_EXPIRES_IN is not defined.");
-}
-
-if (!process.env.JWT_REFRESH_COOKIE_NAME) {
-  throw new Error("Please check your environment variables. JWT_REFRESH_COOKIE_NAME is not defined.");
-}
-
-if (!process.env.JWT_REFRESH_COOKIE_PATH) {
-  throw new Error("Please check your environment variables. JWT_REFRESH_COOKIE_PATH is not defined.");
-}
-
-if (!process.env.JWT_REFRESH_COOKIE_SAME_SITE) {
-  throw new Error("Please check your environment variables. JWT_REFRESH_COOKIE_SAME_SITE is not defined.");
-}
-
-if (process.env.JWT_REFRESH_COOKIE_SECURE === undefined) {
-  throw new Error("Please check your environment variables. JWT_REFRESH_COOKIE_SECURE is not defined.");
-}
-
-if (!process.env.CORS_ORIGINS) {
-  throw new Error("Please check your environment variables. CORS_ORIGINS is not defined.");
-}
-
-if (!process.env.REDIS_URL) {
-  throw new Error("Please check your environment variables. REDIS_URL is not defined.");
-}
+  return absolute;
+};
 
 checkZstdAvailability().then((isAvailable) => {
   if (isAvailable) {
-    logger.info("zstd binary detected. Audit log compression is enabled.");
+    logger.info("zstd binary detected. audit log compression is enabled.");
     return;
   }
 
@@ -98,14 +51,23 @@ const app = new Elysia()
   .use(requestLoggerPlugin)
 
   .get("/", () => "Hello Elysia")
-  .get("/uploads/*", ({ params }) => Bun.file(join(process.cwd(), "uploads", params["*"])))
+  .get("/uploads/*", ({ params, set }) => {
+    const safePath = resolveUploadPath(params["*"]);
+
+    if (!safePath) {
+      set.status = 400;
+      return "invalid upload path";
+    }
+
+    return Bun.file(safePath);
+  })
 
   .use(auditRoutes)
   .use(authRoutes)
   .use(uploadRoutes)
   .use(usersRoutes)
 
-  .listen(ELYSIA_PORT || 1337);
+  .listen(env.ELYSIA_PORT);
 
 logger.info(
   {

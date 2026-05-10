@@ -4,12 +4,13 @@ import { parseDurationToMs } from "@repo/utils";
 import { SessionProvider, signOut, useSession } from "next-auth/react";
 import { FC, PropsWithChildren, ReactElement, useEffect } from "react";
 
+import { clientEnv } from "@/src/config/env.client";
 import { POSTRefresh } from "@/src/utils";
 
 type T = Readonly<PropsWithChildren>;
 
-const ACCESS_TOKEN_EXPIRES_IN = process.env.NEXT_PUBLIC_ACCESS_TOKEN_EXPIRES_IN || "15m";
-const REFRESH_BUFFER_MS = process.env.NEXT_PUBLIC_REFRESH_BUFFER_MS || "15s";
+const ACCESS_TOKEN_EXPIRES_IN = clientEnv.NEXT_PUBLIC_ACCESS_TOKEN_EXPIRES_IN;
+const REFRESH_BUFFER_MS = clientEnv.NEXT_PUBLIC_REFRESH_BUFFER_MS;
 
 const RefreshSessionGuard: FC = (): null | ReactElement => {
   const session = useSession();

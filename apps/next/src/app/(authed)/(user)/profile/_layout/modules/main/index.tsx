@@ -11,12 +11,13 @@ import { FC, HTMLInputTypeAttribute, KeyboardEvent, ReactElement, useEffect, use
 import { SubmitHandler, useForm } from "react-hook-form";
 
 import { Avatar, Container, ExampleATWM, ExampleInput, SubmitButton } from "@/src/components";
+import { clientEnv } from "@/src/config/env.client";
 import { ReactQueryProvider } from "@/src/libs";
 import { DELETEUpload, GETMe, IErrorResponse, inputValidations, POSTUpload, PUTUsers } from "@/src/utils";
 
 import { profileSchema, TProfileSchema } from "../schema";
 
-const API_URL = process.env.NEXT_PUBLIC_BASE_API_URL;
+const API_URL = clientEnv.NEXT_PUBLIC_BASE_API_URL;
 
 interface IFormField {
   label: string;

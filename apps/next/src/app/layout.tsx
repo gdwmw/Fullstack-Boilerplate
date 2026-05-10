@@ -2,6 +2,8 @@ import { Metadata, Viewport } from "next";
 import { FC, PropsWithChildren, ReactElement } from "react";
 
 import { APIConnectionChecker } from "../components";
+import { clientEnv } from "../config/env.client";
+import "../config/env.server";
 import { NextAuthProvider, NextThemesProvider, ReactQueryProvider } from "../libs";
 import { geistMono, geistSans, inter, roboto } from "./fonts";
 import "./globals.css";
@@ -23,34 +25,6 @@ export const metadata: Metadata = {
   },
 };
 
-if (!process.env.NEXTAUTH_URL) {
-  throw new Error("Please check your environment variables. NEXTAUTH_URL is not defined.");
-}
-
-if (!process.env.NEXTAUTH_SECRET) {
-  throw new Error("Please check your environment variables. NEXTAUTH_SECRET is not defined.");
-}
-
-if (!process.env.NEXTAUTH_SESSION_EXPIRES_IN) {
-  throw new Error("Please check your environment variables. NEXTAUTH_SESSION_EXPIRES_IN is not defined.");
-}
-
-if (!process.env.NEXT_PUBLIC_REFRESH_BUFFER_MS) {
-  throw new Error("Please check your environment variables. NEXT_PUBLIC_REFRESH_BUFFER_MS is not defined.");
-}
-
-if (!process.env.NEXT_PUBLIC_ACCESS_TOKEN_EXPIRES_IN) {
-  throw new Error("Please check your environment variables. NEXT_PUBLIC_ACCESS_TOKEN_EXPIRES_IN is not defined.");
-}
-
-if (!process.env.NEXT_PUBLIC_BASE_API_URL) {
-  throw new Error("Please check your environment variables. NEXT_PUBLIC_BASE_API_URL is not defined.");
-}
-
-if (process.env.NEXT_PUBLIC_DEBUG_MODE === undefined) {
-  throw new Error("Please check your environment variables. NEXT_PUBLIC_DEBUG_MODE is not defined.");
-}
-
 type T = Readonly<PropsWithChildren>;
 
 const RootLayout: FC<T> = (props): ReactElement => (
@@ -62,7 +36,7 @@ const RootLayout: FC<T> = (props): ReactElement => (
         <ReactQueryProvider>
           <NextAuthProvider>
             {props.children}
-            {(process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_DEBUG_MODE === "true") && <APIConnectionChecker />}
+            {(process.env.NODE_ENV === "development" || clientEnv.NEXT_PUBLIC_DEBUG_MODE) && <APIConnectionChecker />}
           </NextAuthProvider>
         </ReactQueryProvider>
       </NextThemesProvider>

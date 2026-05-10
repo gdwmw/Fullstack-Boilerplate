@@ -1,12 +1,8 @@
 import { cors } from "@elysiajs/cors";
 
-const ALLOWED_ORIGINS = new Set([
-  "http://127.0.0.1:3000",
-  "http://localhost:3000",
-  ...(process.env.CORS_ORIGINS?.split(",")
-    .map((origin) => origin.trim())
-    .filter(Boolean) ?? []),
-]);
+import { env } from "@/src/config/env";
+
+const ALLOWED_ORIGINS = new Set(env.CORS_ORIGINS);
 
 export const corsPlugin = cors({
   allowedHeaders: ["Content-Type", "Authorization"],

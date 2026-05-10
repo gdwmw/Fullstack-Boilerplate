@@ -1,6 +1,7 @@
 import Elysia, { HTTPHeaders, StatusMap } from "elysia";
 import { ElysiaCookie } from "elysia/dist/cookies";
 
+import { env } from "@/src/config/env";
 import { ERROR_RESPONSE, responseMessage, SUCCESS_RESPONSE } from "@/src/constants";
 import { accessJwtPlugin, getBearerToken, handlePrismaError, refreshJwtPlugin, verifyAccessToken } from "@/src/utils";
 
@@ -14,10 +15,10 @@ import { docs } from "./swagger";
 // ---------------------------------------------------------------------------
 
 const LABEL = "authentication";
-const REFRESH_COOKIE_NAME = process.env.JWT_REFRESH_COOKIE_NAME || "refreshToken";
-const REFRESH_COOKIE_PATH = process.env.JWT_REFRESH_COOKIE_PATH || "/auth";
-const REFRESH_COOKIE_SAME_SITE = process.env.JWT_REFRESH_COOKIE_SAME_SITE || "Lax";
-const REFRESH_COOKIE_SECURE = process.env.JWT_REFRESH_COOKIE_SECURE === "true";
+const REFRESH_COOKIE_NAME = env.JWT_REFRESH_COOKIE_NAME;
+const REFRESH_COOKIE_PATH = env.JWT_REFRESH_COOKIE_PATH;
+const REFRESH_COOKIE_SAME_SITE = env.JWT_REFRESH_COOKIE_SAME_SITE;
+const REFRESH_COOKIE_SECURE = env.JWT_REFRESH_COOKIE_SECURE;
 
 type THeadersMap = Record<string, string | undefined>;
 type TJwtPayload = null | Record<string, unknown> | undefined;
@@ -294,82 +295,50 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
         });
       }
 
-      // [6.3.4] Load the active refresh session by the token jti.
-      const session = await service.getRefreshSessionByJti(refreshJti);
+      // [6.3.4] Issue the new token pair up-front (stateless until persisted).
+      const tokens = await issueAccessAndRefreshTokens({ accessJwt, refreshJwt, userId });
 
-      if (!session) {
+      const clientMetadata = getClientMetadata(headers as THeadersMap);
+
+      // [6.3.5] Validate AND rotate the refresh session in a single transaction.
+      // Reuse-detection (replay of an already-rotated jti, hash mismatch, or
+      // a concurrent rotation race) results in the entire family being revoked.
+      const rotation = await service.rotateRefreshSessionAtomic({
+        incomingToken: refreshToken,
+        newSession: {
+          expiresAt: tokens.expiresAt,
+          ipAddress: clientMetadata.ipAddress,
+          jti: tokens.refreshJti,
+          token: tokens.refreshToken,
+          userAgent: clientMetadata.userAgent,
+        },
+        presentedJti: refreshJti,
+      });
+
+      if (rotation.kind !== "OK") {
         set.headers["set-cookie"] = clearRefreshCookie();
         set.status = 401;
         return ERROR_RESPONSE({
-          message: responseMessage("refresh token").invalid,
+          message: rotation.kind === "EXPIRED" ? responseMessage("refresh token").expired : responseMessage("refresh token").invalid,
         });
       }
 
-      // [6.3.5] Compare the raw cookie token to the hashed token stored in the database.
-      const isHashMatch = await service.isRefreshTokenHashMatch(refreshToken, session.tokenHash);
-
-      if (!isHashMatch) {
-        await service.revokeRefreshFamily(session.userId, session.familyId);
-        set.headers["set-cookie"] = clearRefreshCookie();
-        set.status = 401;
-        return ERROR_RESPONSE({
-          message: responseMessage("refresh token").invalid,
-        });
-      }
-
-      // [6.3.6] If the old session is already revoked, consider the token no longer usable.
-      if (session.revokedAt) {
-        if (session.replacedByJti) {
-          await service.revokeRefreshFamily(session.userId, session.familyId);
-        }
-
-        set.headers["set-cookie"] = clearRefreshCookie();
-        set.status = 401;
-        return ERROR_RESPONSE({
-          message: responseMessage("refresh token").invalid,
-        });
-      }
-
-      // [6.3.7] If the session is expired, revoke it immediately to keep state clean.
-      if (session.expiresAt.getTime() <= Date.now()) {
-        await service.revokeRefreshSessionByJti(session.jti);
-        set.headers["set-cookie"] = clearRefreshCookie();
-        set.status = 401;
-        return ERROR_RESPONSE({
-          message: responseMessage("refresh token").expired,
-        });
-      }
-
-      // [6.3.8] Ensure the token owner user still exists.
-      const user = await service.getUserById(userId);
+      // [6.3.6] Verify the user still exists. If not, revoke the just-created
+      // session as well so we don't leak access to a deleted account.
+      const user = await service.getUserById(rotation.userId);
 
       if (!user) {
+        await service.revokeRefreshSessionByJti(tokens.refreshJti);
         set.headers["set-cookie"] = clearRefreshCookie();
         set.status = 404;
         return ERROR_RESPONSE({ message: responseMessage("users").notFound });
       }
 
-      // [6.3.9] Issue a new token pair for rotation.
-      const tokens = await issueAccessAndRefreshTokens({ accessJwt, refreshJwt, userId: user.id });
+      // [6.3.7] After the rotation has been durably committed, blocklist the
+      // old jti in Redis so it cannot be re-used during its remaining TTL.
+      await service.addToBlocklist(rotation.oldJti, rotation.oldExpiresAt);
 
-      // [6.3.10] Persist client metadata for the new session.
-      const clientMetadata = getClientMetadata(headers as THeadersMap);
-
-      // [6.3.11] Blocklist the old token, then rotate the refresh session (statefully).
-      await service.addToBlocklist(session.jti, session.expiresAt);
-      await service.rotateRefreshSession({
-        currentJti: session.jti,
-        expiresAt: tokens.expiresAt,
-        familyId: session.familyId,
-        ipAddress: clientMetadata.ipAddress,
-        newJti: tokens.refreshJti,
-        rotatedFromJti: session.jti,
-        token: tokens.refreshToken,
-        userAgent: clientMetadata.userAgent,
-        userId: user.id,
-      });
-
-      // [6.3.12] Write the new refresh token to the cookie and return the new access token.
+      // [6.3.8] Write the new refresh token to the cookie and return the new access token.
       set.headers["set-cookie"] = createRefreshCookie(tokens.refreshToken);
 
       return SUCCESS_RESPONSE({

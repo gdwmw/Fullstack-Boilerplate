@@ -3,10 +3,12 @@ import { NextAuthOptions, Session, User } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 
+import { clientEnv } from "@/src/config/env.client";
+import { serverEnv } from "@/src/config/env.server";
 import { IAuthResponse, ILoginPayload, POSTLogin } from "@/src/utils";
 
-const SESSION_EXPIRES_IN = process.env.NEXTAUTH_SESSION_EXPIRES_IN || "7d";
-const ACCESS_TOKEN_EXPIRES_IN = process.env.NEXT_PUBLIC_ACCESS_TOKEN_EXPIRES_IN || "15m";
+const SESSION_EXPIRES_IN = serverEnv.NEXTAUTH_SESSION_EXPIRES_IN;
+const ACCESS_TOKEN_EXPIRES_IN = clientEnv.NEXT_PUBLIC_ACCESS_TOKEN_EXPIRES_IN;
 
 const parseDurationToSeconds = (value: string) => Math.floor(parseDurationToMs(value) / 1000);
 

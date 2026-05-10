@@ -1,12 +1,13 @@
 import { parseDurationToMs } from "@repo/utils";
 
+import { env } from "@/src/config/env";
 import { AUTH_OMIT_FIELDS } from "@/src/constants";
 import { prisma, redis } from "@/src/libs";
 
 import { TChangePasswordSchema, TLoginSchema, TRegisterSchema } from "./type";
 
-const ACCESS_TOKEN_EXPIRES_IN = process.env.JWT_ACCESS_EXPIRES_IN || "15m";
-const REFRESH_TOKEN_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || "7d";
+const ACCESS_TOKEN_EXPIRES_IN = env.JWT_ACCESS_EXPIRES_IN;
+const REFRESH_TOKEN_EXPIRES_IN = env.JWT_REFRESH_EXPIRES_IN;
 
 interface IRefreshSessionBasePayload {
   expiresAt: Date;
@@ -201,6 +202,117 @@ export const service = {
           userId: data.userId,
         },
       });
+    });
+  },
+
+  /**
+   * Atomically validate and rotate a refresh session.
+   *
+   * Performs the entire validation + rotation flow inside a single Postgres
+   * transaction, including reuse-detection. If the same refresh jti is
+   * presented twice (because it was already rotated), the entire family is
+   * revoked and `REUSE_DETECTED` is returned.
+   *
+   * The conditional updateMany (`revokedAt: null`) makes the rotation step
+   * itself atomic: only one concurrent caller can win, the other(s) get
+   * `count === 0` and trigger family revocation.
+   *
+   * Caller is responsible for adding the old jti to the Redis blocklist
+   * AFTER this transaction has committed successfully.
+   */
+  async rotateRefreshSessionAtomic(input: {
+    incomingToken: string;
+    newSession: {
+      expiresAt: Date;
+      ipAddress?: string;
+      jti: string;
+      token: string;
+      userAgent?: string;
+    };
+    presentedJti: string;
+  }): Promise<
+    | {
+        kind: "EXPIRED" | "HASH_MISMATCH" | "NOT_FOUND" | "REUSE_DETECTED";
+      }
+    | {
+        kind: "OK";
+        oldExpiresAt: Date;
+        oldJti: string;
+        userId: number;
+      }
+  > {
+    const { incomingToken, newSession, presentedJti } = input;
+    const incomingHash = await hashToken(incomingToken);
+    const newTokenHash = await hashToken(newSession.token);
+
+    return await prisma.$transaction(async (tx) => {
+      const session = await tx.sessions.findUnique({ where: { jti: presentedJti } });
+
+      if (!session) {
+        return { kind: "NOT_FOUND" } as const;
+      }
+
+      // Constant-time-ish hash compare. If the cookie token does not hash to
+      // the stored value something is being forged → revoke whole family.
+      if (incomingHash !== session.tokenHash) {
+        await tx.sessions.updateMany({
+          data: { revokedAt: new Date() },
+          where: { familyId: session.familyId, revokedAt: null, userId: session.userId },
+        });
+        return { kind: "HASH_MISMATCH" } as const;
+      }
+
+      // Reuse detection: a previously rotated/revoked jti is being presented.
+      if (session.revokedAt !== null) {
+        await tx.sessions.updateMany({
+          data: { revokedAt: new Date() },
+          where: { familyId: session.familyId, revokedAt: null, userId: session.userId },
+        });
+        return { kind: "REUSE_DETECTED" } as const;
+      }
+
+      if (session.expiresAt.getTime() <= Date.now()) {
+        await tx.sessions.update({
+          data: { revokedAt: new Date() },
+          where: { jti: session.jti },
+        });
+        return { kind: "EXPIRED" } as const;
+      }
+
+      // Atomic conditional rotate. If a concurrent transaction already rotated
+      // this jti between findUnique and now, count will be 0 → reuse race.
+      const rotated = await tx.sessions.updateMany({
+        data: { replacedByJti: newSession.jti, revokedAt: new Date() },
+        where: { jti: session.jti, revokedAt: null },
+      });
+
+      if (rotated.count === 0) {
+        await tx.sessions.updateMany({
+          data: { revokedAt: new Date() },
+          where: { familyId: session.familyId, revokedAt: null, userId: session.userId },
+        });
+        return { kind: "REUSE_DETECTED" } as const;
+      }
+
+      await tx.sessions.create({
+        data: {
+          expiresAt: newSession.expiresAt,
+          familyId: session.familyId,
+          ipAddress: newSession.ipAddress,
+          jti: newSession.jti,
+          rotatedFromJti: session.jti,
+          tokenHash: newTokenHash,
+          userAgent: newSession.userAgent,
+          userId: session.userId,
+        },
+      });
+
+      return {
+        kind: "OK",
+        oldExpiresAt: session.expiresAt,
+        oldJti: session.jti,
+        userId: session.userId,
+      } as const;
     });
   },
 };
