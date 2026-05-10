@@ -7,7 +7,7 @@ vi.mock("@/src/libs", () => ({
 }));
 
 import { redis } from "@/src/libs";
-import { getBearerToken, verifyResponse } from "@/src/utils/verifyAccessToken";
+import { getBearerToken, verifyResponse } from "@/src/utils";
 
 const mockRedis = vi.mocked(redis);
 

@@ -1,4 +1,4 @@
-import { AUTH_OMIT_FIELDS } from "@/src/constants/omits";
+import { AUTH_OMIT_FIELDS } from "@/src/constants";
 
 describe("AUTH_OMIT_FIELDS", () => {
   it("should be an object", () => {

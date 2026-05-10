@@ -23,7 +23,7 @@ vi.mock("@/src/generated/prisma/client", () => ({
 import { StatusMap } from "elysia";
 
 import { Prisma } from "@/src/generated/prisma/client";
-import { handlePrismaError } from "@/src/utils/handle-prisma-error/handlePrismaError";
+import { handlePrismaError } from "@/src/utils";
 
 const makeSet = () => ({ headers: {} as Record<string, string>, status: undefined as keyof StatusMap | number | undefined });
 

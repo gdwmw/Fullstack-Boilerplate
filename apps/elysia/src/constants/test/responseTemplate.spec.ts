@@ -12,7 +12,7 @@ vi.mock("@/src/generated/prisma/client", () => ({
   },
 }));
 
-import { ERROR_RESPONSE, SUCCESS_RESPONSE } from "@/src/constants/responseTemplate";
+import { ERROR_RESPONSE, SUCCESS_RESPONSE } from "@/src/constants";
 import { Prisma } from "@/src/generated/prisma/client";
 
 describe("SUCCESS_RESPONSE", () => {
