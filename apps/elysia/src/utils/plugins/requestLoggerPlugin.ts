@@ -23,16 +23,35 @@ const requestIds = new WeakMap<Request, string>();
 const requestUsers = new WeakMap<Request, Promise<null | TAuditLogUser>>();
 
 const SENSITIVE_FIELD_NAMES = new Set([
-  "accessToken",
+  "access-token",
+  "accesstoken",
+  "api-key",
+  "apikey",
   "authorization",
+  "confirm-password",
+  "confirmpassword",
   "confirmPassword",
+  "cookie",
+  "current-password",
+  "currentpassword",
   "currentPassword",
+  "new-password",
   "newPassword",
+  "newpassword",
+  "old-password",
+  "oldpassword",
   "oldPassword",
   "password",
+  "refresh-token",
+  "refreshtoken",
   "refreshToken",
+  "secret",
+  "set-cookie",
   "token",
+  "x-api-key",
 ]);
+
+const PAYLOAD_LOG_EXCLUDED_PATHS = ["/auth", "/users"];
 
 type TAuditLogUser = {
   email: null | string;
@@ -179,7 +198,10 @@ const sanitizePayload = (value: unknown, seen = new WeakSet<object>()): unknown 
 
   return Object.fromEntries(
     Object.entries(value).map(([key, entryValue]) => {
-      if (SENSITIVE_FIELD_NAMES.has(key)) {
+      const normalizedKey = key.trim().toLowerCase();
+      const compactedKey = normalizedKey.replace(/[_\s]/g, "");
+
+      if (SENSITIVE_FIELD_NAMES.has(normalizedKey) || SENSITIVE_FIELD_NAMES.has(compactedKey)) {
         return [key, "[REDACTED]"];
       }
 
@@ -188,7 +210,13 @@ const sanitizePayload = (value: unknown, seen = new WeakSet<object>()): unknown 
   );
 };
 
-const getAuditPayload = (body: unknown) => {
+const shouldLogPayloadForPath = (pathname: string) => !PAYLOAD_LOG_EXCLUDED_PATHS.some((prefix) => pathname.startsWith(prefix));
+
+const getAuditPayload = ({ body, pathname }: { body: unknown; pathname: string }) => {
+  if (!shouldLogPayloadForPath(pathname)) {
+    return null;
+  }
+
   const sanitizedPayload = sanitizePayload(body);
 
   if (sanitizedPayload === null) {
@@ -370,7 +398,7 @@ export const requestLoggerPlugin = new Elysia({ name: "request-logger" })
 
     logger.info(line);
     if (shouldWriteSuccessRequestLog({ method: request.method, pathname })) {
-      const payload = getAuditPayload(body);
+      const payload = getAuditPayload({ body, pathname });
       const user = await resolveRequestUser(request);
 
       writeRequestLog({
@@ -400,7 +428,7 @@ export const requestLoggerPlugin = new Elysia({ name: "request-logger" })
 
     logger.error({ message: errorMessage }, line);
     if (shouldWriteErrorRequestLog(pathname)) {
-      const payload = getAuditPayload(body);
+      const payload = getAuditPayload({ body, pathname });
       const user = await resolveRequestUser(request);
 
       writeRequestLog({

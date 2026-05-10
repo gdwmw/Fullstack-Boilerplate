@@ -2,6 +2,7 @@ import { format } from "date-fns";
 import { readdir, readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 
+import { logger } from "@/src/libs";
 import { decompressLogFileToTemp, getLogDirectory, getRequestLogFileName, isCompressedRequestLogFileName, isRequestLogFileName } from "@/src/utils";
 
 import { IArchiveEntry, ILogEntry, TArchiveQuerySchema, TQuerySchema } from "./type";
@@ -89,6 +90,7 @@ const getActorSearchValues = (entry: ILogEntry): string[] => {
 const parseLogFile = async (filePath: string): Promise<ILogEntry[]> => {
   const content = await readFile(filePath, "utf-8");
   const entries: ILogEntry[] = [];
+  let malformedLines = 0;
 
   for (const line of content.split("\n")) {
     const trimmed = line.trim();
@@ -96,8 +98,19 @@ const parseLogFile = async (filePath: string): Promise<ILogEntry[]> => {
     try {
       entries.push(JSON.parse(trimmed) as ILogEntry);
     } catch {
-      // skip malformed lines
+      malformedLines++;
     }
+  }
+
+  if (malformedLines > 0) {
+    logger.warn(
+      {
+        filePath,
+        malformedLines,
+        scope: "audit",
+      },
+      "malformed log lines were skipped while parsing audit logs",
+    );
   }
 
   return entries;
