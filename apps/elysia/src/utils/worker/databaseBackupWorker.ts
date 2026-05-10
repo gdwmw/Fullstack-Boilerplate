@@ -3,9 +3,13 @@ import { mkdir, readdir, rm, stat } from "node:fs/promises";
 import { join } from "node:path";
 
 import { logger } from "@/src/libs";
+import { checkZstdAvailability, compressLogFile } from "@/src/utils/logCompression";
 
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_RETENTION_DAYS = 365;
+const BACKUP_FILE_PREFIX = "postgres-";
+const RAW_BACKUP_EXTENSION = ".dump";
+const COMPRESSED_BACKUP_EXTENSION = ".dump.zst";
 
 const toInt = (value: string | undefined, fallback: number) => {
   const parsed = Number.parseInt(value ?? "", 10);
@@ -22,6 +26,9 @@ const getBackupDirectory = () => process.env.DB_BACKUP_DIR?.trim() || join(proce
 const getBackupRetentionDays = () => toInt(process.env.DB_BACKUP_RETENTION_DAYS, DEFAULT_RETENTION_DAYS);
 
 const sanitize = (value: string) => value.replace(/[^a-zA-Z0-9._-]/g, "_");
+
+const isBackupFileName = (entry: string) =>
+  entry.startsWith(BACKUP_FILE_PREFIX) && (entry.endsWith(RAW_BACKUP_EXTENSION) || entry.endsWith(COMPRESSED_BACKUP_EXTENSION));
 
 const getConnectionInfo = () => {
   const databaseUrl = process.env.DATABASE_URL;
@@ -55,7 +62,7 @@ const cleanupOldBackups = async (directory: string, retentionDays: number) => {
       continue;
     }
 
-    if (!entry.startsWith("postgres-") || !entry.endsWith(".dump")) {
+    if (!isBackupFileName(entry)) {
       continue;
     }
 
@@ -94,11 +101,12 @@ export const databaseBackupWorker = async () => {
 
     const { database, host, password, port, username } = getConnectionInfo();
     const timestamp = format(new Date(), "dd-MM-yyyy-HH-mm-ss");
-    const fileName = `postgres-${sanitize(database)}-${timestamp}.dump`;
+    const fileName = `${BACKUP_FILE_PREFIX}${sanitize(database)}-${timestamp}${RAW_BACKUP_EXTENSION}`;
     const outputPath = join(directory, fileName);
+    let finalOutputPath = outputPath;
 
     const backupProcess = Bun.spawn(
-      ["pg_dump", "--format=custom", `--file=${outputPath}`, `--host=${host}`, `--port=${port}`, `--username=${username}`, database],
+      ["pg_dump", "--format=custom", "--compress=0", `--file=${outputPath}`, `--host=${host}`, `--port=${port}`, `--username=${username}`, database],
       {
         env: {
           ...process.env,
@@ -116,11 +124,38 @@ export const databaseBackupWorker = async () => {
       throw new Error(errorOutput || `pg_dump failed with exit code ${exitCode}`);
     }
 
+    const zstdAvailable = await checkZstdAvailability();
+
+    if (zstdAvailable) {
+      try {
+        await compressLogFile(outputPath);
+        finalOutputPath = `${outputPath}.zst`;
+      } catch (error) {
+        logger.warn(
+          {
+            error,
+            file: outputPath,
+            scope: "cron",
+          },
+          "database backup compression failed, keeping raw backup file",
+        );
+      }
+    } else {
+      logger.warn(
+        {
+          file: outputPath,
+          scope: "cron",
+        },
+        "zstd is not available, database backup file is stored without additional compression",
+      );
+    }
+
     await cleanupOldBackups(directory, retentionDays);
 
     logger.info(
       {
-        file: outputPath,
+        compressed: finalOutputPath.endsWith(".zst"),
+        file: finalOutputPath,
         retentionDays,
         scope: "cron",
       },
