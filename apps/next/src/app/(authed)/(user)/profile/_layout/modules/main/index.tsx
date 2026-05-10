@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { logTemplate } from "@repo/utils";
-import { DehydratedState, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -12,7 +12,6 @@ import { SubmitHandler, useForm } from "react-hook-form";
 
 import { Avatar, Container, ExampleATWM, ExampleInput, SubmitButton } from "@/src/components";
 import { clientEnv } from "@/src/environments/env.client";
-import { ReactQueryProvider } from "@/src/libs";
 import { DELETEUpload, GETMe, IErrorResponse, inputValidations, POSTUpload, PUTUsers } from "@/src/utils";
 
 import { profileSchema, TProfileSchema } from "../schema";
@@ -61,17 +60,7 @@ const FORM_FIELDS_DATA: IFormField[] = [
   },
 ];
 
-interface I {
-  dehydratedState: DehydratedState;
-}
-
-export const Main: FC<I> = (props): ReactElement => (
-  <ReactQueryProvider dehydratedState={props.dehydratedState}>
-    <MainContent />
-  </ReactQueryProvider>
-);
-
-const MainContent: FC = (): ReactElement => {
+export const Main: FC = (): ReactElement => {
   const session = useSession();
   const router = useRouter();
   const queryClient = useQueryClient();

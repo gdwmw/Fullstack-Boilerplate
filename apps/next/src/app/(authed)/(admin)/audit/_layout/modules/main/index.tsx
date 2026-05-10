@@ -1,12 +1,11 @@
 "use client";
 
-import { DehydratedState, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { FC, ReactElement, useEffect, useMemo, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 
 import { Container, ExampleA, ExampleDatePicker, ExampleInput, ExampleSelect, Header } from "@/src/components";
-import { ReactQueryProvider } from "@/src/libs";
 import { GETAuditArchives, GETAuditLogs, IAuditArchiveEntry, IAuditLogEntry } from "@/src/utils";
 
 import { AuditDetailModal } from "./batches";
@@ -39,17 +38,6 @@ const formatTimeForQuery = (value: Date | null): string | undefined => {
 
 interface I {
   defaultPageSize: number;
-  dehydratedState: DehydratedState;
-}
-
-export const Main: FC<I> = (props): ReactElement => (
-  <ReactQueryProvider dehydratedState={props.dehydratedState}>
-    <MainContent defaultPageSize={props.defaultPageSize} />
-  </ReactQueryProvider>
-);
-
-interface IMainContent {
-  defaultPageSize: number;
 }
 
 interface IFilterFormValues {
@@ -79,7 +67,7 @@ const FILTER_DEFAULT_VALUES: IFilterFormValues = {
   time: null,
 };
 
-const MainContent: FC<IMainContent> = (props): ReactElement => {
+export const Main: FC<I> = (props): ReactElement => {
   const queryClient = useQueryClient();
   const currentYear = new Date().getFullYear();
   const yearOptions = useMemo(() => Array.from({ length: 5 }, (_, index) => currentYear - index), [currentYear]);

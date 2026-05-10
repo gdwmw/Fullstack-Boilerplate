@@ -1,15 +1,21 @@
 "use client";
 
-import { type DehydratedState, HydrationBoundary, QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FC, PropsWithChildren, useState } from "react";
 
-type T = Readonly<{ dehydratedState?: DehydratedState } & PropsWithChildren>;
-
-export const ReactQueryProvider: FC<T> = ({ children, dehydratedState }) => {
-  const [queryClient] = useState(() => new QueryClient());
-  return (
-    <QueryClientProvider client={queryClient}>
-      <HydrationBoundary state={dehydratedState}>{children}</HydrationBoundary>
-    </QueryClientProvider>
+export const ReactQueryProvider: FC<Readonly<PropsWithChildren>> = ({ children }) => {
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            gcTime: 5 * 60 * 1000,
+            retry: (count, error) =>
+              (error as { status?: number }).status !== undefined && (error as { status?: number }).status! >= 500 && count < 2,
+            staleTime: 60_000,
+          },
+        },
+      }),
   );
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 };

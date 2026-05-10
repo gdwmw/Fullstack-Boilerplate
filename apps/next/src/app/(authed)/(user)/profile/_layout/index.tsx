@@ -1,4 +1,4 @@
-import { dehydrate, QueryClient } from "@tanstack/react-query";
+import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
 import { ReactElement } from "react";
 
 import { GETMe } from "@/src/utils";
@@ -16,9 +16,11 @@ const ProfileLayout = async (): Promise<ReactElement> => {
     queryKey: ["me"],
   });
 
-  const dehydratedState = dehydrate(queryClient);
-
-  return <Main dehydratedState={dehydratedState} />;
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <Main />
+    </HydrationBoundary>
+  );
 };
 
 export default ProfileLayout;

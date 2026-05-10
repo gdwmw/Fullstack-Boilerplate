@@ -1,4 +1,4 @@
-import { dehydrate, QueryClient } from "@tanstack/react-query";
+import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
 import { ReactElement } from "react";
 
 import { GETAuditArchives } from "@/src/utils";
@@ -18,9 +18,11 @@ const AuditLayout = async (): Promise<ReactElement> => {
     queryKey: ["audit-archives"],
   });
 
-  const dehydratedState = dehydrate(queryClient);
-
-  return <Main defaultPageSize={defaultPageSize} dehydratedState={dehydratedState} />;
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <Main defaultPageSize={defaultPageSize} />
+    </HydrationBoundary>
+  );
 };
 
 export default AuditLayout;
