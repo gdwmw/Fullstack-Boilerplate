@@ -1,3 +1,4 @@
+import { parseDurationToMs } from "@repo/utils";
 import { format } from "date-fns";
 import { readdir, rm, stat } from "node:fs/promises";
 import { join } from "node:path";
@@ -6,7 +7,7 @@ import { env } from "@/src/environment";
 import { logger } from "@/src/libs";
 import { getLogDirectory, isRequestLogFileName } from "@/src/utils";
 
-const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
+const ONE_DAY_IN_MS = parseDurationToMs("1d");
 
 const getLogRetentionDays = () => env.LOG_RETENTION_DAYS;
 
