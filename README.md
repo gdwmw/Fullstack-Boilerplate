@@ -31,6 +31,8 @@ This monorepo is a fullstack starter kit based on Turborepo, consisting of:
 
 This boilerplate provides common foundations often needed in production projects such as JWT authentication, form validation, state management, theme management, file uploads, and Storybook for UI development.
 
+This project also supports request/audit log compression using `zstd` on the Elysia.js backend.
+
 ---
 
 ## ✨ Main Features
@@ -39,6 +41,7 @@ This boilerplate provides common foundations often needed in production projects
 * 🎨 Frontend with Next.js + Tailwind CSS
 * 🔧 Backend with Elysia.js + Prisma + PostgreSQL
 * ⚡ Redis for token blocklist/session support
+* 🗜️ `zstd` compression for archived request/audit logs and database backups
 * 🔐 JWT authentication
 * 📝 Form handling (`react-hook-form` + `zod`)
 * 📚 Storybook for UI components
@@ -50,7 +53,7 @@ This boilerplate provides common foundations often needed in production projects
 
 * **Monorepo**: Turborepo, pnpm
 * **Frontend**: Next.js, Tailwind CSS, Jotai, React Hook Form, Zod
-* **Backend**: Elysia.js, Prisma, PostgreSQL, JWT
+* **Backend**: Elysia.js, Prisma, PostgreSQL, JWT, zstd (log and DB backup compression)
 * **Tooling**: ESLint, Prettier, Husky, Commitizen
 
 ---
@@ -63,7 +66,9 @@ Make sure the following are installed:
 * 📦 pnpm `>= 10`
 * ⚡ Bun (for running the Elysia API)
 * 🐘 PostgreSQL
+* 🧰 PostgreSQL client tools (`pg_dump`, `pg_restore`)
 * 🔴 Redis
+* 🗜️ zstd (required for log compression/decompression)
 
 ---
 
@@ -130,6 +135,28 @@ pnpm dev
 │   └── elysia      # Elysia.js backend + Prisma
 ├── packages        # Shared packages/config across apps
 └── turbo.json      # Turborepo configuration
+```
+
+---
+
+## 💾 Database Backup Compression
+
+Database backup worker on Elysia runs with this flow:
+
+1. Generate backup using `pg_dump --format=custom --compress=0`
+2. Compress backup file with `zstd`
+3. Keep backup using retention policy (`DB_BACKUP_RETENTION_DAYS`)
+
+Output file format:
+
+* Preferred: `postgres-<db-name>-<timestamp>.dump.zst`
+* Fallback (if `zstd` is unavailable): `postgres-<db-name>-<timestamp>.dump`
+
+Restore example:
+
+```bash
+zstd -d -f postgres-mydb-01-01-2026-00-00-00.dump.zst -o backup.dump
+pg_restore --clean --if-exists --no-owner --dbname "$DATABASE_URL" backup.dump
 ```
 
 ---
