@@ -1,10 +1,18 @@
 import { format } from "date-fns";
-import { readdir, readFile } from "node:fs/promises";
+import { readdir, readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 
 import { decompressLogFileToTemp, getLogDirectory, getRequestLogFileName, isCompressedRequestLogFileName, isRequestLogFileName } from "@/src/utils";
 
 import { IArchiveEntry, ILogEntry, TArchiveQuerySchema, TQuerySchema } from "./type";
+
+interface ILogFileCacheEntry {
+  entries: ILogEntry[];
+  mtimeMs: number;
+  size: number;
+}
+
+const logFileCache = new Map<string, ILogFileCacheEntry>();
 
 const parseTimeFilter = (value?: string): { hours: number; minutes: number } | undefined => {
   if (!value) {
@@ -95,6 +103,25 @@ const parseLogFile = async (filePath: string): Promise<ILogEntry[]> => {
   return entries;
 };
 
+const readLogEntries = async (filePath: string, isCompressed: boolean): Promise<ILogEntry[]> => {
+  const fileStats = await stat(filePath);
+  const cached = logFileCache.get(filePath);
+
+  if (cached && cached.mtimeMs === fileStats.mtimeMs && cached.size === fileStats.size) {
+    return cached.entries;
+  }
+
+  const entries = isCompressed ? await parseCompressedLogFile(filePath) : await parseLogFile(filePath);
+
+  logFileCache.set(filePath, {
+    entries,
+    mtimeMs: fileStats.mtimeMs,
+    size: fileStats.size,
+  });
+
+  return entries;
+};
+
 const parseCompressedLogFile = async (filePath: string): Promise<ILogEntry[]> => {
   const { cleanup, outputFilePath } = await decompressLogFileToTemp(filePath);
 
@@ -125,13 +152,7 @@ export const service = {
       return { data: [], meta: { page, pageSize: pageSize, total: 0, totalPages: 0 } };
     }
 
-    const allEntries: ILogEntry[] = [];
-
-    for (const file of files) {
-      const filePath = join(logDir, file);
-      const entries = isCompressedRequestLogFileName(file) ? await parseCompressedLogFile(filePath) : await parseLogFile(filePath);
-      allEntries.push(...entries);
-    }
+    const allEntries = (await Promise.all(files.map((file) => readLogEntries(join(logDir, file), isCompressedRequestLogFileName(file))))).flat();
 
     allEntries.sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime());
 
