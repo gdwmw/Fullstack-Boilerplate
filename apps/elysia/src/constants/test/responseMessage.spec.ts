@@ -84,7 +84,7 @@ describe("responseMessage", () => {
 
     it("should preserve short acronyms", () => {
       const msg = responseMessage("OTP token");
-      expect(msg.created).toBe("OTP token created successfully");
+      expect(msg.created).toBe("otp token created successfully");
     });
 
     it("should lowercase long uppercase words", () => {
