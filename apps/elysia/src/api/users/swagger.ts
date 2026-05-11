@@ -26,7 +26,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
 
   return {
     delete: {
-      description: "Delete a user by ID",
+      description: "delete a user by ID",
       parameters: [{ in: "path", name: "id", required: true, schema: { example: 1, type: "integer" } }],
       responses: {
         200: {
@@ -35,7 +35,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
               schema: successResponseSchema(responseMessage(label).deleted),
             },
           },
-          description: "User deleted successfully",
+          description: "user deleted successfully",
         },
         400: {
           content: {
@@ -43,7 +43,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
               schema: errorResponseSchema({ message: responseMessage("id").invalid }),
             },
           },
-          description: "Invalid id parameter",
+          description: "invalid id parameter",
         },
         401: {
           content: {
@@ -51,7 +51,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
               schema: errorResponseSchema({ message: responseMessage("access token").required }),
             },
           },
-          description: "Unauthorized",
+          description: "unauthorized",
         },
         404: {
           content: {
@@ -59,16 +59,16 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
               schema: errorResponseSchema({ code: "P2025", message: responseMessage(label).notFound }),
             },
           },
-          description: "User not found",
+          description: "user not found",
         },
       },
       security: [{ bearerAuth: [] }],
-      summary: "Delete",
+      summary: "delete",
       tags: [label.toLowerCase()],
     },
 
     getAll: {
-      description: "Get all users",
+      description: "get all users",
       responses: {
         200: {
           content: {
@@ -76,7 +76,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
               schema: successResponseSchema(responseMessage(label).retrieved),
             },
           },
-          description: "Users retrieved successfully",
+          description: "users retrieved successfully",
         },
         401: {
           content: {
@@ -84,16 +84,16 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
               schema: errorResponseSchema({ message: responseMessage("access token").required }),
             },
           },
-          description: "Unauthorized",
+          description: "unauthorized",
         },
       },
       security: [{ bearerAuth: [] }],
-      summary: "Get All",
+      summary: "get all",
       tags: [label.toLowerCase()],
     },
 
     getById: {
-      description: "Get a user by ID",
+      description: "get a user by ID",
       parameters: [{ in: "path", name: "id", required: true, schema: { example: 1, type: "integer" } }],
       responses: {
         200: {
@@ -102,7 +102,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
               schema: successResponseSchema(responseMessage(label).retrieved),
             },
           },
-          description: "User retrieved successfully",
+          description: "user retrieved successfully",
         },
         400: {
           content: {
@@ -110,7 +110,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
               schema: errorResponseSchema({ message: responseMessage("id").invalid }),
             },
           },
-          description: "Invalid id parameter",
+          description: "invalid id parameter",
         },
         401: {
           content: {
@@ -118,16 +118,16 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
               schema: errorResponseSchema({ message: responseMessage("access token").required }),
             },
           },
-          description: "Unauthorized",
+          description: "unauthorized",
         },
       },
       security: [{ bearerAuth: [] }],
-      summary: "Get by ID",
+      summary: "get by ID",
       tags: [label.toLowerCase()],
     },
 
     put: {
-      description: "Update a user by ID",
+      description: "update a user by ID",
       parameters: [{ in: "path", name: "id", required: true, schema: { example: 1, type: "integer" } }],
       requestBody: {
         content: {
@@ -155,7 +155,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
               schema: successResponseSchema(responseMessage(label).updated),
             },
           },
-          description: "User updated successfully",
+          description: "user updated successfully",
         },
         400: {
           content: {
@@ -163,7 +163,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
               schema: errorResponseSchema({ message: responseMessage("request payload").invalid }),
             },
           },
-          description: "Invalid request payload or id parameter",
+          description: "invalid request payload or id parameter",
         },
         401: {
           content: {
@@ -171,7 +171,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
               schema: errorResponseSchema({ message: responseMessage("access token").required }),
             },
           },
-          description: "Unauthorized",
+          description: "unauthorized",
         },
         404: {
           content: {
@@ -179,7 +179,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
               schema: errorResponseSchema({ code: "P2025", message: responseMessage(label).notFound }),
             },
           },
-          description: "User not found",
+          description: "user not found",
         },
         409: {
           content: {
@@ -187,11 +187,11 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
               schema: errorResponseSchema({ code: "P2002", message: responseMessage("email").alreadyExists }),
             },
           },
-          description: "Unique field conflict",
+          description: "unique field conflict",
         },
       },
       security: [{ bearerAuth: [] }],
-      summary: "Update",
+      summary: "update",
       tags: [label.toLowerCase()],
     },
   };

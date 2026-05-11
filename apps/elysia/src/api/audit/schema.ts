@@ -5,7 +5,7 @@ export const querySchema = z.object({
   actor: z.string().optional(),
   archiveDate: z
     .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, { message: "archiveDate must be in YYYY-MM-DD format" })
+    .regex(/^\d{4}-\d{2}-\d{2}$/, { message: "archive date must be in YYYY-MM-DD format" })
     .optional(),
   level: z.enum(["INFO", "ERROR"], { message: schemaMessage.string.enum("level") }).optional(),
   method: z.enum(["DELETE", "GET", "PATCH", "POST", "PUT"], { message: schemaMessage.string.enum("method") }).optional(),
@@ -31,7 +31,7 @@ export const querySchema = z.object({
     .optional(),
   time: z
     .string()
-    .regex(/^\d{2}:\d{2}$/, { message: "time must be in HH:mm format" })
+    .regex(/^\d{2}:\d{2}$/, { message: "time must be in hh:mm format" })
     .optional(),
 });
 

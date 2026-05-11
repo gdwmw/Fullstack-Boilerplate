@@ -9,6 +9,7 @@ import { service } from "./service";
 import { docs } from "./swagger";
 
 const LABEL = "authentication";
+
 const REFRESH_COOKIE_NAME = env.JWT_REFRESH_COOKIE_NAME;
 const REFRESH_COOKIE_PATH = env.JWT_REFRESH_COOKIE_PATH;
 const REFRESH_COOKIE_SAME_SITE = env.JWT_REFRESH_COOKIE_SAME_SITE;
@@ -25,7 +26,6 @@ interface IResponseSet {
 
 const parseSubjectToUserId = (sub: unknown) => {
   if (typeof sub !== "string") return null;
-
   const userId = Number.parseInt(sub, 10);
   return Number.isNaN(userId) ? null : userId;
 };
@@ -35,9 +35,7 @@ const parseJwtExp = (value: unknown) => (typeof value === "number" ? value : nul
 
 const readRefreshTokenFromCookie = (cookieHeader: string | undefined) => {
   if (!cookieHeader) return null;
-
   const cookies = cookieHeader.split(";").map((cookie) => cookie.trim());
-
   for (const cookie of cookies) {
     const [key, ...valueParts] = cookie.split("=");
     if (key === REFRESH_COOKIE_NAME) {
@@ -51,7 +49,6 @@ const readRefreshTokenFromCookie = (cookieHeader: string | undefined) => {
 const createRefreshCookie = (refreshToken: string) => {
   const maxAge = service.getRefreshTokenMaxAgeSeconds();
   const secure = REFRESH_COOKIE_SECURE ? "; Secure" : "";
-
   return `${REFRESH_COOKIE_NAME}=${encodeURIComponent(refreshToken)}; Path=${REFRESH_COOKIE_PATH}; HttpOnly; SameSite=${REFRESH_COOKIE_SAME_SITE}; Max-Age=${maxAge}${secure}`;
 };
 
@@ -73,7 +70,6 @@ const issueAccessAndRefreshTokens = async ({
   userId: number;
 }) => {
   const refreshJti = crypto.randomUUID();
-
   const accessToken = await accessJwt.sign({ jti: crypto.randomUUID(), sub: String(userId) });
   const refreshToken = await refreshJwt.sign({ jti: refreshJti, sub: String(userId) });
   return {
@@ -92,6 +88,7 @@ const getAuthenticatedUserId = async ({
   set: IResponseSet;
 }) => {
   const verifyResponse = await verifyAccessToken({ accessJwt, headers, set });
+
   if (verifyResponse) {
     return { error: verifyResponse, userId: null };
   }
@@ -116,8 +113,8 @@ const getAuthenticatedUserId = async ({
 export const authRoutes = new Elysia({ prefix: "/auth" })
   .use(accessJwtPlugin)
   .use(refreshJwtPlugin)
-
   .onError(({ error, set }) => handlePrismaError(LABEL, error, set))
+
   .post(
     "/register",
     async ({ accessJwt, body, refreshJwt, set }) => {

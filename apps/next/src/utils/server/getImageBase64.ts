@@ -8,7 +8,7 @@ export const getImageBase64 = async (imageUrl: string) => {
     const res = await fetch(imageUrl);
 
     if (!res.ok) {
-      throw new Error(`Failed to fetch image: ${res.status} ${res.statusText}`);
+      throw new Error(`failed to fetch image: ${res.status} ${res.statusText}`);
     }
 
     const buffer = await res.arrayBuffer();

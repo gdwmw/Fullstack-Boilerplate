@@ -1,6 +1,6 @@
 export const responseMessage = (label: string) => {
-  const normalizeLabel = (label: string) => label.trim().toLowerCase();
-  const result = normalizeLabel(label);
+  const lowerCase = (label: string) => label.trim().toLowerCase();
+  const result = lowerCase(label);
 
   return {
     alreadyExists: `${result} already exists`,

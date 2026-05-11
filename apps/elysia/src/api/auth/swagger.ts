@@ -26,7 +26,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
 
   return {
     changePassword: {
-      description: "Change current authenticated user password",
+      description: "change current authenticated user password",
       requestBody: {
         content: {
           "application/json": {
@@ -49,7 +49,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
               schema: successResponseSchema(responseMessage("password").updated),
             },
           },
-          description: "Password changed successfully",
+          description: "password changed successfully",
         },
         400: {
           content: {
@@ -57,7 +57,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
               schema: errorResponseSchema({ message: responseMessage("request payload").invalid }),
             },
           },
-          description: "Invalid request payload",
+          description: "invalid request payload",
         },
         401: {
           content: {
@@ -65,16 +65,16 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
               schema: errorResponseSchema({ message: responseMessage("current password").invalid }),
             },
           },
-          description: "Unauthorized or current password invalid",
+          description: "unauthorized or current password invalid",
         },
       },
       security: [{ bearerAuth: [] }],
-      summary: "Change Password",
+      summary: "change password",
       tags: [label.toLowerCase()],
     },
 
     login: {
-      description: "Authenticate user and issue access/refresh token pair",
+      description: "authenticate user and issue access/refresh token pair",
       requestBody: {
         content: {
           "application/json": {
@@ -98,7 +98,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
               schema: successResponseSchema(responseMessage("login").success),
             },
           },
-          description: "Login successful",
+          description: "login successful",
         },
         400: {
           content: {
@@ -106,7 +106,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
               schema: errorResponseSchema({ message: responseMessage("request payload").invalid }),
             },
           },
-          description: "Invalid request payload",
+          description: "invalid request payload",
         },
         401: {
           content: {
@@ -114,16 +114,16 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
               schema: errorResponseSchema({ message: responseMessage("email or password").invalid }),
             },
           },
-          description: "Invalid credentials",
+          description: "invalid credentials",
         },
       },
-      summary: "Login",
+      summary: "login",
       tags: [label.toLowerCase()],
     },
 
     logout: {
       description:
-        "Logout current session. Refresh token is read from HttpOnly cookie. Access token is optional but will be blocklisted if provided.",
+        "logout current session. refresh token is read from HttpOnly cookie. access token is optional but will be blocklisted if provided.",
       responses: {
         200: {
           content: {
@@ -131,15 +131,15 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
               schema: successResponseSchema(responseMessage("logout").success),
             },
           },
-          description: "Logout successful",
+          description: "logout successful",
         },
       },
-      summary: "Logout",
+      summary: "logout",
       tags: [label.toLowerCase()],
     },
 
     me: {
-      description: "Get current authenticated user profile",
+      description: "get current authenticated user profile",
       responses: {
         200: {
           content: {
@@ -147,7 +147,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
               schema: successResponseSchema(responseMessage("users").retrieved),
             },
           },
-          description: "User profile retrieved successfully",
+          description: "user profile retrieved successfully",
         },
         401: {
           content: {
@@ -155,7 +155,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
               schema: errorResponseSchema({ message: responseMessage("access token").required }),
             },
           },
-          description: "Unauthorized",
+          description: "unauthorized",
         },
         404: {
           content: {
@@ -163,16 +163,16 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
               schema: errorResponseSchema({ message: responseMessage("users").notFound }),
             },
           },
-          description: "User not found",
+          description: "user not found",
         },
       },
       security: [{ bearerAuth: [] }],
-      summary: "Get Current User",
+      summary: "get current user",
       tags: [label.toLowerCase()],
     },
 
     refresh: {
-      description: "Rotate refresh token and issue a new access token. Refresh token is read from HttpOnly cookie.",
+      description: "rotate refresh token and issue a new access token. refresh token is read from HttpOnly cookie.",
       responses: {
         200: {
           content: {
@@ -180,7 +180,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
               schema: successResponseSchema(responseMessage("token").updated),
             },
           },
-          description: "Token refreshed successfully",
+          description: "token refreshed successfully",
         },
         401: {
           content: {
@@ -188,7 +188,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
               schema: errorResponseSchema({ message: responseMessage("refresh token").required }),
             },
           },
-          description: "Refresh token invalid or expired",
+          description: "refresh token invalid or expired",
         },
         404: {
           content: {
@@ -196,15 +196,15 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
               schema: errorResponseSchema({ message: responseMessage("users").notFound }),
             },
           },
-          description: "User not found",
+          description: "user not found",
         },
       },
-      summary: "Refresh Token",
+      summary: "refresh token",
       tags: [label.toLowerCase()],
     },
 
     register: {
-      description: "Register user and issue access/refresh token pair",
+      description: "register user and issue access/refresh token pair",
       requestBody: {
         content: {
           "application/json": {
@@ -231,7 +231,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
               schema: successResponseSchema(responseMessage("register").success),
             },
           },
-          description: "Registration successful",
+          description: "registration successful",
         },
         400: {
           content: {
@@ -239,7 +239,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
               schema: errorResponseSchema({ message: responseMessage("request payload").invalid }),
             },
           },
-          description: "Invalid request payload",
+          description: "invalid request payload",
         },
         409: {
           content: {
@@ -247,10 +247,10 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
               schema: errorResponseSchema({ code: "P2002", message: responseMessage("email").alreadyExists }),
             },
           },
-          description: "User already exists",
+          description: "user already exists",
         },
       },
-      summary: "Register",
+      summary: "register",
       tags: [label.toLowerCase()],
     },
   };

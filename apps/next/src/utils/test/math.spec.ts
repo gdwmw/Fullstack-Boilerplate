@@ -18,7 +18,7 @@ describe("math utils", () => {
   });
 
   it("throws when dividing by zero", () => {
-    expect(() => divide(1, 0)).toThrow("Cannot divide by zero");
+    expect(() => divide(1, 0)).toThrow("cannot divide by zero");
   });
 
   it("calculates average", () => {
@@ -26,7 +26,7 @@ describe("math utils", () => {
   });
 
   it("throws when averaging empty array", () => {
-    expect(() => calculateAverage([])).toThrow("Cannot divide by zero");
+    expect(() => calculateAverage([])).toThrow("cannot divide by zero");
   });
 
   it("calculates increase percentage", () => {

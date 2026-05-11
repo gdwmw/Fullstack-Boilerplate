@@ -95,58 +95,58 @@ export const docs = (label: string): Record<"getAll" | "getArchives", DocumentDe
 
   return {
     getAll: {
-      description: "Get all audit logs from log files with optional filters",
+      description: "get all audit logs from log files with optional filters",
       parameters: [
         {
-          description: "Load entries from a selected archive date using YYYY-MM-DD format.",
+          description: "load entries from a selected archive date using YYYY-MM-DD format.",
           in: "query",
           name: "archiveDate",
           schema: { example: "2026-05-07", type: "string" },
         },
         {
-          description: "Page number for pagination.",
+          description: "page number for pagination.",
           in: "query",
           name: "page",
           schema: { default: 1, example: 1, minimum: 1, type: "integer" },
         },
         {
-          description: "Maximum number of audit log entries to return per page.",
+          description: "maximum number of audit log entries to return per page.",
           in: "query",
           name: "pageSize",
           schema: { default: 50, example: 50, maximum: 100, minimum: 1, type: "integer" },
         },
         {
-          description: "Search actor snapshot by name, username, email, phone, or role.",
+          description: "search actor snapshot by name, username, email, phone, or role.",
           in: "query",
           name: "actor",
           schema: { example: "admin", type: "string" },
         },
         {
-          description: "Filter entries within the selected minute using HH:mm format.",
+          description: "filter entries within the selected minute using HH:mm format.",
           in: "query",
           name: "time",
           schema: { example: "14:30", type: "string" },
         },
         {
-          description: "Filter by log level.",
+          description: "filter by log level.",
           in: "query",
           name: "level",
           schema: { enum: ["INFO", "ERROR"], type: "string" },
         },
         {
-          description: "Filter by HTTP method.",
+          description: "filter by HTTP method.",
           in: "query",
           name: "method",
           schema: { enum: ["GET", "POST", "PUT", "PATCH", "DELETE"], type: "string" },
         },
         {
-          description: "Filter logs whose path contains the provided substring.",
+          description: "filter logs whose path contains the provided substring.",
           in: "query",
           name: "path",
           schema: { example: "/auth/login", type: "string" },
         },
         {
-          description: "Filter by exact HTTP status code.",
+          description: "filter by exact HTTP status code.",
           in: "query",
           name: "statusCode",
           schema: { example: 200, maximum: 599, minimum: 100, type: "integer" },
@@ -159,7 +159,7 @@ export const docs = (label: string): Record<"getAll" | "getArchives", DocumentDe
               schema: successResponseSchema as TResponseSchema,
             },
           },
-          description: "Audit logs retrieved successfully",
+          description: "audit logs retrieved successfully",
         },
         401: {
           content: {
@@ -167,24 +167,24 @@ export const docs = (label: string): Record<"getAll" | "getArchives", DocumentDe
               schema: errorResponseSchema,
             },
           },
-          description: "Unauthorized",
+          description: "unauthorized",
         },
       },
       security: [{ bearerAuth: [] }],
-      summary: "Get All",
+      summary: "get all",
       tags: [label.toLowerCase()],
     },
     getArchives: {
-      description: "Get the available audit log archives grouped by date.",
+      description: "get the available audit log archives grouped by date.",
       parameters: [
         {
-          description: "Optional month filter for archives.",
+          description: "optional month filter for archives.",
           in: "query",
           name: "month",
           schema: { example: 5, maximum: 12, minimum: 1, type: "integer" },
         },
         {
-          description: "Optional year filter for archives.",
+          description: "optional year filter for archives.",
           in: "query",
           name: "year",
           schema: { example: 2026, minimum: 2000, type: "integer" },
@@ -197,7 +197,7 @@ export const docs = (label: string): Record<"getAll" | "getArchives", DocumentDe
               schema: archiveSuccessResponseSchema as TResponseSchema,
             },
           },
-          description: "Audit archives retrieved successfully",
+          description: "audit archives retrieved successfully",
         },
         401: {
           content: {
@@ -205,11 +205,11 @@ export const docs = (label: string): Record<"getAll" | "getArchives", DocumentDe
               schema: errorResponseSchema,
             },
           },
-          description: "Unauthorized",
+          description: "unauthorized",
         },
       },
       security: [{ bearerAuth: [] }],
-      summary: "Get Archives",
+      summary: "get archives",
       tags: [label.toLowerCase()],
     },
   };
