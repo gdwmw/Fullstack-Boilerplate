@@ -37,10 +37,6 @@ const formatTimeForQuery = (value: Date | null): string | undefined => {
   return format(value, "HH:mm");
 };
 
-interface I {
-  defaultPageSize: number;
-}
-
 interface IFilterFormValues {
   actor: string;
   level: "" | "ERROR" | "INFO";
@@ -67,6 +63,10 @@ const FILTER_DEFAULT_VALUES: IFilterFormValues = {
   statusCode: "",
   time: null,
 };
+
+interface I {
+  defaultPageSize: number;
+}
 
 export const Main: FC<I> = (props): ReactElement => {
   const queryClient = useQueryClient();

@@ -59,6 +59,40 @@ export const getBrowserName = (userAgent: string): string => {
   return "Other";
 };
 
+export const getOSName = (userAgent: string): string => {
+  const ua = userAgent.toLowerCase();
+
+  if (!ua || ua === "unknown") {
+    return "Unknown";
+  }
+
+  if (ua.includes("windows")) {
+    return "Windows";
+  }
+
+  if (ua.includes("mac") || ua.includes("macintosh")) {
+    return "macOS";
+  }
+
+  if (ua.includes("iphone") || ua.includes("ipad")) {
+    return "iOS";
+  }
+
+  if (ua.includes("android")) {
+    return "Android";
+  }
+
+  if (ua.includes("linux")) {
+    return "Linux";
+  }
+
+  if (ua.includes("x11")) {
+    return "Unix";
+  }
+
+  return "Other";
+};
+
 export const getDisplayIp = (ip: string): string => {
   const rawIp = ip.trim();
 
@@ -208,7 +242,9 @@ export const AuditTable: FC<I> = (props): ReactElement => (
               </td>
               <td className="max-w-64 min-w-64">
                 <p className="truncate">{log.path}</p>
-                <p className="truncate text-xs text-gray-500 dark:text-gray-400">{getBrowserName(log.userAgent)}</p>
+                <p className="truncate text-xs text-gray-500 dark:text-gray-400">
+                  {getBrowserName(log.userAgent)} • {getOSName(log.userAgent)}
+                </p>
               </td>
               <td className="max-w-18 min-w-18 text-center">
                 <span className={["block rounded-full px-2 py-0.5 text-xs font-semibold", statusClassName(log.statusCode)].join(" ")}>

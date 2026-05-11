@@ -7,12 +7,7 @@ import { createPortal } from "react-dom";
 import { Container, ExampleA, Header } from "@/src/components";
 import { IAuditLogEntry } from "@/src/utils";
 
-import { durationClassName, getBrowserName, getDisplayIp, levelClassName, methodClassName, statusClassName } from "../../components";
-
-interface IAuditDetailModal {
-  onClose: () => void;
-  selectedLog: IAuditLogEntry | null;
-}
+import { durationClassName, getBrowserName, getDisplayIp, getOSName, levelClassName, methodClassName, statusClassName } from "../../components";
 
 type TAuditPayload = null | Record<string, unknown>;
 type TAuditUser = IAuditLogEntry["users"];
@@ -29,31 +24,37 @@ const stringifyLogValue = (value: unknown): string => {
   return JSON.stringify(value, null, 2);
 };
 
-const DetailMetaItem: FC<{ label: string; value: ReactNode | string }> = ({ label, value }): ReactElement => (
+const DetailMetaItem: FC<{ label: string; value: ReactNode | string }> = (props): ReactElement => (
   <div className="flex h-25 flex-col gap-1 rounded-lg border border-black bg-black/5 p-3 dark:border-white dark:bg-white/5">
-    <h3 className="text-xs font-semibold tracking-widest text-blue-500">{label}</h3>
-    <p className="line-clamp-3 text-xs text-black/80 dark:text-white/80">{value}</p>
+    <h3 className="text-xs font-semibold tracking-widest text-blue-500">{props.label}</h3>
+    <p className="line-clamp-3 text-xs text-black/80 dark:text-white/80">{props.value}</p>
   </div>
 );
 
-const DetailBlock: FC<{ children: string; title: string }> = ({ children, title }): ReactElement => (
+const DetailBlock: FC<{ children: string; title: string }> = (props): ReactElement => (
   <section className="flex flex-1 flex-col gap-2 overflow-hidden rounded-lg border border-black bg-black/5 p-3 dark:border-white dark:bg-white/5">
-    <h3 className="text-xs font-semibold tracking-widest text-blue-500">{title}</h3>
+    <h3 className="text-xs font-semibold tracking-widest text-blue-500">{props.title}</h3>
     <pre className="flex-1 overflow-auto rounded-md border border-black/10 bg-black/5 p-3 font-mono text-xs leading-relaxed text-black/90 dark:border-white/10 dark:bg-white/5 dark:text-white/90">
-      {children}
+      {props.children}
     </pre>
   </section>
 );
 
-export const AuditDetailModal: FC<IAuditDetailModal> = ({ onClose, selectedLog }): null | ReactElement => {
-  if (!selectedLog || typeof document === "undefined") {
+interface I {
+  onClose: () => void;
+  selectedLog: IAuditLogEntry | null;
+}
+
+export const AuditDetailModal: FC<I> = (props): null | ReactElement => {
+  if (!props.selectedLog || typeof document === "undefined") {
     return null;
   }
 
-  const selectedLogBrowser = getBrowserName(selectedLog.userAgent ?? "");
-  const selectedLogIp = getDisplayIp(selectedLog.ip ?? "");
-  const selectedLogPayload = stringifyLogValue((selectedLog as { payload?: TAuditPayload } & IAuditLogEntry).payload ?? null);
-  const selectedLogUser = stringifyLogValue((selectedLog as { users?: TAuditUser } & IAuditLogEntry).users ?? null);
+  const selectedLogBrowser = getBrowserName(props.selectedLog.userAgent ?? "");
+  const selectedLogOs = getOSName(props.selectedLog.userAgent ?? "");
+  const selectedLogIp = getDisplayIp(props.selectedLog.ip ?? "");
+  const selectedLogPayload = stringifyLogValue((props.selectedLog as { payload?: TAuditPayload } & IAuditLogEntry).payload ?? null);
+  const selectedLogUser = stringifyLogValue((props.selectedLog as { users?: TAuditUser } & IAuditLogEntry).users ?? null);
 
   return createPortal(
     <div className="fixed inset-0 bg-black/5 backdrop-blur-sm dark:bg-white/5">
@@ -62,10 +63,10 @@ export const AuditDetailModal: FC<IAuditDetailModal> = ({ onClose, selectedLog }
           <Header
             className={{ label: "flex items-center" }}
             description="Inspect metadata, payload, user snapshot, and error detail for this request."
-            label={["Audit Detail", "-", selectedLog.path].join(" ")}
+            label={["Audit Detail", "-", props.selectedLog.path].join(" ")}
           />
 
-          <ExampleA color="black" onClick={onClose} size="sm" variant="ghost">
+          <ExampleA color="black" onClick={props.onClose} size="sm" variant="ghost">
             <X size={20} />
           </ExampleA>
         </div>
@@ -74,37 +75,37 @@ export const AuditDetailModal: FC<IAuditDetailModal> = ({ onClose, selectedLog }
           <span
             className={[
               "block max-w-21.5 min-w-21.5 rounded-full px-2 py-0.5 text-center text-xs font-semibold",
-              levelClassName(selectedLog.level),
+              levelClassName(props.selectedLog.level),
             ].join(" ")}
           >
-            {selectedLog.level}
+            {props.selectedLog.level}
           </span>
 
           <span
             className={[
               "block max-w-21.5 min-w-21.5 rounded-full px-2 py-0.5 text-center text-xs font-semibold",
-              methodClassName(selectedLog.method),
+              methodClassName(props.selectedLog.method),
             ].join(" ")}
           >
-            {selectedLog.method}
+            {props.selectedLog.method}
           </span>
 
           <span
             className={[
               "block max-w-21.5 min-w-21.5 rounded-full px-2 py-0.5 text-center text-xs font-semibold",
-              statusClassName(selectedLog.statusCode),
+              statusClassName(props.selectedLog.statusCode),
             ].join(" ")}
           >
-            {selectedLog.statusCode}
+            {props.selectedLog.statusCode}
           </span>
 
           <span
             className={[
               "block max-w-21.5 min-w-21.5 rounded-full px-2 py-0.5 text-center text-xs font-semibold",
-              durationClassName(selectedLog.durationMs),
+              durationClassName(props.selectedLog.durationMs),
             ].join(" ")}
           >
-            {selectedLog.durationMs} ms
+            {props.selectedLog.durationMs} ms
           </span>
         </div>
 
@@ -113,13 +114,13 @@ export const AuditDetailModal: FC<IAuditDetailModal> = ({ onClose, selectedLog }
             <div className="grid flex-1 grid-cols-2 gap-3 overflow-hidden">
               <section className="flex flex-col gap-2 overflow-hidden text-xs">
                 <div className="grid grid-cols-3 gap-2">
-                  <DetailMetaItem label="TIMESTAMP" value={selectedLog.ts} />
-                  <DetailMetaItem label="BROWSER" value={selectedLogBrowser} />
+                  <DetailMetaItem label="TIMESTAMP" value={props.selectedLog.ts} />
+                  <DetailMetaItem label="BROWSER/OS" value={`${selectedLogBrowser} • ${selectedLogOs}`} />
                   <DetailMetaItem label="IP ADDRESS" value={selectedLogIp} />
                 </div>
 
                 <DetailBlock title="USER SNAPSHOT">{selectedLogUser}</DetailBlock>
-                <DetailBlock title="ERROR">{selectedLog.error ?? "-"}</DetailBlock>
+                <DetailBlock title="ERROR">{props.selectedLog.error ?? "-"}</DetailBlock>
               </section>
 
               <section className="flex flex-col gap-2 overflow-hidden text-sm">
@@ -130,7 +131,7 @@ export const AuditDetailModal: FC<IAuditDetailModal> = ({ onClose, selectedLog }
         </div>
       </Container>
 
-      <button aria-hidden onClick={onClose} type="button" />
+      <button aria-hidden onClick={props.onClose} type="button" />
     </div>,
     document.body,
   );

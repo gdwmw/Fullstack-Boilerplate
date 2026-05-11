@@ -9,13 +9,13 @@ interface IMeta {
   totalPages?: number;
 }
 
+const PAGE_SIZE_OPTIONS = [10, 20, 50, 100] as const;
+
 interface I {
   meta: IMeta;
   onPageChange: (newPage: number) => void;
   onPageSizeChange: (newPageSize: number) => void;
 }
-
-const PAGE_SIZE_OPTIONS = [10, 20, 50, 100] as const;
 
 export const AuditPagination: FC<I> = (props): ReactElement =>
   (() => {
