@@ -26,8 +26,8 @@ Boilerplate by [Gede Dewo Wahyu M.W](https://github.com/gdwmw)
 
 This monorepo is a fullstack starter kit based on Turborepo, consisting of:
 
-* 🖥️ `apps/next`: frontend application using Next.js
-* ⚙️ `apps/elysia`: REST API using Elysia.js + Prisma
+- 🖥️ `apps/next`: frontend application using Next.js
+- ⚙️ `apps/elysia`: REST API using Elysia.js + Prisma
 
 This boilerplate provides common foundations often needed in production projects such as JWT authentication, form validation, state management, theme management, file uploads, and Storybook for UI development.
 
@@ -37,24 +37,24 @@ This project also supports request/audit log compression using `zstd` on the Ely
 
 ## ✨ Main Features
 
-* 🏗️ Monorepo architecture with Turborepo + pnpm workspace
-* 🎨 Frontend with Next.js + Tailwind CSS
-* 🔧 Backend with Elysia.js + Prisma + PostgreSQL
-* ⚡ Redis for token blocklist/session support
-* 🗜️ `zstd` compression for archived request/audit logs and database backups
-* 🔐 JWT authentication
-* 📝 Form handling (`react-hook-form` + `zod`)
-* 📚 Storybook for UI components
-* 🧹 Linting, formatting, and type-checking
+- 🏗️ Monorepo architecture with Turborepo + pnpm workspace
+- 🎨 Frontend with Next.js + Tailwind CSS
+- 🔧 Backend with Elysia.js + Prisma + PostgreSQL
+- ⚡ Redis for token blocklist/session support
+- 🗜️ `zstd` compression for archived request/audit logs and database backups
+- 🔐 JWT authentication
+- 📝 Form handling (`react-hook-form` + `zod`)
+- 📚 Storybook for UI components
+- 🧹 Linting, formatting, and type-checking
 
 ---
 
 ## 🧰 Tech Stack
 
-* **Monorepo**: Turborepo, pnpm
-* **Frontend**: Next.js, Tailwind CSS, Jotai, React Hook Form, Zod
-* **Backend**: Elysia.js, Prisma, PostgreSQL, JWT, zstd (log and DB backup compression)
-* **Tooling**: ESLint, Prettier, Husky, Commitizen
+- **Monorepo**: Turborepo, pnpm
+- **Frontend**: Next.js, Tailwind CSS, Jotai, React Hook Form, Zod
+- **Backend**: Elysia.js, Prisma, PostgreSQL, JWT, zstd (log and DB backup compression)
+- **Tooling**: ESLint, Prettier, Husky, Commitizen
 
 ---
 
@@ -62,13 +62,13 @@ This project also supports request/audit log compression using `zstd` on the Ely
 
 Make sure the following are installed:
 
-* 🟢 Node.js `>= 18`
-* 📦 pnpm `>= 10`
-* ⚡ Bun (for running the Elysia API)
-* 🐘 PostgreSQL
-* 🧰 PostgreSQL client tools (`pg_dump`, `pg_restore`)
-* 🔴 Redis
-* 🗜️ zstd (required for log compression/decompression)
+- 🟢 Node.js `>= 18`
+- 📦 pnpm `>= 10`
+- ⚡ Bun (for running the Elysia API)
+- 🐘 PostgreSQL
+- 🧰 PostgreSQL client tools (`pg_dump`, `pg_restore`)
+- 🔴 Redis
+- 🗜️ zstd (required for log compression/decompression)
 
 ---
 
@@ -97,13 +97,13 @@ pnpm cpenv
 
 Update at least:
 
-* `apps/elysia/.env`: database connection, JWT secret, and API configuration
-* `apps/next/.env`: API/backend URL and other frontend configurations
+- `apps/elysia/.env`: database connection, JWT secret, and API configuration
+- `apps/next/.env`: API/backend URL and other frontend configurations
 
 1. **Ensure services are running**
 
-* 🐘 PostgreSQL must be active (`DATABASE_URL`)
-* 🔴 Redis must be active (`REDIS_URL`)
+- 🐘 PostgreSQL must be active (`DATABASE_URL`)
+- 🔴 Redis must be active (`REDIS_URL`)
 
 1. **Generate Prisma Client and run migrations**
 
@@ -120,9 +120,9 @@ pnpm dev
 
 1. **Access the application**
 
-* 🌐 Frontend: [http://localhost:3000](http://localhost:3000)
-* 🔗 API: [http://localhost:1337](http://localhost:1337)
-* 📄 Swagger: [http://localhost:1337/swagger](http://localhost:1337/swagger)
+- 🌐 Frontend: [http://localhost:3000](http://localhost:3000)
+- 🔗 API: [http://localhost:1337](http://localhost:1337)
+- 📄 Swagger: [http://localhost:1337/swagger](http://localhost:1337/swagger)
 
 ---
 
@@ -149,8 +149,8 @@ Database backup worker on Elysia runs with this flow:
 
 Output file format:
 
-* Preferred: `postgres-<db-name>-<timestamp>.dump.zst`
-* Fallback (if `zstd` is unavailable): `postgres-<db-name>-<timestamp>.dump`
+- Preferred: `postgres-<db-name>-<timestamp>.dump.zst`
+- Fallback (if `zstd` is unavailable): `postgres-<db-name>-<timestamp>.dump`
 
 Restore example:
 
@@ -163,9 +163,9 @@ pg_restore --clean --if-exists --no-owner --dbname "$DATABASE_URL" backup.dump
 
 ## 🧱 Prisma Notes (Elysia)
 
-* `apps/elysia/prisma/schema.prisma` intentionally omits `datasource db.url`.
-* `DATABASE_URL` is supplied from `apps/elysia/prisma.config.ts` using Prisma's `defineConfig`.
-* To keep split schema files under `apps/elysia/prisma/models` consistently formatted, run:
+- `apps/elysia/prisma/schema.prisma` intentionally omits `datasource db.url`.
+- `DATABASE_URL` is supplied from `apps/elysia/prisma.config.ts` using Prisma's `defineConfig`.
+- To keep split schema files under `apps/elysia/prisma/models` consistently formatted, run:
 
 ```bash
 pnpm -C apps/elysia format
@@ -175,13 +175,13 @@ pnpm -C apps/elysia format
 
 ## 📜 Important Scripts
 
-* ▶️ `pnpm dev` - run all apps in development mode
-* 🏗️ `pnpm build` - build all apps/packages
-* 🧹 `pnpm lint` - lint the entire workspace
-* 🔍 `pnpm check-types` - TypeScript type-check
-* ⚙️ `pnpm generate` - generate Prisma client
-* 🗄️ `pnpm migrate` - run Prisma migrations
-* 🎨 `pnpm prettier` - format codebase
+- ▶️ `pnpm dev` - run all apps in development mode
+- 🏗️ `pnpm build` - build all apps/packages
+- 🧹 `pnpm lint` - lint the entire workspace
+- 🔍 `pnpm check-types` - TypeScript type-check
+- ⚙️ `pnpm generate` - generate Prisma client
+- 🗄️ `pnpm migrate` - run Prisma migrations
+- 🎨 `pnpm prettier` - format codebase
 
 ---
 
@@ -204,9 +204,9 @@ This project uses Commitizen (`pnpm commit`).
 
 Include:
 
-* Context
-* Error message
-* Reproduction steps
+- Context
+- Error message
+- Reproduction steps
 
 ---
 
