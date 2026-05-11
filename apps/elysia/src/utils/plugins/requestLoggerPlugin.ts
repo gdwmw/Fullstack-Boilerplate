@@ -40,7 +40,7 @@ const SENSITIVE_FIELD_NAMES = new Set([
   "xapikey",
 ]);
 
-const PAYLOAD_LOG_EXCLUDED_PATHS = [""];
+const PAYLOAD_LOG_EXCLUDED_PATHS: string[] = [];
 
 type TAuditLogUser = {
   email: null | string;
