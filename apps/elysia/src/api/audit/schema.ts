@@ -17,15 +17,15 @@ export const querySchema = z.object({
     .default(1),
   pageSize: z.coerce
     .number()
-    .int({ message: schemaMessage.number.int("pageSize") })
-    .positive({ message: schemaMessage.number.positive("pageSize") })
-    .max(100, { message: schemaMessage.number.max("pageSize", 100) })
+    .int({ message: schemaMessage.number.int("page size") })
+    .positive({ message: schemaMessage.number.positive("page size") })
+    .max(100, { message: schemaMessage.number.max("page size", 100) })
     .optional()
     .default(50),
   path: z.string().optional(),
   statusCode: z.coerce
     .number()
-    .int({ message: schemaMessage.number.int("statusCode") })
+    .int({ message: schemaMessage.number.int("status code") })
     .min(100)
     .max(599)
     .optional(),
