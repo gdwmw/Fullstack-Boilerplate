@@ -3,7 +3,7 @@ import { IUploadResponse } from "./upload";
 
 export interface IUserPayload {
   email: string;
-  imageId?: null | number;
+  imageId?: null | string;
   name: string;
   phone: string;
   role?: "admin" | "user";
@@ -13,9 +13,9 @@ export interface IUserPayload {
 export interface IUserResponse {
   createdAt: Date;
   email: string;
-  id: number;
+  id: string;
   image?: IUploadResponse | null;
-  imageId?: null | number;
+  imageId?: null | string;
   name: string;
   phone: string;
   role: "admin" | "user";
@@ -34,21 +34,21 @@ export const GETUsers = async (params?: TQueryParams): Promise<ISuccessResponse<
     params: params,
   });
 
-export const GETUsersById = async (id: number, params?: TQueryParams): Promise<ISuccessResponse<IUserResponse>> =>
+export const GETUsersById = async (id: string, params?: TQueryParams): Promise<ISuccessResponse<IUserResponse>> =>
   getApi<IUserResponse>({
     endpoint: `/users/${id}`,
     label: label,
     params: params,
   });
 
-export const PUTUsers = async (id: number, payload: IUserPayload): Promise<ISuccessResponse<IUserResponse>> =>
+export const PUTUsers = async (id: string, payload: IUserPayload): Promise<ISuccessResponse<IUserResponse>> =>
   putApi<IUserResponse>({
     data: payload,
     endpoint: `/users/${id}`,
     label: label,
   });
 
-export const DELETEUsers = async (id: number): Promise<ISuccessResponse<IUserResponse>> =>
+export const DELETEUsers = async (id: string): Promise<ISuccessResponse<IUserResponse>> =>
   deleteApi<IUserResponse>({
     endpoint: `/users/${id}`,
     label: label,

@@ -20,7 +20,7 @@ const IMAGE_FORMATS: { name: string; width: number }[] = [
 
 const IMAGE_MIME_TYPES = new Set(["image/avif", "image/gif", "image/jpeg", "image/png", "image/tiff", "image/webp"]);
 
-async function processImage(buffer: Buffer, originalWidth: number): Promise<Record<string, ImageFormat>> {
+const processImage = async (buffer: Buffer, originalWidth: number): Promise<Record<string, ImageFormat>> => {
   const processedFormats = await Promise.all(
     IMAGE_FORMATS.filter((format) => originalWidth > format.width).map(async (format) => {
       const filename = `${randomUUID()}.webp`;
@@ -49,9 +49,9 @@ async function processImage(buffer: Buffer, originalWidth: number): Promise<Reco
   );
 
   return Object.fromEntries(processedFormats);
-}
+};
 
-async function removeUploadedFile(filename: string) {
+const removeUploadedFile = async (filename: string) => {
   try {
     await unlink(join(UPLOAD_DIR, filename));
   } catch (error) {
@@ -64,10 +64,10 @@ async function removeUploadedFile(filename: string) {
       "failed to delete uploaded file from disk",
     );
   }
-}
+};
 
 export const service = {
-  async delete(fileId: number) {
+  async delete(fileId: string) {
     const fileRecord = await prisma.files.delete({ where: { id: fileId } });
 
     await removeUploadedFile(fileRecord.filename);
@@ -84,7 +84,7 @@ export const service = {
     return await prisma.files.findMany({ orderBy: { createdAt: "desc" } });
   },
 
-  async getById(fileId: number) {
+  async getById(fileId: string) {
     return await prisma.files.findUnique({ where: { id: fileId } });
   },
 

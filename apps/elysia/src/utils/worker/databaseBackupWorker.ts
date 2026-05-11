@@ -12,10 +12,6 @@ const BACKUP_FILE_PREFIX = "postgres-";
 const RAW_BACKUP_EXTENSION = ".dump";
 const COMPRESSED_BACKUP_EXTENSION = ".dump.zst";
 
-const getBackupDirectory = () => env.DB_BACKUP_DIR;
-
-const getBackupRetentionDays = () => env.DB_BACKUP_RETENTION_DAYS;
-
 const sanitize = (value: string) => value.replace(/[^a-zA-Z0-9._-]/g, "_");
 
 const isBackupFileName = (entry: string) =>
@@ -36,22 +32,17 @@ const getConnectionInfo = () => {
 
 const cleanupOldBackups = async (directory: string, retentionDays: number) => {
   const entries = await readdir(directory);
-  const maxAge = retentionDays * ONE_DAY_IN_MS;
-  const now = Date.now();
+  const cutoffTime = Date.now() - retentionDays * ONE_DAY_IN_MS;
 
   for (const entry of entries) {
-    const targetPath = join(directory, entry);
-    const info = await stat(targetPath);
-
-    if (!info.isFile()) {
-      continue;
-    }
-
     if (!isBackupFileName(entry)) {
       continue;
     }
 
-    if (now - info.mtimeMs <= maxAge) {
+    const targetPath = join(directory, entry);
+    const info = await stat(targetPath);
+
+    if (!info.isFile() || info.mtimeMs > cutoffTime) {
       continue;
     }
 
@@ -79,8 +70,8 @@ export const databaseBackupWorker = async () => {
   isBackupRunning = true;
 
   try {
-    const directory = getBackupDirectory();
-    const retentionDays = getBackupRetentionDays();
+    const directory = env.DB_BACKUP_DIR;
+    const retentionDays = env.DB_BACKUP_RETENTION_DAYS;
 
     await mkdir(directory, { recursive: true });
 

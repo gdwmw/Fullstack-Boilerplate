@@ -81,6 +81,16 @@ describe("responseMessage", () => {
       const msg = responseMessage("profile");
       expect(msg.created).toBe("profile created successfully");
     });
+
+    it("should preserve short acronyms", () => {
+      const msg = responseMessage("OTP token");
+      expect(msg.created).toBe("otp token created successfully");
+    });
+
+    it("should lowercase long uppercase words", () => {
+      const msg = responseMessage("ACCOUNT");
+      expect(msg.created).toBe("account created successfully");
+    });
   });
 
   describe("message format consistency", () => {

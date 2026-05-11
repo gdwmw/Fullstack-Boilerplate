@@ -1,13 +1,10 @@
+import { IAuthResponse } from ".";
 import { ISuccessResponse, postApi } from "../base";
-
-export interface IRefreshResponse {
-  accessToken: string;
-}
 
 const label = "refresh token";
 
-export const POSTRefresh = async (): Promise<ISuccessResponse<IRefreshResponse>> =>
-  postApi<IRefreshResponse>({
+export const POSTRefresh = async (): Promise<ISuccessResponse<IAuthResponse>> =>
+  postApi<IAuthResponse>({
     auth: false,
     endpoint: "/auth/refresh",
     label,

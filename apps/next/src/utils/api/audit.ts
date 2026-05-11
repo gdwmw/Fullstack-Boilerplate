@@ -2,8 +2,8 @@ import { getApi, ISuccessResponse } from "./base";
 
 interface IAuditLogUser {
   email: null | string;
-  id: number;
-  imageId: null | number;
+  id: string;
+  imageId: null | string;
   name: null | string;
   phone: null | string;
   role: null | string;

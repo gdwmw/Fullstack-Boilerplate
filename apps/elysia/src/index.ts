@@ -4,15 +4,7 @@ import { normalize, resolve, sep } from "path";
 import { auditRoutes, authRoutes, uploadRoutes, usersRoutes } from "./api";
 import { env } from "./environment";
 import { logger } from "./libs";
-import {
-  checkZstdAvailability,
-  cleanupLogsWorker,
-  cleanupSessionsWorker,
-  corsPlugin,
-  databaseBackupWorker,
-  requestLoggerPlugin,
-  swaggerPlugin,
-} from "./utils";
+import { checkZstdAvailability, cleanupLogsWorker, corsPlugin, databaseBackupWorker, requestLoggerPlugin, swaggerPlugin } from "./utils";
 
 const UPLOAD_DIR = resolve(process.cwd(), "uploads");
 
@@ -76,10 +68,6 @@ logger.info(
   },
   "elysia server started",
 );
-
-Bun.cron("0 0 */4 * *", async () => {
-  await cleanupSessionsWorker();
-});
 
 Bun.cron("0 9,12,15,18 * * *", async () => {
   await databaseBackupWorker();

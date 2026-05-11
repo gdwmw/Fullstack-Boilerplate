@@ -1,5 +1,3 @@
-import { AxiosRequestHeaders } from "axios";
-
 import { IAuthResponse } from "..";
 import { ISuccessResponse, postApi } from "../base";
 
@@ -11,12 +9,11 @@ export interface ILoginPayload {
 
 const label = "login";
 
-export const POSTLogin = async (payload: ILoginPayload, headers?: Record<string, string>): Promise<ISuccessResponse<IAuthResponse>> => {
+export const POSTLogin = async (payload: ILoginPayload): Promise<ISuccessResponse<IAuthResponse>> => {
   const res = await postApi<IAuthResponse>({
     auth: false,
     data: payload,
     endpoint: "/auth/login",
-    headers: headers as AxiosRequestHeaders | undefined,
     label,
   });
 

@@ -14,7 +14,7 @@ export interface UploadedFile {
   filename: string;
   formats: null | Record<string, ImageFormat>;
   height: null | number;
-  id: number;
+  id: string;
   mimetype: string;
   originalFilename: string;
   path: string;
@@ -30,7 +30,7 @@ export interface UploadResponse {
   filename: string;
   formats: null | Record<string, ImageFormat>;
   height: null | number;
-  id: number;
+  id: string;
   mimetype: string;
   originalFilename: string;
   path: string;

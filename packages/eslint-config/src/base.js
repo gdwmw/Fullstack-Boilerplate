@@ -33,6 +33,7 @@ export const baseConfig = [
   {
     rules: {
       "@typescript-eslint/no-empty-object-type": "off",
+      "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-unused-expressions": "warn",
       "@typescript-eslint/no-unused-vars": [
         "warn",
@@ -42,8 +43,23 @@ export const baseConfig = [
           varsIgnorePattern: "^_",
         },
       ],
+      "@typescript-eslint/prefer-function-type": "warn",
       "arrow-body-style": ["warn", "as-needed"],
+      complexity: ["warn", 25],
+      eqeqeq: ["warn", "always"],
+      "func-style": ["warn", "expression"],
+      "key-spacing": [
+        "warn",
+        {
+          afterColon: true,
+          beforeColon: false,
+        },
+      ],
+      "max-params": ["warn", 4],
+      "no-magic-numbers": "off",
+      "no-nested-ternary": "warn",
       "no-unused-expressions": "off",
+      "no-useless-catch": "warn",
       "perfectionist/sort-imports": [
         "warn",
         {
@@ -92,6 +108,10 @@ export const baseConfig = [
           type: "alphabetical",
         },
       ],
+      "prefer-arrow-callback": "warn",
+      "prefer-const": "warn",
+      "prefer-promise-reject-errors": "warn",
+      "prefer-template": "warn",
     },
   },
   {

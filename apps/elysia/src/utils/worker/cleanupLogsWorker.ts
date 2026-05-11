@@ -9,13 +9,10 @@ import { getLogDirectory, isRequestLogFileName } from "@/src/utils";
 
 const ONE_DAY_IN_MS = parseDurationToMs("1d");
 
-const getLogRetentionDays = () => env.LOG_RETENTION_DAYS;
-
 export const cleanupLogsWorker = async () => {
   const directory = getLogDirectory();
-  const retentionDays = getLogRetentionDays();
-  const maxAge = retentionDays * ONE_DAY_IN_MS;
-  const now = Date.now();
+  const retentionDays = env.LOG_RETENTION_DAYS;
+  const cutoffTime = Date.now() - retentionDays * ONE_DAY_IN_MS;
 
   let entries: string[];
 
@@ -25,7 +22,7 @@ export const cleanupLogsWorker = async () => {
     return;
   }
 
-  let count = 0;
+  let removedCount = 0;
 
   for (const entry of entries) {
     if (!isRequestLogFileName(entry)) {
@@ -35,12 +32,12 @@ export const cleanupLogsWorker = async () => {
     const targetPath = join(directory, entry);
     const info = await stat(targetPath);
 
-    if (!info.isFile() || now - info.mtimeMs <= maxAge) {
+    if (!info.isFile() || info.mtimeMs > cutoffTime) {
       continue;
     }
 
     await rm(targetPath);
-    count++;
+    removedCount++;
 
     logger.info(
       {
@@ -55,7 +52,7 @@ export const cleanupLogsWorker = async () => {
   logger.info(
     {
       at: format(new Date(), "dd-MM-yyyy HH:mm:ss"),
-      count,
+      count: removedCount,
       scope: "cron",
     },
     "request logs cleanup finished",

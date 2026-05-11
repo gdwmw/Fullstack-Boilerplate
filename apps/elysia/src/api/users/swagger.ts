@@ -3,128 +3,160 @@ import { DocumentDecoration } from "elysia";
 import { responseMessage } from "@/src/constants";
 
 export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "put", DocumentDecoration> => {
-  const successResponseSchema = {
-    properties: {
-      data: {},
-      message: { example: responseMessage(label).retrieved, nullable: true, type: "string" },
-      success: { example: true, type: "boolean" },
-    },
-    type: "object",
-  } as const;
+  const successResponseSchema = (message: string) =>
+    ({
+      properties: {
+        data: {},
+        message: { example: message, nullable: true, type: "string" },
+        meta: { nullable: true, type: "object" },
+        success: { example: true, type: "boolean" },
+      },
+      type: "object",
+    }) as const;
 
-  const errorResponseSchema = {
-    properties: {
-      code: { example: "P2025", nullable: true, type: "string" },
-      message: { example: responseMessage(label).notFound, nullable: true, type: "string" },
-      success: { example: false, type: "boolean" },
-    },
-    type: "object",
-  } as const;
+  const errorResponseSchema = ({ code = null, message }: { code?: null | string; message: string }) =>
+    ({
+      properties: {
+        code: { example: code, nullable: true, type: "string" },
+        message: { example: message, nullable: true, type: "string" },
+        success: { example: false, type: "boolean" },
+      },
+      type: "object",
+    }) as const;
 
   return {
     delete: {
-      description: "Delete a user by ID",
-      parameters: [{ in: "path", name: "id", required: true, schema: { example: 1, type: "integer" } }],
+      description: "delete a user by ID",
+      parameters: [
+        {
+          in: "path",
+          name: "id",
+          required: true,
+          schema: { example: "550e8400-e29b-41d4-a716-446655440000", format: "uuid", type: "string" },
+        },
+      ],
       responses: {
         200: {
           content: {
             "application/json": {
-              schema: successResponseSchema,
+              schema: successResponseSchema(responseMessage(label).deleted),
             },
           },
-          description: "User deleted successfully",
+          description: "user deleted successfully",
+        },
+        400: {
+          content: {
+            "application/json": {
+              schema: errorResponseSchema({ message: responseMessage("id").invalid }),
+            },
+          },
+          description: "invalid id parameter",
         },
         401: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ message: responseMessage("access token").required }),
             },
           },
-          description: "Unauthorized",
+          description: "unauthorized",
         },
         404: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ code: "P2025", message: responseMessage(label).notFound }),
             },
           },
-          description: "User not found",
+          description: "user not found",
         },
       },
       security: [{ bearerAuth: [] }],
-      summary: "Delete",
+      summary: "delete",
       tags: [label.toLowerCase()],
     },
 
     getAll: {
-      description: "Get all users",
+      description: "get all users",
       responses: {
         200: {
           content: {
             "application/json": {
-              schema: successResponseSchema,
+              schema: successResponseSchema(responseMessage(label).retrieved),
             },
           },
-          description: "Users retrieved successfully",
+          description: "users retrieved successfully",
         },
         401: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ message: responseMessage("access token").required }),
             },
           },
-          description: "Unauthorized",
+          description: "unauthorized",
         },
       },
       security: [{ bearerAuth: [] }],
-      summary: "Get All",
+      summary: "get all",
       tags: [label.toLowerCase()],
     },
 
     getById: {
-      description: "Get a user by ID",
-      parameters: [{ in: "path", name: "id", required: true, schema: { example: 1, type: "integer" } }],
+      description: "get a user by ID",
+      parameters: [
+        {
+          in: "path",
+          name: "id",
+          required: true,
+          schema: { example: "550e8400-e29b-41d4-a716-446655440000", format: "uuid", type: "string" },
+        },
+      ],
       responses: {
         200: {
           content: {
             "application/json": {
-              schema: successResponseSchema,
+              schema: successResponseSchema(responseMessage(label).retrieved),
             },
           },
-          description: "User retrieved successfully",
+          description: "user retrieved successfully",
+        },
+        400: {
+          content: {
+            "application/json": {
+              schema: errorResponseSchema({ message: responseMessage("id").invalid }),
+            },
+          },
+          description: "invalid id parameter",
         },
         401: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ message: responseMessage("access token").required }),
             },
           },
-          description: "Unauthorized",
-        },
-        404: {
-          content: {
-            "application/json": {
-              schema: errorResponseSchema,
-            },
-          },
-          description: "User not found",
+          description: "unauthorized",
         },
       },
       security: [{ bearerAuth: [] }],
-      summary: "Get by ID",
+      summary: "get by ID",
       tags: [label.toLowerCase()],
     },
 
     put: {
-      description: "Update a user by ID",
-      parameters: [{ in: "path", name: "id", required: true, schema: { example: 1, type: "integer" } }],
+      description: "update a user by ID",
+      parameters: [
+        {
+          in: "path",
+          name: "id",
+          required: true,
+          schema: { example: "550e8400-e29b-41d4-a716-446655440000", format: "uuid", type: "string" },
+        },
+      ],
       requestBody: {
         content: {
           "application/json": {
             schema: {
               properties: {
                 email: { example: "jane@example.com", format: "email", type: "string" },
-                imageId: { example: 1, minimum: 1, nullable: true, type: "integer" },
+                imageId: { example: "550e8400-e29b-41d4-a716-446655440000", format: "uuid", nullable: true, type: "string" },
                 name: { example: "Jane Doe", minLength: 3, type: "string" },
                 phone: { example: "08123456789", minLength: 10, type: "string" },
                 role: { enum: ["user", "admin"], example: "user", type: "string" },
@@ -141,38 +173,46 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
         200: {
           content: {
             "application/json": {
-              schema: successResponseSchema,
+              schema: successResponseSchema(responseMessage(label).updated),
             },
           },
-          description: "User updated successfully",
+          description: "user updated successfully",
         },
         400: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ message: responseMessage("request payload").invalid }),
             },
           },
-          description: "Invalid request payload",
+          description: "invalid request payload or id parameter",
         },
         401: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ message: responseMessage("access token").required }),
             },
           },
-          description: "Unauthorized",
+          description: "unauthorized",
         },
         404: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ code: "P2025", message: responseMessage(label).notFound }),
             },
           },
-          description: "User not found",
+          description: "user not found",
+        },
+        409: {
+          content: {
+            "application/json": {
+              schema: errorResponseSchema({ code: "P2002", message: responseMessage("email").alreadyExists }),
+            },
+          },
+          description: "unique field conflict",
         },
       },
       security: [{ bearerAuth: [] }],
-      summary: "Update",
+      summary: "update",
       tags: [label.toLowerCase()],
     },
   };
