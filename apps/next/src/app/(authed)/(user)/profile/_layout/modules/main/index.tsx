@@ -123,7 +123,11 @@ export const Main: FC = (): ReactElement => {
         throw new Error("failed to load current user");
       }
 
-      let imageId: null | number | undefined = currentUser.imageId;
+      if (!currentUser.id) {
+        throw new Error("failed to load current user id");
+      }
+
+      let imageId: null | string | undefined = currentUser.imageId;
 
       if (dt.image && dt.image.length > 0) {
         if (currentUser.imageId) {
@@ -137,7 +141,7 @@ export const Main: FC = (): ReactElement => {
         imageId = uploadResponse.data.id;
       }
 
-      const userResponse = await PUTUsers(currentUser.id ?? 0, {
+      const userResponse = await PUTUsers(currentUser.id, {
         email: dt.email,
         imageId: imageId,
         name: dt.name,

@@ -27,7 +27,14 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
   return {
     delete: {
       description: "delete a user by ID",
-      parameters: [{ in: "path", name: "id", required: true, schema: { example: 1, type: "integer" } }],
+      parameters: [
+        {
+          in: "path",
+          name: "id",
+          required: true,
+          schema: { example: "550e8400-e29b-41d4-a716-446655440000", format: "uuid", type: "string" },
+        },
+      ],
       responses: {
         200: {
           content: {
@@ -94,7 +101,14 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
 
     getById: {
       description: "get a user by ID",
-      parameters: [{ in: "path", name: "id", required: true, schema: { example: 1, type: "integer" } }],
+      parameters: [
+        {
+          in: "path",
+          name: "id",
+          required: true,
+          schema: { example: "550e8400-e29b-41d4-a716-446655440000", format: "uuid", type: "string" },
+        },
+      ],
       responses: {
         200: {
           content: {
@@ -128,14 +142,21 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
 
     put: {
       description: "update a user by ID",
-      parameters: [{ in: "path", name: "id", required: true, schema: { example: 1, type: "integer" } }],
+      parameters: [
+        {
+          in: "path",
+          name: "id",
+          required: true,
+          schema: { example: "550e8400-e29b-41d4-a716-446655440000", format: "uuid", type: "string" },
+        },
+      ],
       requestBody: {
         content: {
           "application/json": {
             schema: {
               properties: {
                 email: { example: "jane@example.com", format: "email", type: "string" },
-                imageId: { example: 1, minimum: 1, nullable: true, type: "integer" },
+                imageId: { example: "550e8400-e29b-41d4-a716-446655440000", format: "uuid", nullable: true, type: "string" },
                 name: { example: "Jane Doe", minLength: 3, type: "string" },
                 phone: { example: "08123456789", minLength: 10, type: "string" },
                 role: { enum: ["user", "admin"], example: "user", type: "string" },

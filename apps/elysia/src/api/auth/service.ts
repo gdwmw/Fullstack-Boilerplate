@@ -19,7 +19,7 @@ export const service = {
     }
   },
 
-  async changePassword(id: number, data: TChangePasswordSchema) {
+  async changePassword(id: string, data: TChangePasswordSchema) {
     const res = await prisma.users.findUnique({
       where: { id },
     });
@@ -44,7 +44,7 @@ export const service = {
     return Math.floor(parseDurationToMs(REFRESH_TOKEN_EXPIRES_IN) / 1000);
   },
 
-  async getUserById(id: number) {
+  async getUserById(id: string) {
     return await prisma.users.findUnique({
       include: { image: true },
       omit: { ...AUTH_OMIT_FIELDS },

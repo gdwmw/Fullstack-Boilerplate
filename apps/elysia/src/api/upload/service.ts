@@ -67,7 +67,7 @@ const removeUploadedFile = async (filename: string) => {
 };
 
 export const service = {
-  async delete(fileId: number) {
+  async delete(fileId: string) {
     const fileRecord = await prisma.files.delete({ where: { id: fileId } });
 
     await removeUploadedFile(fileRecord.filename);
@@ -84,7 +84,7 @@ export const service = {
     return await prisma.files.findMany({ orderBy: { createdAt: "desc" } });
   },
 
-  async getById(fileId: number) {
+  async getById(fileId: string) {
     return await prisma.files.findUnique({ where: { id: fileId } });
   },
 

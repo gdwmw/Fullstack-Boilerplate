@@ -15,5 +15,6 @@ export const schemaMessage = {
     required: (label: string) => `${lowerCase(label)} is required`,
     startsWith: (label: string, value: string) => `${lowerCase(label)} must start with ${value}`,
     url: (label: string) => `${lowerCase(label)} must be a valid URL`,
+    uuid: (label: string) => `${lowerCase(label)} must be a valid UUID`,
   },
 };

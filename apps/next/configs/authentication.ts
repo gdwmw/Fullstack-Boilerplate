@@ -29,7 +29,7 @@ export const options: NextAuthOptions = {
         const u = user as unknown as IAuthResponse;
 
         return {
-          id: Number.parseInt(user.id),
+          id: user.id,
           accessToken: u.accessToken,
           accessTokenExpiresAt: sessionStartedAt + parseDurationToMs(ACCESS_TOKEN_EXPIRES_IN),
           createdAt: u.createdAt,

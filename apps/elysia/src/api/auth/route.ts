@@ -25,9 +25,8 @@ interface IResponseSet {
 }
 
 const parseSubjectToUserId = (sub: unknown) => {
-  if (typeof sub !== "string") return null;
-  const userId = Number.parseInt(sub, 10);
-  return Number.isNaN(userId) ? null : userId;
+  if (typeof sub !== "string" || sub.length === 0) return null;
+  return sub;
 };
 
 const parseJwtStringField = (value: unknown) => (typeof value === "string" && value.length > 0 ? value : null);
@@ -67,7 +66,7 @@ const issueAccessAndRefreshTokens = async ({
     sign(payload: { jti: string; sub: string }): Promise<string>;
     verify(token: string): Promise<unknown>;
   };
-  userId: number;
+  userId: string;
 }) => {
   const refreshJti = crypto.randomUUID();
   const accessToken = await accessJwt.sign({ jti: crypto.randomUUID(), sub: String(userId) });

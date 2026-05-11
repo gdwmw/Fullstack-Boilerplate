@@ -120,9 +120,9 @@ const resolveRequestUser = async (request: Request) => {
     }
 
     const payload = await verifyAccessTokenPayload(token);
-    const userId = Number.parseInt(String(payload?.sub ?? ""), 10);
+    const userId = typeof payload?.sub === "string" && payload.sub.length > 0 ? payload.sub : null;
 
-    if (Number.isNaN(userId)) {
+    if (!userId) {
       return null;
     }
 

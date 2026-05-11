@@ -4,7 +4,7 @@ import { prisma } from "@/src/libs";
 import { TPayloadSchema } from "./type";
 
 export const service = {
-  async delete(id: number) {
+  async delete(id: string) {
     return await prisma.users.delete({
       include: { image: true },
       omit: AUTH_OMIT_FIELDS,
@@ -20,7 +20,7 @@ export const service = {
     });
   },
 
-  async getById(id: number) {
+  async getById(id: string) {
     return await prisma.users.findUnique({
       include: { image: true },
       omit: AUTH_OMIT_FIELDS,
@@ -28,7 +28,7 @@ export const service = {
     });
   },
 
-  async put(id: number, data: TPayloadSchema) {
+  async put(id: string, data: TPayloadSchema) {
     const { imageId, ...rest } = data;
     return await prisma.users.update({
       data: {

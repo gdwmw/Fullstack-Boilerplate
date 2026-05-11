@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE "files" (
-    "id" SERIAL NOT NULL,
+    "id" UUID NOT NULL,
     "filename" TEXT NOT NULL,
     "originalFilename" TEXT NOT NULL,
     "mimetype" TEXT NOT NULL,
@@ -19,8 +19,8 @@ CREATE TABLE "files" (
 
 -- CreateTable
 CREATE TABLE "users" (
-    "id" SERIAL NOT NULL,
-    "image_id" INTEGER,
+    "id" UUID NOT NULL,
+    "image_id" UUID,
     "name" TEXT NOT NULL,
     "username" TEXT NOT NULL,
     "email" TEXT NOT NULL,

@@ -27,7 +27,14 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
   return {
     delete: {
       description: "delete an uploaded file",
-      parameters: [{ in: "path", name: "id", required: true, schema: { example: 1, type: "integer" } }],
+      parameters: [
+        {
+          in: "path",
+          name: "id",
+          required: true,
+          schema: { example: "550e8400-e29b-41d4-a716-446655440000", format: "uuid", type: "string" },
+        },
+      ],
       responses: {
         200: {
           content: {
@@ -94,7 +101,14 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
 
     getById: {
       description: "get a file by ID",
-      parameters: [{ in: "path", name: "id", required: true, schema: { example: 1, type: "integer" } }],
+      parameters: [
+        {
+          in: "path",
+          name: "id",
+          required: true,
+          schema: { example: "550e8400-e29b-41d4-a716-446655440000", format: "uuid", type: "string" },
+        },
+      ],
       responses: {
         200: {
           content: {

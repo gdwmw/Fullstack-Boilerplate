@@ -20,7 +20,7 @@ export interface IUploadResponse {
   filename: string;
   formats: null | Record<string, IImageFormat>;
   height: null | number;
-  id: number;
+  id: string;
   mimetype: string;
   originalFilename: string;
   path: string;
@@ -60,7 +60,7 @@ export const POSTUpload = async (payload: IUploadPayload): Promise<ISuccessRespo
   });
 };
 
-export const DELETEUpload = async (id: number): Promise<ISuccessResponse<IUploadResponse>> =>
+export const DELETEUpload = async (id: string): Promise<ISuccessResponse<IUploadResponse>> =>
   deleteApi<IUploadResponse>({
     endpoint: `/upload/${id}`,
     label: label,
