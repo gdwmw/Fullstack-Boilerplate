@@ -173,20 +173,28 @@ export const AuditTable: FC<I> = (props): ReactElement => (
       </thead>
 
       <tbody className="divide-y divide-black/10 dark:divide-white/10">
-        {!props.resolvedSelectedDateKey ? (
-          <tr>
-            <td className="px-3 py-8 text-center text-gray-500 dark:text-gray-400" colSpan={8}>
-              Choose an archive from the sidebar to load entries.
-            </td>
-          </tr>
-        ) : props.logs.length === 0 && !props.isLoading ? (
-          <tr>
-            <td className="px-3 py-8 text-center text-gray-500 dark:text-gray-400" colSpan={8}>
-              No audit logs found.
-            </td>
-          </tr>
-        ) : (
-          props.logs.map((log) => (
+        {(() => {
+          if (!props.resolvedSelectedDateKey) {
+            return (
+              <tr>
+                <td className="px-3 py-8 text-center text-gray-500 dark:text-gray-400" colSpan={8}>
+                  Choose an archive from the sidebar to load entries.
+                </td>
+              </tr>
+            );
+          }
+
+          if (props.logs.length === 0 && !props.isLoading) {
+            return (
+              <tr>
+                <td className="px-3 py-8 text-center text-gray-500 dark:text-gray-400" colSpan={8}>
+                  No audit logs found.
+                </td>
+              </tr>
+            );
+          }
+
+          return props.logs.map((log) => (
             <tr className="hover:bg-black/5 dark:hover:bg-white/5 [&>td]:px-3 [&>td]:py-2" key={log.requestId}>
               <td className="max-w-44 min-w-44">
                 <p>{formatLogTimestamp(log.ts)}</p>
@@ -221,8 +229,8 @@ export const AuditTable: FC<I> = (props): ReactElement => (
                 </ExampleA>
               </td>
             </tr>
-          ))
-        )}
+          ));
+        })()}
       </tbody>
     </table>
   </section>

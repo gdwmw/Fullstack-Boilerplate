@@ -182,7 +182,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
         set.headers["set-cookie"] = clearRefreshCookie();
         set.status = 401;
         return ERROR_RESPONSE({
-          message: responseMessage("refresh token").invalid + " or " + responseMessage("refresh token").expired,
+          message: `${responseMessage("refresh token").invalid} or ${responseMessage("refresh token").expired}`,
         });
       }
 

@@ -22,70 +22,78 @@ interface I {
   yearOptions: number[];
 }
 
-export const AuditArchiveList: FC<I> = (props): ReactElement => (
-  <aside className="flex w-60 shrink-0 flex-col gap-1 overflow-hidden rounded-lg border border-black px-3 pt-2 pb-3 dark:border-white">
-    <div className="border-b border-black pb-2 dark:border-white">
-      <h2 className="text-lg font-semibold text-blue-500">Archive</h2>
-      <p className="text-xs text-gray-500 dark:text-gray-400">Choose a date to view logs</p>
-    </div>
+export const AuditArchiveList: FC<I> = (props): ReactElement => {
+  const archiveContent = () => {
+    if (props.isLoading) {
+      return <p className="py-4 text-center text-xs text-gray-500 dark:text-gray-400">Loading archives...</p>;
+    }
 
-    <div className="flex flex-col gap-1">
-      <ExampleSelect
-        color="default"
-        label="Year"
-        onChange={(e) => {
-          props.onYearChange(e.target.value ? Number(e.target.value) : undefined);
-        }}
-        value={props.archiveYear ?? ""}
-      >
-        <option className="text-black" value="">
-          All Years
-        </option>
-        {props.yearOptions.map((yearOption) => (
-          <option className="text-black" key={yearOption} value={yearOption}>
-            {yearOption}
+    if (props.isError) {
+      return <p className="py-4 text-center text-xs text-red-500">Failed to load archives.</p>;
+    }
+
+    if (props.archives.length === 0) {
+      return <p className="py-4 text-center text-xs text-gray-500 dark:text-gray-400">No audit archives found.</p>;
+    }
+
+    return props.archives.map((archive) => {
+      const isActive = archive.dateKey === props.resolvedSelectedDateKey;
+
+      return (
+        <ExampleA color="blue" key={archive.dateKey} onClick={() => props.onSelect(archive)} size="sm" variant={isActive ? "solid" : "outline"}>
+          {archive.label}
+          <ChevronRight size={16} />
+        </ExampleA>
+      );
+    });
+  };
+
+  return (
+    <aside className="flex w-60 shrink-0 flex-col gap-1 overflow-hidden rounded-lg border border-black px-3 pt-2 pb-3 dark:border-white">
+      <div className="border-b border-black pb-2 dark:border-white">
+        <h2 className="text-lg font-semibold text-blue-500">Archive</h2>
+        <p className="text-xs text-gray-500 dark:text-gray-400">Choose a date to view logs</p>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <ExampleSelect
+          color="default"
+          label="Year"
+          onChange={(e) => {
+            props.onYearChange(e.target.value ? Number(e.target.value) : undefined);
+          }}
+          value={props.archiveYear ?? ""}
+        >
+          <option className="text-black" value="">
+            All Years
           </option>
-        ))}
-      </ExampleSelect>
+          {props.yearOptions.map((yearOption) => (
+            <option className="text-black" key={yearOption} value={yearOption}>
+              {yearOption}
+            </option>
+          ))}
+        </ExampleSelect>
 
-      <ExampleSelect
-        color="default"
-        label="Month"
-        onChange={(e) => {
-          props.onMonthChange(e.target.value ? Number(e.target.value) : undefined);
-        }}
-        value={props.archiveMonth ?? ""}
-      >
-        <option className="text-black" value="">
-          All Months
-        </option>
-        {props.monthOptions.map((option) => (
-          <option className="text-black" key={option.value} value={option.value}>
-            {option.label}
+        <ExampleSelect
+          color="default"
+          label="Month"
+          onChange={(e) => {
+            props.onMonthChange(e.target.value ? Number(e.target.value) : undefined);
+          }}
+          value={props.archiveMonth ?? ""}
+        >
+          <option className="text-black" value="">
+            All Months
           </option>
-        ))}
-      </ExampleSelect>
-    </div>
+          {props.monthOptions.map((option) => (
+            <option className="text-black" key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </ExampleSelect>
+      </div>
 
-    <div className="mt-1 flex flex-1 flex-col gap-1 overflow-y-auto">
-      {props.isLoading ? (
-        <p className="py-4 text-center text-xs text-gray-500 dark:text-gray-400">Loading archives...</p>
-      ) : props.isError ? (
-        <p className="py-4 text-center text-xs text-red-500">Failed to load archives.</p>
-      ) : props.archives.length === 0 ? (
-        <p className="py-4 text-center text-xs text-gray-500 dark:text-gray-400">No audit archives found.</p>
-      ) : (
-        props.archives.map((archive) => {
-          const isActive = archive.dateKey === props.resolvedSelectedDateKey;
-
-          return (
-            <ExampleA color="blue" key={archive.dateKey} onClick={() => props.onSelect(archive)} size="sm" variant={isActive ? "solid" : "outline"}>
-              {archive.label}
-              <ChevronRight size={16} />
-            </ExampleA>
-          );
-        })
-      )}
-    </div>
-  </aside>
-);
+      <div className="mt-1 flex flex-1 flex-col gap-1 overflow-y-auto">{archiveContent()}</div>
+    </aside>
+  );
+};
