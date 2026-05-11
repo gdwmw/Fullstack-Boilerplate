@@ -1,5 +1,6 @@
 "use client";
 
+import { parseDurationToMs } from "@repo/utils";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FC, PropsWithChildren, useState } from "react";
 
@@ -9,10 +10,10 @@ export const ReactQueryProvider: FC<Readonly<PropsWithChildren>> = ({ children }
       new QueryClient({
         defaultOptions: {
           queries: {
-            gcTime: 5 * 60 * 1000,
+            gcTime: parseDurationToMs("5m"),
             retry: (count, error) =>
-              (error as { status?: number }).status !== undefined && (error as { status?: number }).status! >= 500 && count < 2,
-            staleTime: 60_000,
+              (error as { status?: number }).status !== undefined && (error as { status?: number }).status! >= 500 && count < 4,
+            staleTime: parseDurationToMs("60s"),
           },
         },
       }),
