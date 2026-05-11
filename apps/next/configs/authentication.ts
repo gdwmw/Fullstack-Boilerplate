@@ -6,7 +6,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 
 import { clientEnv } from "@/src/environments/env.client";
 import { serverEnv } from "@/src/environments/env.server";
-import { IAuthResponse, ILoginPayload, POSTLogin } from "@/src/utils";
+import { IAuthResponse, IErrorResponse, ILoginPayload, POSTLogin } from "@/src/utils";
 
 const SESSION_EXPIRES_IN = serverEnv.NEXTAUTH_SESSION_EXPIRES_IN;
 const ACCESS_TOKEN_EXPIRES_IN = clientEnv.NEXT_PUBLIC_ACCESS_TOKEN_EXPIRES_IN;
@@ -66,48 +66,24 @@ export const options: NextAuthOptions = {
 
   providers: [
     CredentialsProvider({
-      async authorize(credentials: Record<string, string> | undefined, req): Promise<null | User> {
+      async authorize(credentials: Record<string, string> | undefined): Promise<null | User> {
         if (!credentials) {
           return null;
         }
 
         const { identifier, method, password } = credentials as unknown as ILoginPayload;
 
-        const reqHeaders = (req?.headers ?? {}) as Record<string, string | string[] | undefined>;
-        const pickHeader = (key: string): string | undefined => {
-          const value = reqHeaders[key];
-          if (Array.isArray(value)) {
-            return value[0];
-          }
-          return value;
-        };
-
-        const forwardedHeaders: Record<string, string> = {};
-        const userAgent = pickHeader("user-agent");
-        if (userAgent) {
-          forwardedHeaders["user-agent"] = userAgent;
-        }
-
-        const forwardedFor = pickHeader("x-forwarded-for");
-        if (forwardedFor) {
-          forwardedHeaders["x-forwarded-for"] = forwardedFor;
-        }
-
-        const realIp = pickHeader("x-real-ip");
-        if (realIp) {
-          forwardedHeaders["x-real-ip"] = realIp;
-        }
-
         try {
-          const res = await POSTLogin({ identifier, method: method === "email" ? "email" : "username", password }, forwardedHeaders);
+          const res = await POSTLogin({ identifier, method: method === "email" ? "email" : "username", password });
 
           return res.data as IAuthResponse & User;
         } catch (error) {
-          if (axios.isAxiosError(error)) {
-            const message = error.response?.data?.message ?? error.message ?? "login failed";
-            throw new Error(message);
+          if (axios.isAxiosError<IErrorResponse>(error)) {
+            const message = error.response?.data?.message;
+            throw new Error(message ?? "authentication failed. please try again.");
           }
-          throw error instanceof Error ? error : new Error("login failed");
+
+          throw new Error("authentication failed. please try again.");
         }
       },
       credentials: {},

@@ -8,11 +8,6 @@ import { changePasswordSchema, loginSchema, registerSchema } from "./schema";
 import { service } from "./service";
 import { docs } from "./swagger";
 
-// ---------------------------------------------------------------------------
-// [1] Constants & local types
-// Defines the route label, cookie name, and local helper types.
-// ---------------------------------------------------------------------------
-
 const LABEL = "authentication";
 const REFRESH_COOKIE_NAME = env.JWT_REFRESH_COOKIE_NAME;
 const REFRESH_COOKIE_PATH = env.JWT_REFRESH_COOKIE_PATH;
@@ -28,11 +23,6 @@ interface IResponseSet {
   status?: keyof StatusMap | number;
 }
 
-// ---------------------------------------------------------------------------
-// [2] JWT payload helpers
-// Reads important fields from the JWT payload with defensive parsing.
-// ---------------------------------------------------------------------------
-
 const parseSubjectToUserId = (sub: unknown) => {
   if (typeof sub !== "string") return null;
 
@@ -42,11 +32,6 @@ const parseSubjectToUserId = (sub: unknown) => {
 
 const parseJwtStringField = (value: unknown) => (typeof value === "string" && value.length > 0 ? value : null);
 const parseJwtExp = (value: unknown) => (typeof value === "number" ? value : null);
-
-// ---------------------------------------------------------------------------
-// [3] Refresh cookie helpers
-// Reads, creates, and clears the refresh token cookie.
-// ---------------------------------------------------------------------------
 
 const readRefreshTokenFromCookie = (cookieHeader: string | undefined) => {
   if (!cookieHeader) return null;
@@ -75,26 +60,6 @@ const clearRefreshCookie = () => {
   return `${REFRESH_COOKIE_NAME}=; Path=${REFRESH_COOKIE_PATH}; HttpOnly; SameSite=${REFRESH_COOKIE_SAME_SITE}; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT${secure}`;
 };
 
-// ---------------------------------------------------------------------------
-// [4] Request helpers
-// Extracts request metadata that will be stored in the refresh session.
-// ---------------------------------------------------------------------------
-
-const getClientMetadata = (headers: THeadersMap) => {
-  const rawIp = headers["x-forwarded-for"] || headers["x-real-ip"];
-  const ipAddress = rawIp?.split(",")[0]?.trim();
-
-  return {
-    ipAddress: ipAddress && ipAddress.length > 0 ? ipAddress : undefined,
-    userAgent: headers["user-agent"] || undefined,
-  };
-};
-
-// ---------------------------------------------------------------------------
-// [5] JWT & auth guard helpers
-// Shared helpers to issue tokens and extract the user id from the access token.
-// ---------------------------------------------------------------------------
-
 const issueAccessAndRefreshTokens = async ({
   accessJwt,
   refreshJwt,
@@ -107,23 +72,12 @@ const issueAccessAndRefreshTokens = async ({
   };
   userId: number;
 }) => {
-  const accessJti = crypto.randomUUID();
   const refreshJti = crypto.randomUUID();
 
-  const accessToken = await accessJwt.sign({ jti: accessJti, sub: String(userId) });
+  const accessToken = await accessJwt.sign({ jti: crypto.randomUUID(), sub: String(userId) });
   const refreshToken = await refreshJwt.sign({ jti: refreshJti, sub: String(userId) });
-  const decodedRefresh = await refreshJwt.verify(refreshToken);
-  const exp = parseJwtExp((decodedRefresh as null | Record<string, unknown> | undefined)?.exp);
-
-  if (!exp) {
-    throw new Error("failed to parse refresh token expiration");
-  }
-
   return {
-    accessJti,
     accessToken,
-    expiresAt: new Date(exp * 1000),
-    refreshJti,
     refreshToken,
   };
 };
@@ -159,48 +113,22 @@ const getAuthenticatedUserId = async ({
   return { error: null, userId };
 };
 
-// ---------------------------------------------------------------------------
-// [6] Routes
-// Auth endpoints start here. The numbered comments are also referenced by the README.
-// ---------------------------------------------------------------------------
-
 export const authRoutes = new Elysia({ prefix: "/auth" })
   .use(accessJwtPlugin)
   .use(refreshJwtPlugin)
 
   .onError(({ error, set }) => handlePrismaError(LABEL, error, set))
-
-  // ----- [6.1] /register -----
-  // Flow: validate body -> create user -> issue tokens -> persist session -> set cookie -> return response.
   .post(
     "/register",
-    async ({ accessJwt, body, headers, refreshJwt, set }) => {
-      // [6.1.1] Validate the register payload, then create a new user.
+    async ({ accessJwt, body, refreshJwt, set }) => {
       const payload = registerSchema.parse(body);
       const res = await service.register(payload);
 
-      // [6.1.2] Create an access/refresh token pair for the new user.
       const tokens = await issueAccessAndRefreshTokens({ accessJwt, refreshJwt, userId: res.id });
-
-      // [6.1.3] Extract request metadata, then persist the refresh session to the database.
-      const clientMetadata = getClientMetadata(headers as THeadersMap);
-
-      await service.createRefreshSession({
-        expiresAt: tokens.expiresAt,
-        familyId: crypto.randomUUID(),
-        ipAddress: clientMetadata.ipAddress,
-        jti: tokens.refreshJti,
-        token: tokens.refreshToken,
-        userAgent: clientMetadata.userAgent,
-        userId: res.id,
-      });
-
-      // [6.1.4] Write the refresh token to an HttpOnly cookie so the client never holds it in JS runtime.
       set.headers["set-cookie"] = createRefreshCookie(tokens.refreshToken);
 
       set.status = 201;
 
-      // [6.1.5] Return the user data and access token to the client.
       return SUCCESS_RESPONSE({
         data: { ...res, accessToken: tokens.accessToken },
         message: responseMessage("register").success,
@@ -209,16 +137,11 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
 
     { detail: docs(LABEL).register },
   )
-
-  // ----- [6.2] /login -----
-  // Flow: validate login -> verify user -> issue tokens -> persist session -> set cookie -> return response.
   .post(
     "/login",
-    async ({ accessJwt, body, headers, refreshJwt, set }) => {
-      // [6.2.1] Validate the payload based on the login method: email or username.
+    async ({ accessJwt, body, refreshJwt, set }) => {
       const payload = loginSchema((body as { method: "email" | "username" }).method).parse(body);
 
-      // [6.2.2] Verify the user credentials in the service layer.
       const res = await service.login(payload);
 
       if (!res) {
@@ -228,23 +151,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
         });
       }
 
-      // [6.2.3] If valid, issue a new token pair.
       const tokens = await issueAccessAndRefreshTokens({ accessJwt, refreshJwt, userId: res.id });
-
-      // [6.2.4] Persist the new refresh session along with client metadata.
-      const clientMetadata = getClientMetadata(headers as THeadersMap);
-
-      await service.createRefreshSession({
-        expiresAt: tokens.expiresAt,
-        familyId: crypto.randomUUID(),
-        ipAddress: clientMetadata.ipAddress,
-        jti: tokens.refreshJti,
-        token: tokens.refreshToken,
-        userAgent: clientMetadata.userAgent,
-        userId: res.id,
-      });
-
-      // [6.2.5] Write the refresh token to the cookie and send the access token in the response body.
       set.headers["set-cookie"] = createRefreshCookie(tokens.refreshToken);
 
       return SUCCESS_RESPONSE({
@@ -255,13 +162,9 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
 
     { detail: docs(LABEL).login },
   )
-
-  // ----- [6.3] /refresh -----
-  // Flow: read cookie -> verify old token -> validate session -> rotate session -> set new cookie -> return new access token.
   .post(
     "/refresh",
     async ({ accessJwt, headers, refreshJwt, set }) => {
-      // [6.3.1] Read the refresh token from the request cookie.
       const cookieHeader = (headers as THeadersMap).cookie;
       const refreshToken = readRefreshTokenFromCookie(cookieHeader);
 
@@ -273,12 +176,12 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
         });
       }
 
-      // [6.3.2] Verify the refresh JWT, then extract user id and jti from the payload.
       const decoded = await refreshJwt.verify(refreshToken);
       const userId = parseSubjectToUserId((decoded as TJwtPayload)?.sub);
       const refreshJti = parseJwtStringField((decoded as TJwtPayload)?.jti);
+      const refreshExp = parseJwtExp((decoded as TJwtPayload)?.exp);
 
-      if (!decoded || !userId || !refreshJti) {
+      if (!decoded || !userId || !refreshJti || !refreshExp) {
         set.headers["set-cookie"] = clearRefreshCookie();
         set.status = 401;
         return ERROR_RESPONSE({
@@ -286,7 +189,6 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
         });
       }
 
-      // [6.3.3] Reject tokens that are already present in the Redis blocklist.
       if (await service.isBlocklisted(refreshJti)) {
         set.headers["set-cookie"] = clearRefreshCookie();
         set.status = 401;
@@ -295,79 +197,37 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
         });
       }
 
-      // [6.3.4] Issue the new token pair up-front (stateless until persisted).
       const tokens = await issueAccessAndRefreshTokens({ accessJwt, refreshJwt, userId });
 
-      const clientMetadata = getClientMetadata(headers as THeadersMap);
-
-      // [6.3.5] Validate AND rotate the refresh session in a single transaction.
-      // Reuse-detection (replay of an already-rotated jti, hash mismatch, or
-      // a concurrent rotation race) results in the entire family being revoked.
-      const rotation = await service.rotateRefreshSessionAtomic({
-        incomingToken: refreshToken,
-        newSession: {
-          expiresAt: tokens.expiresAt,
-          ipAddress: clientMetadata.ipAddress,
-          jti: tokens.refreshJti,
-          token: tokens.refreshToken,
-          userAgent: clientMetadata.userAgent,
-        },
-        presentedJti: refreshJti,
-      });
-
-      if (rotation.kind !== "OK") {
-        set.headers["set-cookie"] = clearRefreshCookie();
-        set.status = 401;
-        return ERROR_RESPONSE({
-          message: rotation.kind === "EXPIRED" ? responseMessage("refresh token").expired : responseMessage("refresh token").invalid,
-        });
-      }
-
-      // [6.3.6] Verify the user still exists. If not, revoke the just-created
-      // session as well so we don't leak access to a deleted account.
-      const user = await service.getUserById(rotation.userId);
+      const user = await service.getUserById(userId);
 
       if (!user) {
-        await service.revokeRefreshSessionByJti(tokens.refreshJti);
         set.headers["set-cookie"] = clearRefreshCookie();
         set.status = 404;
         return ERROR_RESPONSE({ message: responseMessage("users").notFound });
       }
 
-      // [6.3.7] After the rotation has been durably committed, blocklist the
-      // old jti in Redis so it cannot be re-used during its remaining TTL.
-      await service.addToBlocklist(rotation.oldJti, rotation.oldExpiresAt);
-
-      // [6.3.8] Write the new refresh token to the cookie and return the new access token.
+      await service.addToBlocklist(refreshJti, new Date(refreshExp * 1000));
       set.headers["set-cookie"] = createRefreshCookie(tokens.refreshToken);
 
       return SUCCESS_RESPONSE({
-        data: { accessToken: tokens.accessToken },
+        data: { ...user, accessToken: tokens.accessToken },
         message: responseMessage("token").updated,
       });
     },
 
     { detail: docs(LABEL).refresh },
   )
-
-  // ----- [6.4] /logout -----
-  // Flow: revoke refresh token if present -> blocklist access token if present -> clear cookie.
   .post(
     "/logout",
     async ({ accessJwt, headers, refreshJwt, set }) => {
-      // [6.4.1] Try to read the refresh token from the cookie to revoke it.
       const cookieHeader = (headers as THeadersMap).cookie;
       const refreshToken = readRefreshTokenFromCookie(cookieHeader);
 
       if (refreshToken) {
-        // [6.4.2] If the refresh token is valid, revoke the session and blocklist its jti.
         const decodedRefresh = await refreshJwt.verify(refreshToken);
         const refreshJti = parseJwtStringField((decodedRefresh as TJwtPayload)?.jti);
         const refreshExp = parseJwtExp((decodedRefresh as TJwtPayload)?.exp);
-
-        if (refreshJti) {
-          await service.revokeRefreshSessionByJti(refreshJti);
-        }
 
         if (refreshJti && refreshExp) {
           await service.addToBlocklist(refreshJti, new Date(refreshExp * 1000));
@@ -378,7 +238,6 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
       const bearerToken = authorization?.startsWith("Bearer ") ? authorization.slice(7) : undefined;
 
       if (bearerToken) {
-        // [6.4.3] Blocklist the currently active access token so it can't be used again.
         const decodedAccess = await accessJwt.verify(bearerToken);
 
         if (
@@ -393,7 +252,6 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
         }
       }
 
-      // [6.4.4] Clear the refresh token cookie in the browser/client.
       set.headers["set-cookie"] = clearRefreshCookie();
 
       return SUCCESS_RESPONSE({ data: null, message: responseMessage("logout").success });
@@ -401,20 +259,15 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
 
     { detail: docs(LABEL).logout },
   )
-
-  // ----- [6.5] /me -----
-  // Flow: verify access token -> extract user id -> fetch user profile -> return response.
   .get(
     "/me",
     async ({ accessJwt, headers, set }) => {
-      // [6.5.1] Ensure the access token is valid and can be mapped to a user id.
       const auth = await getAuthenticatedUserId({ accessJwt, headers, set });
       if (auth.error) {
         set.status = 401;
         return auth.error;
       }
 
-      // [6.5.2] Fetch the user data using the id from the token claim.
       const res = await service.getUserById(auth.userId);
 
       if (!res) {
@@ -427,23 +280,17 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
 
     { detail: docs(LABEL).me },
   )
-
-  // ----- [6.6] /change-password -----
-  // Flow: verify access token -> validate body -> verify old password -> update password.
   .post(
     "/change-password",
     async ({ accessJwt, body, headers, set }) => {
-      // [6.6.1] Ensure the request is made by an authenticated user.
       const auth = await getAuthenticatedUserId({ accessJwt, headers, set });
       if (auth.error) {
         set.status = 401;
         return auth.error;
       }
 
-      // [6.6.2] Validate the change-password payload.
       const payload = changePasswordSchema.parse(body);
 
-      // [6.6.3] The service validates the old password, then updates the password with a hashed new password.
       const res = await service.changePassword(auth.userId, payload);
 
       if (!res) {

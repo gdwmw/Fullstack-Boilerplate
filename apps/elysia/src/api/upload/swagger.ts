@@ -3,23 +3,26 @@ import { DocumentDecoration } from "elysia";
 import { responseMessage } from "@/src/constants";
 
 export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "upload", DocumentDecoration> => {
-  const successResponseSchema = {
-    properties: {
-      data: {},
-      message: { example: responseMessage(label).retrieved, nullable: true, type: "string" },
-      success: { example: true, type: "boolean" },
-    },
-    type: "object",
-  } as const;
+  const successResponseSchema = (message: string) =>
+    ({
+      properties: {
+        data: {},
+        message: { example: message, nullable: true, type: "string" },
+        meta: { nullable: true, type: "object" },
+        success: { example: true, type: "boolean" },
+      },
+      type: "object",
+    }) as const;
 
-  const errorResponseSchema = {
-    properties: {
-      code: { example: "P2025", nullable: true, type: "string" },
-      message: { example: responseMessage(label).notFound, nullable: true, type: "string" },
-      success: { example: false, type: "boolean" },
-    },
-    type: "object",
-  } as const;
+  const errorResponseSchema = ({ code = null, message }: { code?: null | string; message: string }) =>
+    ({
+      properties: {
+        code: { example: code, nullable: true, type: "string" },
+        message: { example: message, nullable: true, type: "string" },
+        success: { example: false, type: "boolean" },
+      },
+      type: "object",
+    }) as const;
 
   return {
     delete: {
@@ -29,15 +32,23 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
         200: {
           content: {
             "application/json": {
-              schema: successResponseSchema,
+              schema: successResponseSchema(responseMessage(label).deleted),
             },
           },
           description: "File deleted successfully",
         },
+        400: {
+          content: {
+            "application/json": {
+              schema: errorResponseSchema({ message: responseMessage("id").invalid }),
+            },
+          },
+          description: "Invalid id parameter",
+        },
         401: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ message: responseMessage("access token").required }),
             },
           },
           description: "Unauthorized",
@@ -45,7 +56,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
         404: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ code: "P2025", message: responseMessage(label).notFound }),
             },
           },
           description: "File not found",
@@ -62,7 +73,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
         200: {
           content: {
             "application/json": {
-              schema: successResponseSchema,
+              schema: successResponseSchema(responseMessage(label).retrieved),
             },
           },
           description: "Files retrieved successfully",
@@ -70,7 +81,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
         401: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ message: responseMessage("access token").required }),
             },
           },
           description: "Unauthorized",
@@ -88,15 +99,23 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
         200: {
           content: {
             "application/json": {
-              schema: successResponseSchema,
+              schema: successResponseSchema(responseMessage(label).retrieved),
             },
           },
           description: "File retrieved successfully",
         },
+        400: {
+          content: {
+            "application/json": {
+              schema: errorResponseSchema({ message: responseMessage("id").invalid }),
+            },
+          },
+          description: "Invalid id parameter",
+        },
         401: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ message: responseMessage("access token").required }),
             },
           },
           description: "Unauthorized",
@@ -130,7 +149,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
         200: {
           content: {
             "application/json": {
-              schema: successResponseSchema,
+              schema: successResponseSchema(responseMessage(label).created),
             },
           },
           description: "File uploaded successfully",
@@ -138,7 +157,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
         400: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ message: responseMessage("request payload").invalid }),
             },
           },
           description: "Invalid request payload",
@@ -146,7 +165,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
         401: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ message: responseMessage("access token").required }),
             },
           },
           description: "Unauthorized",

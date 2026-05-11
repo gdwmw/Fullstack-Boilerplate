@@ -3,23 +3,26 @@ import { DocumentDecoration } from "elysia";
 import { responseMessage } from "@/src/constants";
 
 export const docs = (label: string): Record<"changePassword" | "login" | "logout" | "me" | "refresh" | "register", DocumentDecoration> => {
-  const successResponseSchema = {
-    properties: {
-      data: {},
-      message: { example: responseMessage(label).success, nullable: true, type: "string" },
-      success: { example: true, type: "boolean" },
-    },
-    type: "object",
-  } as const;
+  const successResponseSchema = (message: string) =>
+    ({
+      properties: {
+        data: {},
+        message: { example: message, nullable: true, type: "string" },
+        meta: { nullable: true, type: "object" },
+        success: { example: true, type: "boolean" },
+      },
+      type: "object",
+    }) as const;
 
-  const errorResponseSchema = {
-    properties: {
-      code: { example: "P2025", nullable: true, type: "string" },
-      message: { example: responseMessage(label).invalid, nullable: true, type: "string" },
-      success: { example: false, type: "boolean" },
-    },
-    type: "object",
-  } as const;
+  const errorResponseSchema = ({ code = null, message }: { code?: null | string; message: string }) =>
+    ({
+      properties: {
+        code: { example: code, nullable: true, type: "string" },
+        message: { example: message, nullable: true, type: "string" },
+        success: { example: false, type: "boolean" },
+      },
+      type: "object",
+    }) as const;
 
   return {
     changePassword: {
@@ -43,15 +46,23 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
         200: {
           content: {
             "application/json": {
-              schema: successResponseSchema,
+              schema: successResponseSchema(responseMessage("password").updated),
             },
           },
           description: "Password changed successfully",
         },
+        400: {
+          content: {
+            "application/json": {
+              schema: errorResponseSchema({ message: responseMessage("request payload").invalid }),
+            },
+          },
+          description: "Invalid request payload",
+        },
         401: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ message: responseMessage("current password").invalid }),
             },
           },
           description: "Unauthorized or current password invalid",
@@ -84,15 +95,23 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
         200: {
           content: {
             "application/json": {
-              schema: successResponseSchema,
+              schema: successResponseSchema(responseMessage("login").success),
             },
           },
           description: "Login successful",
         },
+        400: {
+          content: {
+            "application/json": {
+              schema: errorResponseSchema({ message: responseMessage("request payload").invalid }),
+            },
+          },
+          description: "Invalid request payload",
+        },
         401: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ message: responseMessage("email or password").invalid }),
             },
           },
           description: "Invalid credentials",
@@ -109,7 +128,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
         200: {
           content: {
             "application/json": {
-              schema: successResponseSchema,
+              schema: successResponseSchema(responseMessage("logout").success),
             },
           },
           description: "Logout successful",
@@ -125,7 +144,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
         200: {
           content: {
             "application/json": {
-              schema: successResponseSchema,
+              schema: successResponseSchema(responseMessage("users").retrieved),
             },
           },
           description: "User profile retrieved successfully",
@@ -133,7 +152,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
         401: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ message: responseMessage("access token").required }),
             },
           },
           description: "Unauthorized",
@@ -141,7 +160,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
         404: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ message: responseMessage("users").notFound }),
             },
           },
           description: "User not found",
@@ -158,7 +177,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
         200: {
           content: {
             "application/json": {
-              schema: successResponseSchema,
+              schema: successResponseSchema(responseMessage("token").updated),
             },
           },
           description: "Token refreshed successfully",
@@ -166,7 +185,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
         401: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ message: responseMessage("refresh token").required }),
             },
           },
           description: "Refresh token invalid or expired",
@@ -174,7 +193,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
         404: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ message: responseMessage("users").notFound }),
             },
           },
           description: "User not found",
@@ -209,7 +228,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
         201: {
           content: {
             "application/json": {
-              schema: successResponseSchema,
+              schema: successResponseSchema(responseMessage("register").success),
             },
           },
           description: "Registration successful",
@@ -217,7 +236,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
         400: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ message: responseMessage("request payload").invalid }),
             },
           },
           description: "Invalid request payload",
@@ -225,7 +244,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
         409: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ code: "P2002", message: responseMessage("email").alreadyExists }),
             },
           },
           description: "User already exists",

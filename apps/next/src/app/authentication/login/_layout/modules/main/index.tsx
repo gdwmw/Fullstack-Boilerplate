@@ -41,7 +41,7 @@ export const Main: FC = (): ReactElement => {
       });
 
       if (!res?.ok) {
-        throw new Error(res?.error || "authentication failed. please try again.");
+        throw new Error(res?.error ?? "login failed. please try again.");
       }
 
       return true;

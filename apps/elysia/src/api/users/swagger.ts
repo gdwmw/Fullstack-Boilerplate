@@ -3,23 +3,26 @@ import { DocumentDecoration } from "elysia";
 import { responseMessage } from "@/src/constants";
 
 export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "put", DocumentDecoration> => {
-  const successResponseSchema = {
-    properties: {
-      data: {},
-      message: { example: responseMessage(label).retrieved, nullable: true, type: "string" },
-      success: { example: true, type: "boolean" },
-    },
-    type: "object",
-  } as const;
+  const successResponseSchema = (message: string) =>
+    ({
+      properties: {
+        data: {},
+        message: { example: message, nullable: true, type: "string" },
+        meta: { nullable: true, type: "object" },
+        success: { example: true, type: "boolean" },
+      },
+      type: "object",
+    }) as const;
 
-  const errorResponseSchema = {
-    properties: {
-      code: { example: "P2025", nullable: true, type: "string" },
-      message: { example: responseMessage(label).notFound, nullable: true, type: "string" },
-      success: { example: false, type: "boolean" },
-    },
-    type: "object",
-  } as const;
+  const errorResponseSchema = ({ code = null, message }: { code?: null | string; message: string }) =>
+    ({
+      properties: {
+        code: { example: code, nullable: true, type: "string" },
+        message: { example: message, nullable: true, type: "string" },
+        success: { example: false, type: "boolean" },
+      },
+      type: "object",
+    }) as const;
 
   return {
     delete: {
@@ -29,15 +32,23 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
         200: {
           content: {
             "application/json": {
-              schema: successResponseSchema,
+              schema: successResponseSchema(responseMessage(label).deleted),
             },
           },
           description: "User deleted successfully",
         },
+        400: {
+          content: {
+            "application/json": {
+              schema: errorResponseSchema({ message: responseMessage("id").invalid }),
+            },
+          },
+          description: "Invalid id parameter",
+        },
         401: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ message: responseMessage("access token").required }),
             },
           },
           description: "Unauthorized",
@@ -45,7 +56,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
         404: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ code: "P2025", message: responseMessage(label).notFound }),
             },
           },
           description: "User not found",
@@ -62,7 +73,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
         200: {
           content: {
             "application/json": {
-              schema: successResponseSchema,
+              schema: successResponseSchema(responseMessage(label).retrieved),
             },
           },
           description: "Users retrieved successfully",
@@ -70,7 +81,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
         401: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ message: responseMessage("access token").required }),
             },
           },
           description: "Unauthorized",
@@ -88,26 +99,26 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
         200: {
           content: {
             "application/json": {
-              schema: successResponseSchema,
+              schema: successResponseSchema(responseMessage(label).retrieved),
             },
           },
           description: "User retrieved successfully",
         },
+        400: {
+          content: {
+            "application/json": {
+              schema: errorResponseSchema({ message: responseMessage("id").invalid }),
+            },
+          },
+          description: "Invalid id parameter",
+        },
         401: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ message: responseMessage("access token").required }),
             },
           },
           description: "Unauthorized",
-        },
-        404: {
-          content: {
-            "application/json": {
-              schema: errorResponseSchema,
-            },
-          },
-          description: "User not found",
         },
       },
       security: [{ bearerAuth: [] }],
@@ -141,7 +152,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
         200: {
           content: {
             "application/json": {
-              schema: successResponseSchema,
+              schema: successResponseSchema(responseMessage(label).updated),
             },
           },
           description: "User updated successfully",
@@ -149,15 +160,15 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
         400: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ message: responseMessage("request payload").invalid }),
             },
           },
-          description: "Invalid request payload",
+          description: "Invalid request payload or id parameter",
         },
         401: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ message: responseMessage("access token").required }),
             },
           },
           description: "Unauthorized",
@@ -165,10 +176,18 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
         404: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ code: "P2025", message: responseMessage(label).notFound }),
             },
           },
           description: "User not found",
+        },
+        409: {
+          content: {
+            "application/json": {
+              schema: errorResponseSchema({ code: "P2002", message: responseMessage("email").alreadyExists }),
+            },
+          },
+          description: "Unique field conflict",
         },
       },
       security: [{ bearerAuth: [] }],
