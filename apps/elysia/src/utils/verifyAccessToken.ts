@@ -5,6 +5,8 @@ import { redis } from "@/src/libs";
 
 export const getBearerToken = (authorization?: string) => (authorization?.startsWith("Bearer ") ? authorization.slice(7) : null);
 
+const accessTokenInvalidOrExpiredMessage = `${responseMessage("access token").invalid} or ${responseMessage("access token").expired}`;
+
 export const verifyResponse = async ({
   accessJwt,
   authorization,
@@ -12,30 +14,27 @@ export const verifyResponse = async ({
   accessJwt: { verify(token: string): Promise<unknown> };
   authorization?: string;
 }) => {
-  const res = getBearerToken(authorization);
+  const token = getBearerToken(authorization);
 
-  if (!res) {
+  if (!token) {
     return ERROR_RESPONSE({
       message: responseMessage("access token").required,
     });
   }
 
-  const decoded = await accessJwt.verify(res);
+  const decoded = await accessJwt.verify(token);
 
   if (!decoded || typeof decoded !== "object") {
     return ERROR_RESPONSE({
-      message: responseMessage("access token").invalid + " or " + responseMessage("access token").expired,
+      message: accessTokenInvalidOrExpiredMessage,
     });
   }
 
-  const jti = (decoded as Record<string, unknown>).jti;
-  if (typeof jti === "string") {
-    const blocked = await redis.exists(`blocklist:${jti}`);
-    if (blocked === 1) {
-      return ERROR_RESPONSE({
-        message: responseMessage("access token").invalid + " or " + responseMessage("access token").expired,
-      });
-    }
+  const jti = (decoded as { jti?: unknown }).jti;
+  if (typeof jti === "string" && (await redis.exists(`blocklist:${jti}`)) === 1) {
+    return ERROR_RESPONSE({
+      message: accessTokenInvalidOrExpiredMessage,
+    });
   }
 
   return null;
@@ -60,8 +59,8 @@ export const verifyAccessToken = async ({
     authorization: headers.authorization,
   });
 
-  if (res) {
-    set.status = 401;
-    return res;
-  }
+  if (!res) return null;
+
+  set.status = 401;
+  return res;
 };

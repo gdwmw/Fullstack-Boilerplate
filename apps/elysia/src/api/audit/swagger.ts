@@ -2,10 +2,27 @@ import { DocumentDecoration } from "elysia";
 
 import { responseMessage } from "@/src/constants";
 
-type TContentResponse = Extract<NonNullable<NonNullable<DocumentDecoration["responses"]>[200]>, { content?: unknown }>;
-type TResponseSchema = NonNullable<NonNullable<NonNullable<TContentResponse["content"]>["application/json"]>["schema"]>;
-
 export const docs = (label: string): Record<"getAll" | "getArchives", DocumentDecoration> => {
+  const successResponseSchema = ({ data, message }: { data: Record<string, unknown>; message: string }) =>
+    ({
+      properties: {
+        data,
+        message: { example: message, nullable: true, type: "string" },
+        success: { example: true, type: "boolean" },
+      },
+      type: "object",
+    }) as const;
+
+  const errorResponseSchema = ({ code = null, message }: { code?: null | string; message: string }) =>
+    ({
+      properties: {
+        code: { example: code, nullable: true, type: "string" },
+        message: { example: message, nullable: true, type: "string" },
+        success: { example: false, type: "boolean" },
+      },
+      type: "object",
+    }) as const;
+
   const auditLogUserSchema = {
     nullable: true,
     properties: {
@@ -54,44 +71,21 @@ export const docs = (label: string): Record<"getAll" | "getArchives", DocumentDe
     type: "object",
   };
 
-  const successResponseSchema = {
+  const getAllDataSchema = {
     properties: {
       data: {
-        properties: {
-          data: {
-            items: auditLogEntrySchema,
-            type: "array",
-          },
-          meta: auditLogMetaSchema,
-        },
-        type: "object",
-      },
-      message: { example: responseMessage(label).retrieved, nullable: true, type: "string" },
-      success: { example: true, type: "boolean" },
-    },
-    type: "object",
-  };
-
-  const archiveSuccessResponseSchema = {
-    properties: {
-      data: {
-        items: auditArchiveSchema,
+        items: auditLogEntrySchema,
         type: "array",
       },
-      message: { example: responseMessage("audit archives").retrieved, nullable: true, type: "string" },
-      success: { example: true, type: "boolean" },
+      meta: auditLogMetaSchema,
     },
     type: "object",
   };
 
-  const errorResponseSchema = {
-    properties: {
-      code: { example: null, nullable: true, type: "string" },
-      message: { example: responseMessage(label).notFound, nullable: true, type: "string" },
-      success: { example: false, type: "boolean" },
-    },
-    type: "object",
-  } as const;
+  const getArchivesDataSchema = {
+    items: auditArchiveSchema,
+    type: "array",
+  };
 
   return {
     getAll: {
@@ -122,7 +116,7 @@ export const docs = (label: string): Record<"getAll" | "getArchives", DocumentDe
           schema: { example: "admin", type: "string" },
         },
         {
-          description: "filter entries within the selected minute using HH:mm format.",
+          description: "filter entries within the selected minute using hh:mm format.",
           in: "query",
           name: "time",
           schema: { example: "14:30", type: "string" },
@@ -156,7 +150,10 @@ export const docs = (label: string): Record<"getAll" | "getArchives", DocumentDe
         200: {
           content: {
             "application/json": {
-              schema: successResponseSchema as TResponseSchema,
+              schema: successResponseSchema({
+                data: getAllDataSchema,
+                message: responseMessage(label).retrieved,
+              }),
             },
           },
           description: "audit logs retrieved successfully",
@@ -164,7 +161,7 @@ export const docs = (label: string): Record<"getAll" | "getArchives", DocumentDe
         401: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ message: responseMessage("access token").required }),
             },
           },
           description: "unauthorized",
@@ -194,7 +191,10 @@ export const docs = (label: string): Record<"getAll" | "getArchives", DocumentDe
         200: {
           content: {
             "application/json": {
-              schema: archiveSuccessResponseSchema as TResponseSchema,
+              schema: successResponseSchema({
+                data: getArchivesDataSchema,
+                message: responseMessage("audit archives").retrieved,
+              }),
             },
           },
           description: "audit archives retrieved successfully",
@@ -202,7 +202,7 @@ export const docs = (label: string): Record<"getAll" | "getArchives", DocumentDe
         401: {
           content: {
             "application/json": {
-              schema: errorResponseSchema,
+              schema: errorResponseSchema({ message: responseMessage("access token").required }),
             },
           },
           description: "unauthorized",

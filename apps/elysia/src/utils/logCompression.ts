@@ -6,6 +6,7 @@ import { basename, join } from "node:path";
 import { promisify } from "node:util";
 
 import { env } from "@/src/environment";
+import { logger } from "@/src/libs";
 
 const execFileAsync = promisify(execFile);
 
@@ -16,13 +17,9 @@ const COMPRESSED_LOG_EXTENSION = ".log.zst";
 let zstdAvailabilityPromise: null | Promise<boolean> = null;
 
 export const getLogDirectory = () => env.LOG_DIR;
-
 export const getRequestLogFileName = (date = new Date()) => `${REQUEST_LOG_PREFIX}${format(date, "dd-MM-yyyy")}${RAW_LOG_EXTENSION}`;
-
 export const isRawRequestLogFileName = (entry: string) => entry.startsWith(REQUEST_LOG_PREFIX) && entry.endsWith(RAW_LOG_EXTENSION);
-
 export const isCompressedRequestLogFileName = (entry: string) => entry.startsWith(REQUEST_LOG_PREFIX) && entry.endsWith(COMPRESSED_LOG_EXTENSION);
-
 export const isRequestLogFileName = (entry: string) => isRawRequestLogFileName(entry) || isCompressedRequestLogFileName(entry);
 
 export const checkZstdAvailability = async (): Promise<boolean> => {
@@ -56,8 +53,16 @@ export const compressArchivedLogFiles = async ({ currentFileName, directory }: {
 
     try {
       await compressLogFile(join(directory, entry));
-    } catch {
-      // ignore compression failures so request logging can continue with the active file
+    } catch (error) {
+      logger.warn(
+        {
+          directory,
+          entry,
+          error,
+          scope: "audit",
+        },
+        "failed to compress archived request log file",
+      );
     }
   }
 };

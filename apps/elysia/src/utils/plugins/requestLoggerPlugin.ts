@@ -1,7 +1,7 @@
 import { Elysia } from "elysia";
 import { randomUUID } from "node:crypto";
-import { createWriteStream, mkdirSync, type WriteStream } from "node:fs";
 import { join } from "node:path";
+import pino from "pino";
 
 import { env } from "@/src/environment";
 import { logger, prisma } from "@/src/libs";
@@ -17,38 +17,27 @@ import {
 export const requestStartTimes = new WeakMap<Request, number>();
 
 let activeLogDate = "";
-let activeLogStream: null | WriteStream = null;
+let activeAuditLogger: null | pino.Logger = null;
+let activeAuditDestination: null | ReturnType<typeof pino.destination> = null;
 let activeLogPath = "";
 const requestIds = new WeakMap<Request, string>();
 const requestUsers = new WeakMap<Request, Promise<null | TAuditLogUser>>();
 
 const SENSITIVE_FIELD_NAMES = new Set([
-  "access-token",
   "accesstoken",
-  "api-key",
   "apikey",
   "authorization",
-  "confirm-password",
   "confirmpassword",
-  "confirmPassword",
   "cookie",
-  "current-password",
   "currentpassword",
-  "currentPassword",
-  "new-password",
-  "newPassword",
   "newpassword",
-  "old-password",
   "oldpassword",
-  "oldPassword",
   "password",
-  "refresh-token",
   "refreshtoken",
-  "refreshToken",
   "secret",
-  "set-cookie",
+  "setcookie",
   "token",
-  "x-api-key",
+  "xapikey",
 ]);
 
 const PAYLOAD_LOG_EXCLUDED_PATHS = ["/auth", "/users"];
@@ -196,12 +185,17 @@ const sanitizePayload = (value: unknown, seen = new WeakSet<object>()): unknown 
 
   seen.add(value);
 
+  const normalizeSensitiveFieldKey = (key: string) =>
+    key
+      .trim()
+      .toLowerCase()
+      .replace(/[-_\s]/g, "");
+
   return Object.fromEntries(
     Object.entries(value).map(([key, entryValue]) => {
-      const normalizedKey = key.trim().toLowerCase();
-      const compactedKey = normalizedKey.replace(/[_\s]/g, "");
+      const normalizedKey = normalizeSensitiveFieldKey(key);
 
-      if (SENSITIVE_FIELD_NAMES.has(normalizedKey) || SENSITIVE_FIELD_NAMES.has(compactedKey)) {
+      if (SENSITIVE_FIELD_NAMES.has(normalizedKey)) {
         return [key, "[REDACTED]"];
       }
 
@@ -226,46 +220,66 @@ const getAuditPayload = ({ body, pathname }: { body: unknown; pathname: string }
   return sanitizedPayload;
 };
 
-const getRequestLogStream = () => {
+const getRequestAuditLogger = () => {
   const now = new Date();
   const dateKey = now.toISOString().slice(0, 10);
 
-  if (activeLogStream && activeLogDate === dateKey) {
-    return activeLogStream;
+  if (activeAuditLogger && activeAuditDestination && activeLogDate === dateKey) {
+    return activeAuditLogger;
   }
 
-  if (activeLogStream) {
+  if (activeAuditDestination) {
     const previousLogPath = activeLogPath;
-    const stream = activeLogStream;
+    const destination = activeAuditDestination;
 
-    activeLogStream = null;
+    activeAuditLogger = null;
+    activeAuditDestination = null;
     activeLogPath = "";
 
-    stream.end(() => {
+    destination.once("close", () => {
       if (previousLogPath) {
         void compressLogFile(previousLogPath);
       }
     });
+
+    destination.end();
   }
 
   const logDirectory = getLogDirectory();
   const fileName = getRequestLogFileName(now);
 
-  mkdirSync(logDirectory, { recursive: true });
   const filePath = join(logDirectory, fileName);
 
   void compressArchivedLogFiles({ currentFileName: fileName, directory: logDirectory });
 
+  const destination = pino.destination({
+    append: true,
+    dest: filePath,
+    mkdir: true,
+    sync: false,
+  });
+
+  activeAuditDestination = destination;
+  activeAuditLogger = pino(
+    {
+      base: undefined,
+      formatters: {
+        level: (label) => ({ severity: label.toUpperCase() }),
+      },
+      timestamp: false,
+    },
+    destination,
+  );
+
   activeLogDate = dateKey;
   activeLogPath = filePath;
-  activeLogStream = createWriteStream(filePath, { flags: "a" });
 
-  return activeLogStream;
+  return activeAuditLogger;
 };
 
 const writeRequestLog = (payload: Record<string, unknown>) => {
-  const stream = getRequestLogStream();
-  stream.write(`${JSON.stringify(payload)}\n`);
+  const auditLogger = getRequestAuditLogger();
+  auditLogger.info(payload);
 };
 
 const getHeaderIp = (request: Request) => {
@@ -373,14 +387,69 @@ export const getErrorMessage = (error: unknown) => {
 };
 
 const shouldWriteSuccessRequestLog = ({ method, pathname }: { method: string; pathname: string }) => {
-  if (pathname === "/audit" || pathname === "/auth/refresh") {
+  if (isExcludedAuditPath(pathname)) {
     return false;
   }
 
   return method !== "GET";
 };
 
-const shouldWriteErrorRequestLog = (pathname: string) => pathname !== "/audit" && pathname !== "/auth/refresh";
+const isExcludedAuditPath = (pathname: string) => pathname === "/audit" || pathname === "/auth/refresh";
+
+const shouldWriteErrorRequestLog = (pathname: string) => !isExcludedAuditPath(pathname);
+
+const getRequestLogMeta = (request: Request) => {
+  const requestId = requestIds.get(request) ?? randomUUID();
+  const startedAt = requestStartTimes.get(request) ?? performance.now();
+  const durationMs = Math.round(performance.now() - startedAt);
+  const pathname = new URL(request.url).pathname;
+
+  return {
+    durationMs,
+    pathname,
+    requestId,
+  };
+};
+
+const createAuditLogEntry = async ({
+  body,
+  durationMs,
+  error,
+  level,
+  pathname,
+  request,
+  requestId,
+  server,
+  statusCode,
+}: {
+  body: unknown;
+  durationMs: number;
+  error?: string;
+  level: "ERROR" | "INFO";
+  pathname: string;
+  request: Request;
+  requestId: string;
+  server?: unknown;
+  statusCode: number;
+}) => {
+  const payload = getAuditPayload({ body, pathname });
+  const user = await resolveRequestUser(request);
+
+  return {
+    durationMs,
+    ...(error ? { error } : {}),
+    ip: getRequestIp(request, server),
+    level,
+    method: request.method,
+    path: pathname,
+    payload,
+    requestId,
+    statusCode,
+    ts: new Date().toISOString(),
+    userAgent: request.headers.get("user-agent") || "unknown",
+    users: user,
+  };
+};
 
 export const requestLoggerPlugin = new Elysia({ name: "request-logger" })
   .trace({ as: "global" }, ({ context }) => {
@@ -389,61 +458,47 @@ export const requestLoggerPlugin = new Elysia({ name: "request-logger" })
   })
 
   .onAfterHandle({ as: "global" }, async ({ body, request, server, set }) => {
-    const requestId = requestIds.get(request) ?? randomUUID();
-    const startedAt = requestStartTimes.get(request) ?? performance.now();
-    const durationMs = Math.round(performance.now() - startedAt);
+    const { durationMs, pathname, requestId } = getRequestLogMeta(request);
     const statusCode = getStatusCode(set.status);
-    const pathname = new URL(request.url).pathname;
     const line = `${statusCode} | ${request.method} | ${pathname} | ${durationMs}ms`;
 
     logger.info(line);
     if (shouldWriteSuccessRequestLog({ method: request.method, pathname })) {
-      const payload = getAuditPayload({ body, pathname });
-      const user = await resolveRequestUser(request);
-
-      writeRequestLog({
-        durationMs,
-        ip: getRequestIp(request, server),
-        level: "INFO",
-        method: request.method,
-        path: pathname,
-        payload,
-        requestId,
-        statusCode,
-        ts: new Date().toISOString(),
-        userAgent: request.headers.get("user-agent") || "unknown",
-        users: user,
-      });
+      writeRequestLog(
+        await createAuditLogEntry({
+          body,
+          durationMs,
+          level: "INFO",
+          pathname,
+          request,
+          requestId,
+          server,
+          statusCode,
+        }),
+      );
     }
   })
 
   .onError({ as: "global" }, async ({ body, error, request, server, set }) => {
-    const requestId = requestIds.get(request) ?? randomUUID();
-    const startedAt = requestStartTimes.get(request) ?? performance.now();
-    const durationMs = Math.round(performance.now() - startedAt);
+    const { durationMs, pathname, requestId } = getRequestLogMeta(request);
     const statusCode = resolveErrorStatusCode(set.status, error);
-    const pathname = new URL(request.url).pathname;
     const line = `${statusCode} | ${request.method} | ${pathname} | ${durationMs}ms`;
     const errorMessage = getErrorMessage(error);
 
     logger.error({ message: errorMessage }, line);
     if (shouldWriteErrorRequestLog(pathname)) {
-      const payload = getAuditPayload({ body, pathname });
-      const user = await resolveRequestUser(request);
-
-      writeRequestLog({
-        durationMs,
-        error: errorMessage,
-        ip: getRequestIp(request, server),
-        level: "ERROR",
-        method: request.method,
-        path: pathname,
-        payload,
-        requestId,
-        statusCode,
-        ts: new Date().toISOString(),
-        userAgent: request.headers.get("user-agent") || "unknown",
-        users: user,
-      });
+      writeRequestLog(
+        await createAuditLogEntry({
+          body,
+          durationMs,
+          error: errorMessage,
+          level: "ERROR",
+          pathname,
+          request,
+          requestId,
+          server,
+          statusCode,
+        }),
+      );
     }
   });
