@@ -15,6 +15,10 @@
     "eslint --fix --max-warnings 0 --config packages/eslint-config/eslint.config.mjs",
     "prettier --write"
   ],
+  "packages/schemas/**/*.{js,jsx,ts,tsx,mjs,cjs}": [
+    "eslint --fix --max-warnings 0 --config packages/schemas/eslint.config.mjs",
+    "prettier --write"
+  ],
   "packages/utils/**/*.{js,jsx,ts,tsx,mjs,cjs}": [
     "eslint --fix --max-warnings 0 --config packages/utils/eslint.config.mjs",
     "prettier --write"
