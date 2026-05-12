@@ -45,6 +45,7 @@ const parseArchiveDateFromFileName = (fileName: string): null | string => {
   }
 
   const dateToken = matchedDate[1];
+
   if (!dateToken) {
     return null;
   }
@@ -73,7 +74,6 @@ const parseArchiveDateFromFileName = (fileName: string): null | string => {
 };
 
 const parseArchiveDate = (dateKey: string): Date => new Date(dateKey);
-
 const getArchiveLabel = (dateKey: string) => format(new Date(dateKey), "dd MMM yyyy");
 const getActorSearchValues = (entry: ILogEntry): string[] => {
   const user = entry.users;
@@ -154,6 +154,7 @@ export const service = {
     const selectedFileName = selectedFileDate ? getRequestLogFileName(selectedFileDate) : undefined;
 
     let files: string[];
+
     try {
       const all = await readdir(logDir);
       files = all
@@ -162,17 +163,15 @@ export const service = {
         .sort()
         .reverse();
     } catch {
-      return { data: [], meta: { page, pageSize: pageSize, total: 0, totalPages: 0 } };
+      return { data: [], meta: { page, pageSize, total: 0, totalPages: 0 } };
     }
 
     const allEntries = (await Promise.all(files.map((file) => readLogEntries(join(logDir, file), isCompressedRequestLogFileName(file))))).flat();
-
     allEntries.sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime());
 
     const filtered = allEntries.filter((entry) => {
       if (selectedTime) {
         const entryDate = new Date(entry.ts);
-
         if (entryDate.getHours() !== selectedTime.hours || entryDate.getMinutes() !== selectedTime.minutes) {
           return false;
         }
@@ -180,7 +179,6 @@ export const service = {
 
       if (normalizedActor) {
         const actorValues = getActorSearchValues(entry);
-
         if (!actorValues.some((value) => value.includes(normalizedActor))) {
           return false;
         }
@@ -201,7 +199,7 @@ export const service = {
       data,
       meta: {
         page,
-        pageSize: pageSize,
+        pageSize,
         total,
         totalPages: Math.ceil(total / pageSize),
       },
@@ -212,6 +210,7 @@ export const service = {
     const logDir = getLogDirectory();
 
     let files: string[];
+
     try {
       files = (await readdir(logDir))
         .filter((file) => isRequestLogFileName(file))
