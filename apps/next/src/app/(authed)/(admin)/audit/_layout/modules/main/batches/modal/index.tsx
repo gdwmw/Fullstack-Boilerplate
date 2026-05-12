@@ -116,7 +116,7 @@ export const AuditDetailModal: FC<I> = (props): null | ReactElement => {
                 <div className="grid grid-cols-3 gap-2">
                   <DetailMetaItem label="TIMESTAMP" value={props.selectedLog.ts} />
                   <DetailMetaItem label="BROWSER/OS" value={`${selectedLogBrowser} • ${selectedLogOs}`} />
-                  <DetailMetaItem label="IP ADDRESS" value={selectedLogIp} />
+                  <DetailMetaItem label="IP ADDRESS" value={<span className="break-all">{selectedLogIp}</span>} />
                 </div>
 
                 <DetailBlock title="USER SNAPSHOT">{selectedLogUser}</DetailBlock>
