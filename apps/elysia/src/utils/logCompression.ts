@@ -33,7 +33,41 @@ export const checkZstdAvailability = async (): Promise<boolean> => {
 };
 
 export const compressLogFile = async (filePath: string) => {
-  await execFileAsync("zstd", ["-q", "--rm", "-f", filePath, "-o", `${filePath}.zst`]);
+  const outputFilePath = `${filePath}.zst`;
+
+  logger.info(
+    {
+      filePath,
+      outputFilePath,
+      scope: "audit",
+    },
+    "compressing archived request log file",
+  );
+
+  try {
+    await execFileAsync("zstd", ["-q", "--rm", "-f", filePath, "-o", outputFilePath]);
+
+    logger.info(
+      {
+        filePath,
+        outputFilePath,
+        scope: "audit",
+      },
+      "finished compressing archived request log file",
+    );
+  } catch (error) {
+    logger.error(
+      {
+        error,
+        filePath,
+        outputFilePath,
+        scope: "audit",
+      },
+      "failed to compress archived request log file",
+    );
+
+    throw error;
+  }
 };
 
 export const compressArchivedLogFiles = async ({ currentFileName, directory }: { currentFileName: string; directory: string }) => {
@@ -71,7 +105,39 @@ export const decompressLogFileToTemp = async (filePath: string) => {
   const tempDirectory = await mkdtemp(join(tmpdir(), "elysia-audit-"));
   const outputFilePath = join(tempDirectory, basename(filePath, ".zst"));
 
-  await execFileAsync("zstd", ["-d", "-q", "-f", filePath, "-o", outputFilePath]);
+  logger.info(
+    {
+      filePath,
+      outputFilePath,
+      scope: "audit",
+    },
+    "decompressing archived request log file",
+  );
+
+  try {
+    await execFileAsync("zstd", ["-d", "-q", "-f", filePath, "-o", outputFilePath]);
+
+    logger.info(
+      {
+        filePath,
+        outputFilePath,
+        scope: "audit",
+      },
+      "finished decompressing archived request log file",
+    );
+  } catch (error) {
+    logger.error(
+      {
+        error,
+        filePath,
+        outputFilePath,
+        scope: "audit",
+      },
+      "failed to decompress archived request log file",
+    );
+
+    throw error;
+  }
 
   return {
     cleanup: async () => {
