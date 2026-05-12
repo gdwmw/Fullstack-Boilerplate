@@ -81,44 +81,44 @@ git clone https://github.com/gdwmw/Fullstack-Boilerplate.git
 cd Fullstack-Boilerplate
 ```
 
-1. **Install dependencies**
+2. **Install dependencies**
 
 ```bash
 pnpm install
 ```
 
-1. **Setup environment variables**
+3. **Setup environment variables**
 
 ```bash
 pnpm cpenv
 ```
 
-1. **Configure `.env`**
+4. **Configure `.env`**
 
 Update at least:
 
 - `apps/elysia/.env`: database connection, JWT secret, and API configuration
 - `apps/next/.env`: API/backend URL and other frontend configurations
 
-1. **Ensure services are running**
+5. **Ensure services are running**
 
 - 🐘 PostgreSQL must be active (`DATABASE_URL`)
 - 🔴 Redis must be active (`REDIS_URL`)
 
-1. **Generate Prisma Client and run migrations**
+6. **Generate Prisma Client and run migrations**
 
 ```bash
 pnpm generate
 pnpm migrate
 ```
 
-1. **Run development mode**
+7. **Run development mode**
 
 ```bash
 pnpm dev
 ```
 
-1. **Access the application**
+8. **Access the application**
 
 - 🌐 Frontend: [http://localhost:3000](http://localhost:3000)
 - 🔗 API: [http://localhost:1337](http://localhost:1337)
