@@ -68,7 +68,7 @@ Make sure the following are installed:
 - 🐘 PostgreSQL
 - 🧰 PostgreSQL client tools (`pg_dump`, `pg_restore`)
 - 🔴 Redis
-- 🗜️ zstd (required for log compression/decompression)
+- 🗜️ zstd (required for compression/decompression)
 
 ---
 
