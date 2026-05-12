@@ -62,9 +62,9 @@ This project also supports request/audit log compression using `zstd` on the Ely
 
 Make sure the following are installed:
 
-- 🟢 Node.js `>= 18`
-- 📦 pnpm `>= 10`
-- ⚡ Bun (for running the Elysia API)
+- 🟢 Node.js `>= 22.22.1`
+- 📦 pnpm `>= 11`
+- ⚡ Bun `>= 1.3.6` (for running the Elysia API)
 - 🐘 PostgreSQL
 - 🧰 PostgreSQL client tools (`pg_dump`, `pg_restore`)
 - 🔴 Redis
@@ -135,40 +135,6 @@ pnpm dev
 │   └── elysia      # Elysia.js backend + Prisma
 ├── packages        # Shared packages/config across apps
 └── turbo.json      # Turborepo configuration
-```
-
----
-
-## 💾 Database Backup Compression
-
-Database backup worker on Elysia runs with this flow:
-
-1. Generate backup using `pg_dump --format=custom --compress=0`
-2. Compress backup file with `zstd`
-3. Keep backup using retention policy (`DB_BACKUP_RETENTION_DAYS`)
-
-Output file format:
-
-- Preferred: `postgres-<db-name>-<timestamp>.dump.zst`
-- Fallback (if `zstd` is unavailable): `postgres-<db-name>-<timestamp>.dump`
-
-Restore example:
-
-```bash
-zstd -d -f postgres-mydb-01-01-2026-00-00-00.dump.zst -o backup.dump
-pg_restore --clean --if-exists --no-owner --dbname "$DATABASE_URL" backup.dump
-```
-
----
-
-## 🧱 Prisma Notes (Elysia)
-
-- `apps/elysia/prisma/schema.prisma` intentionally omits `datasource db.url`.
-- `DATABASE_URL` is supplied from `apps/elysia/prisma.config.ts` using Prisma's `defineConfig`.
-- To keep split schema files under `apps/elysia/prisma/models` consistently formatted, run:
-
-```bash
-pnpm -C apps/elysia format
 ```
 
 ---
