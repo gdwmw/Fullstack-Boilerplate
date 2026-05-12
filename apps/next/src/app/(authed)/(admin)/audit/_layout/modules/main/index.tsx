@@ -43,7 +43,8 @@ interface IFilterFormValues {
   method: "" | "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
   path: string;
   statusCode: string;
-  time: Date | null;
+  timeFrom: Date | null;
+  timeTo: Date | null;
 }
 
 interface IAppliedFilters {
@@ -52,7 +53,8 @@ interface IAppliedFilters {
   method?: "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
   path?: string;
   statusCode?: number;
-  time?: string;
+  timeFrom?: string;
+  timeTo?: string;
 }
 
 const FILTER_DEFAULT_VALUES: IFilterFormValues = {
@@ -61,7 +63,8 @@ const FILTER_DEFAULT_VALUES: IFilterFormValues = {
   method: "",
   path: "",
   statusCode: "",
-  time: null,
+  timeFrom: null,
+  timeTo: null,
 };
 
 interface I {
@@ -96,7 +99,8 @@ export const Main: FC<I> = (props): ReactElement => {
       method: filterValues.method || undefined,
       path: normalizedPath || undefined,
       statusCode: parsedStatusCode !== undefined && Number.isNaN(parsedStatusCode) ? undefined : parsedStatusCode,
-      time: formatTimeForQuery(filterValues.time ?? null),
+      timeFrom: formatTimeForQuery(filterValues.timeFrom ?? null),
+      timeTo: formatTimeForQuery(filterValues.timeTo ?? null),
     };
   }, [filterValues]);
 
@@ -131,7 +135,8 @@ export const Main: FC<I> = (props): ReactElement => {
       pageSize,
       path: appliedFilters.path,
       statusCode: appliedFilters.statusCode,
-      time: appliedFilters.time,
+      timeFrom: appliedFilters.timeFrom,
+      timeTo: appliedFilters.timeTo,
     },
   ];
 
@@ -147,7 +152,8 @@ export const Main: FC<I> = (props): ReactElement => {
         pageSize,
         path: appliedFilters.path,
         statusCode: appliedFilters.statusCode,
-        time: appliedFilters.time,
+        timeFrom: appliedFilters.timeFrom,
+        timeTo: appliedFilters.timeTo,
       });
 
       return res.data;
@@ -172,14 +178,27 @@ export const Main: FC<I> = (props): ReactElement => {
     return logs.find((log) => log.requestId === selectedLogRequestId) ?? null;
   }, [logs, selectedLogRequestId]);
   const hasActiveFilters = Boolean(
-    appliedFilters.actor || appliedFilters.level || appliedFilters.method || appliedFilters.path || appliedFilters.statusCode || appliedFilters.time,
+    appliedFilters.actor ||
+    appliedFilters.level ||
+    appliedFilters.method ||
+    appliedFilters.path ||
+    appliedFilters.statusCode ||
+    appliedFilters.timeFrom ||
+    appliedFilters.timeTo,
   );
   const hasDraftFilters = Boolean(
-    draftFilters.actor || draftFilters.level || draftFilters.method || draftFilters.path || draftFilters.statusCode || draftFilters.time,
+    draftFilters.actor ||
+    draftFilters.level ||
+    draftFilters.method ||
+    draftFilters.path ||
+    draftFilters.statusCode ||
+    draftFilters.timeFrom ||
+    draftFilters.timeTo,
   );
   const hasPendingFilterChanges =
     draftFilters.actor !== appliedFilters.actor ||
-    draftFilters.time !== appliedFilters.time ||
+    draftFilters.timeFrom !== appliedFilters.timeFrom ||
+    draftFilters.timeTo !== appliedFilters.timeTo ||
     draftFilters.level !== appliedFilters.level ||
     draftFilters.method !== appliedFilters.method ||
     draftFilters.path !== appliedFilters.path ||
@@ -203,7 +222,8 @@ export const Main: FC<I> = (props): ReactElement => {
           pageSize,
           path: appliedFilters.path,
           statusCode: appliedFilters.statusCode,
-          time: appliedFilters.time,
+          timeFrom: appliedFilters.timeFrom,
+          timeTo: appliedFilters.timeTo,
         });
 
         return res.data;
@@ -219,7 +239,8 @@ export const Main: FC<I> = (props): ReactElement => {
           pageSize,
           path: appliedFilters.path,
           statusCode: appliedFilters.statusCode,
-          time: appliedFilters.time,
+          timeFrom: appliedFilters.timeFrom,
+          timeTo: appliedFilters.timeTo,
         },
       ],
     });
@@ -229,7 +250,8 @@ export const Main: FC<I> = (props): ReactElement => {
     appliedFilters.method,
     appliedFilters.path,
     appliedFilters.statusCode,
-    appliedFilters.time,
+    appliedFilters.timeFrom,
+    appliedFilters.timeTo,
     meta,
     page,
     pageSize,
@@ -276,13 +298,35 @@ export const Main: FC<I> = (props): ReactElement => {
               <div className="flex gap-1">
                 <Controller
                   control={control}
-                  name="time"
+                  name="timeFrom"
                   render={({ field }) => (
                     <ExampleDatePicker
                       className={{ container: "w-full" }}
                       color="default"
                       dateFormat="HH:mm"
-                      label="Time"
+                      label="Time From"
+                      onChange={(selectedDate: Date | null) => {
+                        field.onChange(selectedDate);
+                      }}
+                      placeholderText="HH:mm"
+                      selected={field.value}
+                      showTimeSelect
+                      showTimeSelectOnly
+                      timeFormat="HH:mm"
+                      timeIntervals={5}
+                    />
+                  )}
+                />
+
+                <Controller
+                  control={control}
+                  name="timeTo"
+                  render={({ field }) => (
+                    <ExampleDatePicker
+                      className={{ container: "w-full" }}
+                      color="default"
+                      dateFormat="HH:mm"
+                      label="Time To"
                       onChange={(selectedDate: Date | null) => {
                         field.onChange(selectedDate);
                       }}

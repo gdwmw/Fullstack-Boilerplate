@@ -36,6 +36,28 @@ const parseTimeFilter = (value?: string): { hours: number; minutes: number } | u
   return { hours, minutes };
 };
 
+const toTotalMinutes = ({ hours, minutes }: { hours: number; minutes: number }): number => hours * 60 + minutes;
+
+const isTimeWithinRange = ({ candidate, from, to }: { candidate: number; from?: number; to?: number }): boolean => {
+  if (from === undefined && to === undefined) {
+    return true;
+  }
+
+  if (from !== undefined && to !== undefined) {
+    if (from <= to) {
+      return candidate >= from && candidate <= to;
+    }
+
+    return candidate >= from || candidate <= to;
+  }
+
+  if (from !== undefined) {
+    return candidate >= from;
+  }
+
+  return candidate <= to!;
+};
+
 const parseArchiveDateFromFileName = (fileName: string): null | string => {
   const normalizedFileName = fileName.replace(/\.zst$/, "");
   const matchedDate = normalizedFileName.match(/^(?:elysia-req-)(\d{2}-\d{2}-\d{4})\.log$/);
@@ -146,9 +168,12 @@ const parseCompressedLogFile = async (filePath: string): Promise<ILogEntry[]> =>
 };
 
 export const service = {
-  async getAll({ actor, archiveDate, level, method, page, pageSize, path, statusCode, time }: TQuerySchema) {
+  async getAll({ actor, archiveDate, level, method, page, pageSize, path, statusCode, timeFrom, timeTo }: TQuerySchema) {
     const logDir = getLogDirectory();
-    const selectedTime = parseTimeFilter(time);
+    const selectedTimeFrom = parseTimeFilter(timeFrom);
+    const selectedTimeTo = parseTimeFilter(timeTo);
+    const selectedTimeFromMinutes = selectedTimeFrom ? toTotalMinutes(selectedTimeFrom) : undefined;
+    const selectedTimeToMinutes = selectedTimeTo ? toTotalMinutes(selectedTimeTo) : undefined;
     const normalizedActor = actor?.trim().toLowerCase();
     const selectedFileDate = archiveDate ? new Date(archiveDate) : undefined;
     const selectedFileName = selectedFileDate ? getRequestLogFileName(selectedFileDate) : undefined;
@@ -170,9 +195,11 @@ export const service = {
     allEntries.sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime());
 
     const filtered = allEntries.filter((entry) => {
-      if (selectedTime) {
+      if (selectedTimeFromMinutes !== undefined || selectedTimeToMinutes !== undefined) {
         const entryDate = new Date(entry.ts);
-        if (entryDate.getHours() !== selectedTime.hours || entryDate.getMinutes() !== selectedTime.minutes) {
+        const entryTotalMinutes = entryDate.getHours() * 60 + entryDate.getMinutes();
+
+        if (!isTimeWithinRange({ candidate: entryTotalMinutes, from: selectedTimeFromMinutes, to: selectedTimeToMinutes })) {
           return false;
         }
       }

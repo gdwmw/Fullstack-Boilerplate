@@ -42,12 +42,12 @@ export interface IAuditLogListResponse {
   meta: IAuditLogMeta;
 }
 
-type TArchiveQueryParams = {
+interface IArchiveQueryParams {
   month?: number;
   year?: number;
-};
+}
 
-type TQueryParams = {
+interface IQueryParams {
   actor?: string;
   archiveDate?: string;
   level?: "ERROR" | "INFO";
@@ -56,19 +56,20 @@ type TQueryParams = {
   pageSize?: number;
   path?: string;
   statusCode?: number;
-  time?: string;
-};
+  timeFrom?: string;
+  timeTo?: string;
+}
 
 const label = "audit logs";
 
-export const GETAuditArchives = async (params?: TArchiveQueryParams): Promise<ISuccessResponse<IAuditArchiveEntry[]>> =>
+export const GETAuditArchives = async (params?: IArchiveQueryParams): Promise<ISuccessResponse<IAuditArchiveEntry[]>> =>
   getApi<IAuditArchiveEntry[]>({
     endpoint: "/audit/archives",
     label: "audit archives",
     params: params,
   });
 
-export const GETAuditLogs = async (params?: TQueryParams): Promise<ISuccessResponse<IAuditLogListResponse>> =>
+export const GETAuditLogs = async (params?: IQueryParams): Promise<ISuccessResponse<IAuditLogListResponse>> =>
   getApi<IAuditLogListResponse>({
     endpoint: "/audit",
     label: label,

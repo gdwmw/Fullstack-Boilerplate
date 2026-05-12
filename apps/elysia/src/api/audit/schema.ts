@@ -29,9 +29,13 @@ export const querySchema = z.object({
     .min(100)
     .max(599)
     .optional(),
-  time: z
+  timeFrom: z
     .string()
-    .regex(/^\d{2}:\d{2}$/, { message: "time must be in hh:mm format" })
+    .regex(/^\d{2}:\d{2}$/, { message: "time from must be in hh:mm format" })
+    .optional(),
+  timeTo: z
+    .string()
+    .regex(/^\d{2}:\d{2}$/, { message: "time to must be in hh:mm format" })
     .optional(),
 });
 
