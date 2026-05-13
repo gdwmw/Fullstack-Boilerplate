@@ -1,4 +1,4 @@
-import { IAuthResponse } from "..";
+import { IAuthResponse } from ".";
 import { ISuccessResponse, postApi } from "../base";
 
 export interface ILoginPayload {

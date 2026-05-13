@@ -1,7 +1,7 @@
 import { IAuthResponse } from ".";
 import { ISuccessResponse, postApi } from "../base";
 
-const label = "refresh token";
+const label = "refresh";
 
 export const POSTRefresh = async (): Promise<ISuccessResponse<IAuthResponse>> =>
   postApi<IAuthResponse>({
