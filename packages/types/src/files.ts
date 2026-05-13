@@ -1,4 +1,4 @@
-import { FilesModel } from "@prisma/models";
+import { FilesModel } from "@/elysia/src/generated/prisma/models";
 
 export interface IFormats {
   filename: string;

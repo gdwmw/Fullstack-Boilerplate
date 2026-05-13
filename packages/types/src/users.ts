@@ -1,4 +1,4 @@
-import { UsersModel } from "@prisma/models";
+import { UsersModel } from "@/elysia/src/generated/prisma/models";
 
 import { IFilesModel } from "./files";
 

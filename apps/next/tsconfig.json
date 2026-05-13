@@ -13,7 +13,7 @@
     ],
     "paths": {
       "@/*": ["./*"],
-      "@prisma/*": ["../elysia/src/generated/prisma/*"],
+      "@/elysia/*": ["../elysia/*"],
       "@repo/constants": ["../../packages/constants/src/index.ts"],
       "@repo/eslint-config": ["../../packages/eslint-config/src/index.ts"],
       "@repo/schemas": ["../../packages/schemas/src/index.ts"],
