@@ -1,6 +1,6 @@
+import { USER_OMIT_FIELDS } from "@repo/types";
 import { parseDurationToMs } from "@repo/utils";
 
-import { AUTH_OMIT_FIELDS } from "@/src/constants";
 import { env } from "@/src/environment";
 import { prisma, redis } from "@/src/libs";
 
@@ -35,7 +35,7 @@ export const service = {
       data: {
         password: hashedNewPassword,
       },
-      omit: { ...AUTH_OMIT_FIELDS, imageId: true },
+      omit: { ...USER_OMIT_FIELDS, imageId: true },
       where: { id },
     });
   },
@@ -47,7 +47,7 @@ export const service = {
   async getUserById(id: string) {
     return await prisma.users.findUnique({
       include: { image: true },
-      omit: { ...AUTH_OMIT_FIELDS },
+      omit: { ...USER_OMIT_FIELDS },
       where: { id },
     });
   },
@@ -87,7 +87,7 @@ export const service = {
         role: data.role ?? "user",
         username: data.username,
       },
-      omit: { ...AUTH_OMIT_FIELDS, imageId: true },
+      omit: { ...USER_OMIT_FIELDS, imageId: true },
     });
   },
 };

@@ -1,5 +1,6 @@
+import { IUsersModel } from "@repo/types";
+
 import { ISuccessResponse, postApi } from "../base";
-import { IUserResponse } from "../users";
 
 export interface IPasswordPayload {
   newPassword: string;
@@ -8,8 +9,8 @@ export interface IPasswordPayload {
 
 const label = "change password";
 
-export const POSTChangePassword = async (payload: IPasswordPayload): Promise<ISuccessResponse<IUserResponse>> =>
-  postApi<IUserResponse>({
+export const POSTChangePassword = async (payload: IPasswordPayload): Promise<ISuccessResponse<IUsersModel>> =>
+  postApi<IUsersModel>({
     data: payload,
     endpoint: "/auth/change-password",
     label: label,

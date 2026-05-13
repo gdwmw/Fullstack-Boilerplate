@@ -1,10 +1,11 @@
+import { IUsersModel } from "@repo/types";
+
 import { getApi, ISuccessResponse } from "../base";
-import { IUserResponse } from "../users";
 
 const label = "me";
 
-export const GETMe = async (): Promise<ISuccessResponse<IUserResponse>> =>
-  getApi<IUserResponse>({
+export const GETMe = async (): Promise<ISuccessResponse<IUsersModel>> =>
+  getApi<IUsersModel>({
     endpoint: "/auth/me",
     label,
   });

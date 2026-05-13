@@ -1,30 +1,30 @@
-import { AUTH_OMIT_FIELDS } from "@/src/constants";
+import { USER_OMIT_FIELDS } from "@repo/types";
 
-describe("AUTH_OMIT_FIELDS", () => {
+describe("USER_OMIT_FIELDS", () => {
   it("should be an object", () => {
-    expect(typeof AUTH_OMIT_FIELDS).toBe("object");
-    expect(AUTH_OMIT_FIELDS).not.toBeNull();
+    expect(typeof USER_OMIT_FIELDS).toBe("object");
+    expect(USER_OMIT_FIELDS).not.toBeNull();
   });
 
   it("should have password field set to true", () => {
-    expect(AUTH_OMIT_FIELDS.password).toBe(true);
+    expect(USER_OMIT_FIELDS.password).toBe(true);
   });
 
   it("should only contain the password key", () => {
-    expect(Object.keys(AUTH_OMIT_FIELDS)).toEqual(["password"]);
+    expect(Object.keys(USER_OMIT_FIELDS)).toEqual(["password"]);
   });
 
   it("should have exactly one property", () => {
-    expect(Object.keys(AUTH_OMIT_FIELDS).length).toBe(1);
+    expect(Object.keys(USER_OMIT_FIELDS).length).toBe(1);
   });
 
   it("should use password as the only property", () => {
-    expect(Object.prototype.hasOwnProperty.call(AUTH_OMIT_FIELDS, "password")).toBe(true);
+    expect(Object.prototype.hasOwnProperty.call(USER_OMIT_FIELDS, "password")).toBe(true);
   });
 
   it("should not have other auth-related fields", () => {
-    expect(AUTH_OMIT_FIELDS).not.toHaveProperty("email");
-    expect(AUTH_OMIT_FIELDS).not.toHaveProperty("token");
-    expect(AUTH_OMIT_FIELDS).not.toHaveProperty("apiKey");
+    expect(USER_OMIT_FIELDS).not.toHaveProperty("email");
+    expect(USER_OMIT_FIELDS).not.toHaveProperty("token");
+    expect(USER_OMIT_FIELDS).not.toHaveProperty("apiKey");
   });
 });

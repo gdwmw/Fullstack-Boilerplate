@@ -1,18 +1,17 @@
-import { IUploadResponse } from "../upload";
-import { IUserResponse } from "../users";
+import { IFilesModel, IUsersModel } from "@repo/types";
 
-export interface IAuthResponse extends IUserResponse {
+export interface IAuthResponse extends IUsersModel {
   accessToken: string;
   status: string;
 }
 
-export interface INextAuthResponse extends Partial<Omit<IUserResponse, "email" | "image" | "name">> {
+export interface INextAuthResponse extends Partial<Omit<IUsersModel, "email" | "image" | "name">> {
   accessToken?: string;
   accessTokenExpiresAt?: number;
   email?: null | string;
   exp?: number;
   iat?: number;
-  image?: IUploadResponse | null;
+  image?: IFilesModel | null;
   name?: null | string;
   sessionExpiresAt?: number;
   sessionStartedAt?: number;

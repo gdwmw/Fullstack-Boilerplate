@@ -1,14 +1,13 @@
 "use server";
 
+import { IFilesModel } from "@repo/types";
 import { getServerSession, Session, User } from "next-auth";
 
 import { options } from "@/configs/authentication";
 
-import { IUploadResponse } from "../api";
-
 type T = keyof User;
 
-export const getSession = async (props: T): Promise<Date | IUploadResponse | null | number | string | undefined> => {
+export const getSession = async (props: T): Promise<Date | IFilesModel | null | number | string | undefined> => {
   const session = await getServerSession(options);
   return session?.user?.[props];
 };

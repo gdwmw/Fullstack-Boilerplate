@@ -1,4 +1,5 @@
-import { AUTH_OMIT_FIELDS } from "@/src/constants";
+import { USER_OMIT_FIELDS } from "@repo/types";
+
 import { prisma } from "@/src/libs";
 
 import { TPayloadSchema } from "./type";
@@ -7,7 +8,7 @@ export const service = {
   async delete(id: string) {
     return await prisma.users.delete({
       include: { image: true },
-      omit: AUTH_OMIT_FIELDS,
+      omit: USER_OMIT_FIELDS,
       where: { id },
     });
   },
@@ -15,7 +16,7 @@ export const service = {
   async getAll() {
     return await prisma.users.findMany({
       include: { image: true },
-      omit: AUTH_OMIT_FIELDS,
+      omit: USER_OMIT_FIELDS,
       orderBy: { id: "asc" },
     });
   },
@@ -23,7 +24,7 @@ export const service = {
   async getById(id: string) {
     return await prisma.users.findUnique({
       include: { image: true },
-      omit: AUTH_OMIT_FIELDS,
+      omit: USER_OMIT_FIELDS,
       where: { id },
     });
   },
@@ -36,7 +37,7 @@ export const service = {
         imageId: imageId ?? null,
       },
       include: { image: true },
-      omit: AUTH_OMIT_FIELDS,
+      omit: USER_OMIT_FIELDS,
       where: { id },
     });
   },

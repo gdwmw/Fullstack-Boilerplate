@@ -103,6 +103,9 @@ importers:
       '@repo/schemas':
         specifier: workspace:*
         version: link:../../packages/schemas
+      '@repo/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@repo/utils':
         specifier: workspace:*
         version: link:../../packages/utils
@@ -173,6 +176,9 @@ importers:
       '@repo/schemas':
         specifier: workspace:*
         version: link:../../packages/schemas
+      '@repo/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@repo/utils':
         specifier: workspace:*
         version: link:../../packages/utils
@@ -275,6 +281,12 @@ importers:
       '@repo/constants':
         specifier: workspace:*
         version: link:../constants
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+
+  packages/types:
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
