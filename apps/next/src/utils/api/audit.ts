@@ -47,7 +47,7 @@ interface IArchiveQueryParams {
   year?: number;
 }
 
-interface IQueryParams {
+interface ILogQueryParams {
   actor?: string;
   archiveDate?: string;
   level?: "ERROR" | "INFO";
@@ -69,7 +69,7 @@ export const GETAuditArchives = async (params?: IArchiveQueryParams): Promise<IS
     params: params,
   });
 
-export const GETAuditLogs = async (params?: IQueryParams): Promise<ISuccessResponse<IAuditLogListResponse>> =>
+export const GETAuditLogs = async (params?: ILogQueryParams): Promise<ISuccessResponse<IAuditLogListResponse>> =>
   getApi<IAuditLogListResponse>({
     endpoint: "/audit",
     label: label,
