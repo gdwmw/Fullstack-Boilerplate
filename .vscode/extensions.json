@@ -20,6 +20,10 @@
     "pedrohenrique-ql.regex-match",
     "rangav.vscode-thunder-client",
     "prisma.prisma",
-    "cweijan.vscode-postgresql-client2"
+    "cweijan.vscode-postgresql-client2",
+    "ms-vscode.vscode-chat-customizations-evaluations",
+    "github.vscode-github-actions",
+    "pflannery.vscode-versionlens",
+    "wware.snippet-creator"
   ]
 }
