@@ -1,8 +1,9 @@
 import { USER_OMIT_FIELDS } from "@repo/types";
 
 import { prisma } from "@/src/libs";
+import { createPaginationMeta } from "@/src/utils";
 
-import { TPayloadSchema } from "./type";
+import { TPayloadSchema, TQuerySchema } from "./type";
 
 export const service = {
   async delete(id: string) {
@@ -13,12 +14,23 @@ export const service = {
     });
   },
 
-  async getAll() {
-    return await prisma.users.findMany({
-      include: { image: true },
-      omit: USER_OMIT_FIELDS,
-      orderBy: { id: "asc" },
-    });
+  async getAll({ page, pageSize }: TQuerySchema) {
+    const skip = (page - 1) * pageSize;
+    const [data, total] = await prisma.$transaction([
+      prisma.users.findMany({
+        include: { image: true },
+        omit: USER_OMIT_FIELDS,
+        orderBy: { id: "asc" },
+        skip,
+        take: pageSize,
+      }),
+      prisma.users.count(),
+    ]);
+
+    return {
+      data,
+      meta: createPaginationMeta({ page, pageSize, totalData: total }),
+    };
   },
 
   async getById(id: string) {

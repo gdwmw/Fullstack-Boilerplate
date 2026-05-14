@@ -3,7 +3,7 @@ import Elysia from "elysia";
 import { responseMessage, SUCCESS_RESPONSE } from "@/src/constants";
 import { protectedRoutePlugin } from "@/src/utils";
 
-import { paramSchema, payloadSchema } from "./schema";
+import { paramSchema, payloadSchema, querySchema } from "./schema";
 import { service } from "./service";
 import { docs } from "./swagger";
 
@@ -24,9 +24,10 @@ export const usersRoutes = new Elysia({ prefix: "/users" })
 
   .get(
     "/",
-    async () => {
-      const res = await service.getAll();
-      return SUCCESS_RESPONSE({ data: res, message: responseMessage(LABEL).retrieved });
+    async ({ query }) => {
+      const params = querySchema.parse(query);
+      const res = await service.getAll(params);
+      return SUCCESS_RESPONSE({ data: res.data, message: responseMessage(LABEL).retrieved, meta: res.meta });
     },
     { detail: docs(LABEL).getAll },
   )

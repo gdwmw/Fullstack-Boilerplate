@@ -1,13 +1,11 @@
 import { IUsersModel } from "@repo/types";
 
-import { deleteApi, getApi, ISuccessResponse, putApi } from "./base";
+import { deleteApi, getApi, ISuccessResponse, putApi, TQueryParams } from "./base";
 
 export interface IUserPayload extends Omit<IUsersModel, "createdAt" | "id" | "image" | "imageId" | "role" | "updatedAt"> {
   imageId?: IUsersModel["imageId"];
   role?: IUsersModel["role"];
 }
-
-type TQueryParams = Record<string, unknown>;
 
 const label = "users";
 
@@ -18,11 +16,10 @@ export const GETUsers = async (params?: TQueryParams): Promise<ISuccessResponse<
     params: params,
   });
 
-export const GETUsersById = async (id: string, params?: TQueryParams): Promise<ISuccessResponse<IUsersModel>> =>
+export const GETUsersById = async (id: string): Promise<ISuccessResponse<IUsersModel>> =>
   getApi<IUsersModel>({
     endpoint: `/users/${id}`,
     label: label,
-    params: params,
   });
 
 export const PUTUsers = async (id: string, payload: IUserPayload): Promise<ISuccessResponse<IUsersModel>> =>

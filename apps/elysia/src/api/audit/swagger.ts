@@ -57,8 +57,8 @@ export const docs = (label: string): Record<"getAll" | "getArchives", DocumentDe
     properties: {
       page: { example: 1, type: "integer" },
       pageSize: { example: 50, type: "integer" },
-      total: { example: 42, type: "integer" },
-      totalPages: { example: 1, type: "integer" },
+      totalData: { example: 42, type: "integer" },
+      totalPage: { example: 1, type: "integer" },
     },
     type: "object",
   };

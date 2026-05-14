@@ -6,10 +6,19 @@ import { getSession } from "@/src/utils";
 
 const API_URL = clientEnv.NEXT_PUBLIC_BASE_API_URL;
 
+export type TQueryParams = Record<string, unknown>;
+
+export interface IPaginationMeta {
+  page: number;
+  pageSize: number;
+  totalData: number;
+  totalPage?: number;
+}
+
 export interface ISuccessResponse<T> {
   data: T;
   message: string;
-  meta?: { page: number; pageSize: number; total: number; totalPages?: number } | null;
+  meta?: IPaginationMeta | null;
   success: true;
 }
 
@@ -26,8 +35,7 @@ interface I {
   headers?: AxiosRequestHeaders;
   label: string;
   method?: Method;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  params?: Record<string, any>;
+  params?: TQueryParams;
 }
 
 export const apiRequest = async <T>({ auth = true, ...props }: I): Promise<ISuccessResponse<T>> => {

@@ -3,7 +3,14 @@ import { readdir, readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 
 import { logger } from "@/src/libs";
-import { decompressLogFileToTemp, getLogDirectory, getRequestLogFileName, isCompressedRequestLogFileName, isRequestLogFileName } from "@/src/utils";
+import {
+  decompressLogFileToTemp,
+  getLogDirectory,
+  getRequestLogFileName,
+  isCompressedRequestLogFileName,
+  isRequestLogFileName,
+  paginateArray,
+} from "@/src/utils";
 
 import { IArchiveEntry, ILogEntry, TArchiveQuerySchema, TQuerySchema } from "./type";
 
@@ -188,7 +195,7 @@ export const service = {
         .sort()
         .reverse();
     } catch {
-      return { data: [], meta: { page, pageSize, total: 0, totalPages: 0 } };
+      return paginateArray({ items: [], page, pageSize });
     }
 
     const allEntries = (await Promise.all(files.map((file) => readLogEntries(join(logDir, file), isCompressedRequestLogFileName(file))))).flat();
@@ -218,19 +225,7 @@ export const service = {
       return true;
     });
 
-    const total = filtered.length;
-    const skip = (page - 1) * pageSize;
-    const data = filtered.slice(skip, skip + pageSize);
-
-    return {
-      data,
-      meta: {
-        page,
-        pageSize,
-        total,
-        totalPages: Math.ceil(total / pageSize),
-      },
-    };
+    return paginateArray({ items: filtered, page, pageSize });
   },
 
   async getArchives({ month, year }: TArchiveQuerySchema): Promise<IArchiveEntry[]> {

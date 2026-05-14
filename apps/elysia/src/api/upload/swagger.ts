@@ -3,12 +3,30 @@ import { DocumentDecoration } from "elysia";
 import { responseMessage } from "@/src/constants";
 
 export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "upload", DocumentDecoration> => {
-  const successResponseSchema = (message: string) =>
+  const successResponseSchema = ({ data, message }: { data: Record<string, unknown>; message: string }) =>
     ({
       properties: {
-        data: {},
+        data,
         message: { example: message, nullable: true, type: "string" },
-        meta: { nullable: true, type: "object" },
+        success: { example: true, type: "boolean" },
+      },
+      type: "object",
+    }) as const;
+
+  const successResponseWithMetaSchema = ({
+    data,
+    message,
+    meta,
+  }: {
+    data: Record<string, unknown>;
+    message: string;
+    meta: Record<string, unknown>;
+  }) =>
+    ({
+      properties: {
+        data,
+        message: { example: message, nullable: true, type: "string" },
+        meta,
         success: { example: true, type: "boolean" },
       },
       type: "object",
@@ -23,6 +41,16 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
       },
       type: "object",
     }) as const;
+
+  const paginationMetaSchema = {
+    properties: {
+      page: { example: 1, type: "integer" },
+      pageSize: { example: 50, type: "integer" },
+      totalData: { example: 42, type: "integer" },
+      totalPage: { example: 1, type: "integer" },
+    },
+    type: "object",
+  } as const;
 
   return {
     delete: {
@@ -39,7 +67,10 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
         200: {
           content: {
             "application/json": {
-              schema: successResponseSchema(responseMessage(label).deleted),
+              schema: successResponseSchema({
+                data: {},
+                message: responseMessage(label).deleted,
+              }),
             },
           },
           description: "file deleted successfully",
@@ -76,11 +107,29 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
 
     getAll: {
       description: "get all uploaded files",
+      parameters: [
+        {
+          description: "page number for pagination.",
+          in: "query",
+          name: "page",
+          schema: { default: 1, example: 1, minimum: 1, type: "integer" },
+        },
+        {
+          description: "maximum number of files to return per page.",
+          in: "query",
+          name: "pageSize",
+          schema: { default: 50, example: 50, maximum: 100, minimum: 1, type: "integer" },
+        },
+      ],
       responses: {
         200: {
           content: {
             "application/json": {
-              schema: successResponseSchema(responseMessage(label).retrieved),
+              schema: successResponseWithMetaSchema({
+                data: { items: {}, type: "array" },
+                message: responseMessage(label).retrieved,
+                meta: paginationMetaSchema,
+              }),
             },
           },
           description: "files retrieved successfully",
@@ -113,7 +162,10 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
         200: {
           content: {
             "application/json": {
-              schema: successResponseSchema(responseMessage(label).retrieved),
+              schema: successResponseSchema({
+                data: {},
+                message: responseMessage(label).retrieved,
+              }),
             },
           },
           description: "file retrieved successfully",
@@ -163,7 +215,10 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
         200: {
           content: {
             "application/json": {
-              schema: successResponseSchema(responseMessage(label).created),
+              schema: successResponseSchema({
+                data: {},
+                message: responseMessage(label).created,
+              }),
             },
           },
           description: "file uploaded successfully",

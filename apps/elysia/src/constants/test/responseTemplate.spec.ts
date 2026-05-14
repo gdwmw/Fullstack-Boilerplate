@@ -53,20 +53,20 @@ describe("SUCCESS_RESPONSE", () => {
       const result = SUCCESS_RESPONSE({
         data: [{ id: 1 }],
         message: "ok",
-        meta: { page: 1, pageSize: 50, total: 120, totalPages: 3 },
+        meta: { page: 1, pageSize: 50, totalData: 120, totalPage: 3 },
       });
 
-      expect(result.meta).toEqual({ page: 1, pageSize: 50, total: 120, totalPages: 3 });
+      expect(result.meta).toEqual({ page: 1, pageSize: 50, totalData: 120, totalPage: 3 });
     });
 
-    it("should include meta without totalPages", () => {
+    it("should include meta without totalPage", () => {
       const result = SUCCESS_RESPONSE({
         data: [{ id: 1 }],
         message: "ok",
-        meta: { page: 1, pageSize: 10, total: 50 },
+        meta: { page: 1, pageSize: 10, totalData: 50 },
       });
 
-      expect(result.meta).toEqual({ page: 1, pageSize: 10, total: 50 });
+      expect(result.meta).toEqual({ page: 1, pageSize: 10, totalData: 50 });
     });
 
     it("should default meta to null when not provided", () => {

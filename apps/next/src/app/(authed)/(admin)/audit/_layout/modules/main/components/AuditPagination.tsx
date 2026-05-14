@@ -5,8 +5,8 @@ import { ExampleA } from "@/src/components";
 interface IMeta {
   page: number;
   pageSize: number;
-  total: number;
-  totalPages?: number;
+  totalData: number;
+  totalPage?: number;
 }
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100] as const;
@@ -19,12 +19,12 @@ interface I {
 
 export const AuditPagination: FC<I> = (props): ReactElement =>
   (() => {
-    const totalPages = props.meta.totalPages ?? Math.max(1, Math.ceil(props.meta.total / props.meta.pageSize));
+    const totalPage = props.meta.totalPage ?? Math.max(1, Math.ceil(props.meta.totalData / props.meta.pageSize));
 
     return (
       <div className="flex justify-between">
         <p className="text-xs text-gray-500">
-          Page {props.meta.page} of {totalPages}
+          Page {props.meta.page} of {totalPage}
         </p>
 
         <div className="flex items-center gap-2">
@@ -56,7 +56,7 @@ export const AuditPagination: FC<I> = (props): ReactElement =>
 
           <ExampleA
             color="blue"
-            disabled={props.meta.page >= totalPages}
+            disabled={props.meta.page >= totalPage}
             onClick={() => props.onPageChange(props.meta.page + 1)}
             size="sm"
             variant="solid"

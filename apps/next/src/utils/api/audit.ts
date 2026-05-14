@@ -1,4 +1,4 @@
-import { getApi, ISuccessResponse } from "./base";
+import { getApi, IPaginationMeta, ISuccessResponse, TQueryParams } from "./base";
 
 interface IAuditLogUser {
   email: null | string;
@@ -30,24 +30,17 @@ export interface IAuditArchiveEntry {
   label: string;
 }
 
-export interface IAuditLogMeta {
-  page: number;
-  pageSize: number;
-  total: number;
-  totalPages?: number;
-}
-
 export interface IAuditLogListResponse {
   data: IAuditLogEntry[];
-  meta: IAuditLogMeta;
+  meta: IPaginationMeta;
 }
 
-interface IArchiveQueryParams {
+interface IArchiveQueryParams extends TQueryParams {
   month?: number;
   year?: number;
 }
 
-interface ILogQueryParams {
+interface ILogQueryParams extends TQueryParams {
   actor?: string;
   archiveDate?: string;
   level?: "ERROR" | "INFO";

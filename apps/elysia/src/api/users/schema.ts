@@ -1,6 +1,8 @@
 import { schemaMessage } from "@repo/constants";
 import { z } from "zod";
 
+import { paginationQuerySchema } from "@/src/utils";
+
 export const payloadSchema = z.object({
   email: z.email({ message: schemaMessage.string.email("email") }),
   imageId: z
@@ -16,3 +18,5 @@ export const payloadSchema = z.object({
 export const paramSchema = z.object({
   id: z.uuid({ message: schemaMessage.string.uuid("id") }),
 });
+
+export const querySchema = paginationQuerySchema;

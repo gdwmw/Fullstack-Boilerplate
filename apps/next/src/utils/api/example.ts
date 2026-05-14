@@ -1,4 +1,4 @@
-import { deleteApi, getApi, ISuccessResponse, patchApi, postApi, putApi } from "./base";
+import { deleteApi, getApi, ISuccessResponse, patchApi, postApi, putApi, TQueryParams } from "./base";
 
 interface IExampleCommon {
   email: string;
@@ -7,57 +7,48 @@ interface IExampleCommon {
   username: string;
 }
 
-export interface IExamplePayload extends IExampleCommon {
-  documentId?: string;
-}
+export interface IExamplePayload extends IExampleCommon {}
 
 export interface IExampleResponse extends IExampleCommon {}
-
-type TQueryParams = Record<string, unknown>;
 
 const label = "example";
 
 export const GETExample = async (params?: TQueryParams): Promise<ISuccessResponse<IExampleResponse[]>> =>
   getApi<IExampleResponse[]>({
-    endpoint: "/api/example",
-    label: label,
-    params: params,
+    endpoint: "/example",
+    label,
+    params,
   });
 
-export const GETExampleByDocumentId = async (documentId: string, params?: TQueryParams): Promise<ISuccessResponse<IExampleResponse>> =>
+export const GETExampleById = async (id: string): Promise<ISuccessResponse<IExampleResponse>> =>
   getApi<IExampleResponse>({
-    endpoint: `/api/example/${documentId}`,
-    label: label,
-    params: params,
+    endpoint: `/example/${id}`,
+    label,
   });
 
 export const POSTExample = async (payload: IExamplePayload): Promise<ISuccessResponse<IExampleResponse>> =>
   postApi<IExampleResponse>({
-    data: { data: payload },
-    endpoint: "/api/example",
-    label: label,
+    data: payload,
+    endpoint: "/example",
+    label,
   });
 
-export const PUTExample = async (payload: IExamplePayload): Promise<ISuccessResponse<IExampleResponse>> => {
-  const { documentId, ...restPayload } = payload;
-  return putApi<IExampleResponse>({
-    data: { data: restPayload },
-    endpoint: `/api/example/${documentId}`,
-    label: label,
+export const PUTExample = async (id: string, payload: IExamplePayload): Promise<ISuccessResponse<IExampleResponse>> =>
+  putApi<IExampleResponse>({
+    data: payload,
+    endpoint: `/example/${id}`,
+    label,
   });
-};
 
-export const PATCHExample = async (payload: IExamplePayload): Promise<ISuccessResponse<IExampleResponse>> => {
-  const { documentId, ...restPayload } = payload;
-  return patchApi<IExampleResponse>({
-    data: { data: restPayload },
-    endpoint: `/api/example/${documentId}`,
-    label: label,
+export const PATCHExample = async (id: string, payload: IExamplePayload): Promise<ISuccessResponse<IExampleResponse>> =>
+  patchApi<IExampleResponse>({
+    data: payload,
+    endpoint: `/example/${id}`,
+    label,
   });
-};
 
-export const DELETEExample = async (documentId: string): Promise<ISuccessResponse<IExampleResponse>> =>
+export const DELETEExample = async (id: string): Promise<ISuccessResponse<IExampleResponse>> =>
   deleteApi<IExampleResponse>({
-    endpoint: `/api/example/${documentId}`,
-    label: label,
+    endpoint: `/example/${id}`,
+    label,
   });

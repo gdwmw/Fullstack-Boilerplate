@@ -7,6 +7,9 @@ import sharp from "sharp";
 
 import { Prisma } from "@/src/generated/prisma/client";
 import { logger, prisma } from "@/src/libs";
+import { createPaginationMeta } from "@/src/utils";
+
+import { TQuerySchema } from "./schema";
 
 const UPLOAD_DIR = join(process.cwd(), "uploads");
 
@@ -71,8 +74,21 @@ export const service = {
     return fileRecord;
   },
 
-  async getAll() {
-    return await prisma.files.findMany({ orderBy: { createdAt: "desc" } });
+  async getAll({ page, pageSize }: TQuerySchema) {
+    const skip = (page - 1) * pageSize;
+    const [data, total] = await prisma.$transaction([
+      prisma.files.findMany({
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: pageSize,
+      }),
+      prisma.files.count(),
+    ]);
+
+    return {
+      data,
+      meta: createPaginationMeta({ page, pageSize, totalData: total }),
+    };
   },
 
   async getById(fileId: string) {

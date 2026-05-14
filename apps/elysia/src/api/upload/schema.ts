@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { paginationQuerySchema } from "@/src/utils";
+
 export const uploadSchema = z.object({
   file: z
     .instanceof(File)
@@ -14,3 +16,6 @@ export const uploadSchema = z.object({
 export const paramSchema = z.object({
   id: z.uuid(),
 });
+
+export const querySchema = paginationQuerySchema;
+export type TQuerySchema = z.infer<typeof querySchema>;

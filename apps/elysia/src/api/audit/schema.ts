@@ -1,7 +1,9 @@
 import { schemaMessage } from "@repo/constants";
 import { z } from "zod";
 
-export const querySchema = z.object({
+import { paginationQuerySchema } from "@/src/utils";
+
+export const querySchema = paginationQuerySchema.extend({
   actor: z.string().optional(),
   archiveDate: z
     .string()
@@ -9,19 +11,6 @@ export const querySchema = z.object({
     .optional(),
   level: z.enum(["INFO", "ERROR"], { message: schemaMessage.string.enum("level") }).optional(),
   method: z.enum(["DELETE", "GET", "PATCH", "POST", "PUT"], { message: schemaMessage.string.enum("method") }).optional(),
-  page: z.coerce
-    .number()
-    .int({ message: schemaMessage.number.int("page") })
-    .positive({ message: schemaMessage.number.positive("page") })
-    .optional()
-    .default(1),
-  pageSize: z.coerce
-    .number()
-    .int({ message: schemaMessage.number.int("page size") })
-    .positive({ message: schemaMessage.number.positive("page size") })
-    .max(100, { message: schemaMessage.number.max("page size", 100) })
-    .optional()
-    .default(50),
   path: z.string().optional(),
   statusCode: z.coerce
     .number()

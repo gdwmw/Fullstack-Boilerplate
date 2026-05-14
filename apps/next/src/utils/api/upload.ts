@@ -1,12 +1,10 @@
 import { IFilesModel } from "@repo/types";
 
-import { deleteApi, getApi, ISuccessResponse, postApi } from "./base";
+import { deleteApi, getApi, ISuccessResponse, postApi, TQueryParams } from "./base";
 
 export interface IUploadPayload {
   file: File;
 }
-
-type TQueryParams = Record<string, unknown>;
 
 const label = "upload";
 
@@ -17,11 +15,10 @@ export const GETUpload = async (params?: TQueryParams): Promise<ISuccessResponse
     params: params,
   });
 
-export const GETUploadById = async (id: string, params?: TQueryParams): Promise<ISuccessResponse<IFilesModel>> =>
+export const GETUploadById = async (id: string): Promise<ISuccessResponse<IFilesModel>> =>
   getApi<IFilesModel>({
     endpoint: `/upload/${id}`,
     label: label,
-    params: params,
   });
 
 export const POSTUpload = async (payload: IUploadPayload): Promise<ISuccessResponse<IFilesModel>> => {

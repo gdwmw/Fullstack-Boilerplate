@@ -163,12 +163,12 @@ export const Main: FC<I> = (props): ReactElement => {
 
   const logs = useMemo(() => auditQuery.data?.data ?? [], [auditQuery.data?.data]);
   const meta = auditQuery.data?.meta;
-  const totalPages = useMemo(() => {
+  const totalPage = useMemo(() => {
     if (!meta) {
       return 0;
     }
 
-    return meta.totalPages ?? Math.max(1, Math.ceil(meta.total / meta.pageSize));
+    return meta.totalPage ?? Math.max(1, Math.ceil(meta.totalData / meta.pageSize));
   }, [meta]);
   const selectedLog = useMemo(() => {
     if (!selectedLogRequestId) {
@@ -205,7 +205,7 @@ export const Main: FC<I> = (props): ReactElement => {
     draftFilters.statusCode !== appliedFilters.statusCode;
 
   useEffect(() => {
-    if (!resolvedSelectedDateKey || !meta || page >= totalPages) {
+    if (!resolvedSelectedDateKey || !meta || page >= totalPage) {
       return;
     }
 
@@ -257,7 +257,7 @@ export const Main: FC<I> = (props): ReactElement => {
     pageSize,
     queryClient,
     resolvedSelectedDateKey,
-    totalPages,
+    totalPage,
   ]);
 
   const applyFilters = handleSubmit(() => {
@@ -426,7 +426,7 @@ export const Main: FC<I> = (props): ReactElement => {
 
                 {resolvedSelectedDateKey && meta && (
                   <AuditPagination
-                    meta={{ page: meta.page, pageSize: meta.pageSize, total: meta.total, totalPages: meta.totalPages }}
+                    meta={{ page: meta.page, pageSize: meta.pageSize, totalData: meta.totalData, totalPage: meta.totalPage }}
                     onPageChange={setPage}
                     onPageSizeChange={(nextPageSize) => {
                       setPageSize(nextPageSize);

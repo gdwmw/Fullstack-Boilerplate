@@ -7,7 +7,7 @@ export const SUCCESS_RESPONSE = ({
 }: {
   data: unknown;
   message: null | string;
-  meta?: { page: number; pageSize: number; total: number; totalPages?: number } | null;
+  meta?: { page: number; pageSize: number; totalData: number; totalPage?: number } | null;
 }) => ({
   data: data || null,
   message: message,
