@@ -65,8 +65,7 @@ export const service = {
     await removeUploadedFile(fileRecord.filename);
 
     if (fileRecord.formats) {
-      const formats = fileRecord.formats as unknown as TFormats;
-      await Promise.all(Object.values(formats).map((file) => removeUploadedFile(file.filename)));
+      await Promise.all(Object.values(fileRecord.formats as TFormats).map((file) => removeUploadedFile(file.filename)));
     }
 
     return fileRecord;
@@ -124,6 +123,9 @@ export const service = {
       },
     });
 
-    return { ...fileRecord, formats: (fileRecord.formats as null | TFormats) ?? null };
+    return {
+      ...fileRecord,
+      formats: (fileRecord.formats as null | TFormats) ?? null,
+    };
   },
 };

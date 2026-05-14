@@ -14,7 +14,7 @@ export const FORMAT_OPTIONS = ["large", "medium", "small", "thumbnail"] as const
 
 export type TFormatKey = (typeof FORMAT_OPTIONS)[number];
 
-export type TFormats = Record<TFormatKey, IFormats>;
+export type TFormats = Partial<Record<TFormatKey, IFormats>>;
 
 export const IMAGE_FORMATS: { name: TFormatKey; width: number }[] = [
   { name: "thumbnail", width: 245 },
