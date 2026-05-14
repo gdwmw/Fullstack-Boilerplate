@@ -1,3 +1,4 @@
+import { IFilesModel, IMAGE_FORMATS, TFormats } from "@repo/types";
 import { randomUUID } from "crypto";
 import { mkdir, unlink, writeFile } from "fs/promises";
 import { extname, join } from "path";
@@ -7,20 +8,11 @@ import sharp from "sharp";
 import { Prisma } from "@/src/generated/prisma/client";
 import { logger, prisma } from "@/src/libs";
 
-import { ImageFormat, UploadResponse } from "./type";
-
 const UPLOAD_DIR = join(process.cwd(), "uploads");
-
-const IMAGE_FORMATS: { name: string; width: number }[] = [
-  { name: "thumbnail", width: 245 },
-  { name: "small", width: 500 },
-  { name: "medium", width: 750 },
-  { name: "large", width: 1000 },
-];
 
 const IMAGE_MIME_TYPES = new Set(["image/avif", "image/gif", "image/jpeg", "image/png", "image/tiff", "image/webp"]);
 
-const processImage = async (buffer: Buffer, originalWidth: number): Promise<Record<string, ImageFormat>> => {
+const processImage = async (buffer: Buffer, originalWidth: number): Promise<TFormats> => {
   const processedFormats = await Promise.all(
     IMAGE_FORMATS.filter((format) => originalWidth > format.width).map(async (format) => {
       const filename = `${randomUUID()}.webp`;
@@ -48,7 +40,7 @@ const processImage = async (buffer: Buffer, originalWidth: number): Promise<Reco
     }),
   );
 
-  return Object.fromEntries(processedFormats);
+  return Object.fromEntries(processedFormats) as TFormats;
 };
 
 const removeUploadedFile = async (filename: string) => {
@@ -73,7 +65,7 @@ export const service = {
     await removeUploadedFile(fileRecord.filename);
 
     if (fileRecord.formats) {
-      const formats = fileRecord.formats as unknown as Record<string, ImageFormat>;
+      const formats = fileRecord.formats as unknown as TFormats;
       await Promise.all(Object.values(formats).map((file) => removeUploadedFile(file.filename)));
     }
 
@@ -88,7 +80,7 @@ export const service = {
     return await prisma.files.findUnique({ where: { id: fileId } });
   },
 
-  async upload(file: File): Promise<UploadResponse> {
+  async upload(file: File): Promise<IFilesModel> {
     await mkdir(UPLOAD_DIR, { recursive: true });
     const originalFilename = file.name;
     const extension = extname(originalFilename);
@@ -102,7 +94,7 @@ export const service = {
     let height: null | number = null;
     let dominantColor: null | string = null;
     let placeholder: null | string = null;
-    let formats: null | Record<string, ImageFormat> = null;
+    let formats: null | TFormats = null;
 
     if (IMAGE_MIME_TYPES.has(file.type)) {
       const metadata = await sharp(buffer).metadata();
@@ -127,24 +119,11 @@ export const service = {
         path: relativePath,
         placeholder,
         size: file.size,
+        url: `/${relativePath}`,
         width,
       },
     });
 
-    return {
-      id: fileRecord.id,
-      createdAt: fileRecord.createdAt,
-      dominantColor: fileRecord.dominantColor,
-      filename: fileRecord.filename,
-      formats: (fileRecord.formats as null | Record<string, ImageFormat>) ?? null,
-      height: fileRecord.height,
-      mimetype: fileRecord.mimetype,
-      originalFilename: fileRecord.originalFilename,
-      path: fileRecord.path,
-      placeholder: fileRecord.placeholder,
-      size: fileRecord.size,
-      url: `/${fileRecord.path}`,
-      width: fileRecord.width,
-    };
+    return { ...fileRecord, formats: (fileRecord.formats as null | TFormats) ?? null };
   },
 };

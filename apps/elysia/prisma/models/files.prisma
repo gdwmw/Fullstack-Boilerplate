@@ -5,6 +5,7 @@ model Files {
   mimetype         String
   size             Int
   path             String
+  url              String
   width            Int?
   height           Int?
   dominantColor    String?  @map("dominant_color")
