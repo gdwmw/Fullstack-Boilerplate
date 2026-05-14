@@ -9,6 +9,7 @@ CREATE TABLE "files" (
     "mimetype" TEXT NOT NULL,
     "size" INTEGER NOT NULL,
     "path" TEXT NOT NULL,
+    "url" TEXT NOT NULL,
     "width" INTEGER,
     "height" INTEGER,
     "dominant_color" TEXT,
