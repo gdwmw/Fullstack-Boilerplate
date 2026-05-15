@@ -128,7 +128,7 @@ Konfigurasi ESLint memberi `--max-warnings 0`, jadi semua warning = build break.
     };
     ```
   - **Imports** dipisah newline antar grup, urut alphabetical, internal pattern `@/` dan `@repo/`.
-- **Tailwind**: gunakan helper `twm` untuk semua class composition. Plugin `better-tailwindcss` aktif (`callees: ["twm"]`, variabel `*TWM`). Jangan template literal manual.
+- **Tailwind**: gunakan helper `twm` untuk komponen reusable (terutama di `components/**`) atau saat class perlu dikomposisikan lintas tempat. Untuk layout/page/module yang non-reusable, className biasa atau template literal diperbolehkan. Plugin `better-tailwindcss` tetap aktif (`callees: ["twm"]`, variabel `*TWM`).
 
   ```ts
   // libs/twm.ts (tipikal isinya)
@@ -227,6 +227,8 @@ Setiap folder yang sudah memiliki `index.ts` adalah barrel export — pertahanka
   );
   export default RootLayout;
   ```
+
+- Hindari alias props yang tidak perlu (contoh `const boardId = props.boardId`) jika nilainya hanya diteruskan atau dipakai langsung tanpa transformasi.
 
 - Komponen di `components/templates/**` dengan props sederhana boleh akses lewat `props.X`:
 
@@ -368,7 +370,7 @@ Setiap folder yang sudah memiliki `index.ts` adalah barrel export — pertahanka
 
 ### Styling
 
-- Wajib `twm(...)` untuk merge class. Jangan template literal manual untuk class kondisional.
+- Gunakan `twm(...)` untuk komponen reusable atau class composition yang dipakai lintas tempat. Untuk page/layout/module non-reusable, className biasa atau template literal kondisional diperbolehkan.
 - Tema gelap pakai `dark:` variant. Selalu sediakan dark mode style untuk warna teks/background dasar.
 - Class yang reusable per komponen → ekspor `<Name>TWM` agar bisa dipakai elemen lain (lihat contoh `ExampleATWM` di section Komponen di atas).
 
@@ -689,7 +691,7 @@ new Elysia().use(examplesRoute).listen(env.PORT);
 - [ ] Domain backend baru punya 6 file lengkap (`route`, `service`, `schema`, `type`, `swagger`, `index`).
 - [ ] LABEL backend uppercase, response & error message via helper, lowercase tone.
 - [ ] Komponen Next pakai `FC`, return type eksplisit, page/layout pakai `props.X`, default export hanya untuk page/layout.
-- [ ] Class Tailwind via `twm`, variant component punya `<Name>TWM`.
+- [ ] Class Tailwind di komponen reusable via `twm`; variant component punya `<Name>TWM`.
 - [ ] API client baru pakai prefix `GET/POST/PUT/PATCH/DELETE` + `getApi/postApi/...` helper.
 - [ ] Test relevan ditambah/diperbarui di `test/` terdekat.
 - [ ] `pnpm lint` dan `pnpm check-types` pass tanpa warning baru.
