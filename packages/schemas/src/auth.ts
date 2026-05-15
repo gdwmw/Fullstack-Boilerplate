@@ -9,9 +9,9 @@ const passwordPolicySchema = (label: string) =>
     .string()
     .min(PASSWORD_MIN, { message: schemaMessage.string.min(label, PASSWORD_MIN) })
     .max(PASSWORD_MAX, { message: schemaMessage.string.max(label, PASSWORD_MAX) })
-    .regex(/^(?=.*[A-Z])/, { message: `${label} must have at least 1 uppercase letter` })
-    .regex(/^(?=.*\d)/, { message: `${label} must have at least 1 number` })
-    .regex(/^(?=.*[!@#$%^&*])/, { message: `${label} must have at least 1 symbol (!@#$%^&*)` });
+    .regex(/^(?=.*[A-Z])/, { message: schemaMessage.string.hasUppercase(label) })
+    .regex(/^(?=.*\d)/, { message: schemaMessage.string.hasNumber(label) })
+    .regex(/^(?=.*[!@#$%^&*])/, { message: schemaMessage.string.hasSymbol(label, "!@#$%^&*") });
 
 export const registerSchema = z.object({
   email: z.email({ message: schemaMessage.string.email("email") }),

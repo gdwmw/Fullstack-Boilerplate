@@ -81,7 +81,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
               schema: errorResponseSchema({ message: responseMessage("id").invalid }),
             },
           },
-          description: "invalid id parameter",
+          description: "invalid ID parameter",
         },
         401: {
           content: {
@@ -176,7 +176,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
               schema: errorResponseSchema({ message: responseMessage("id").invalid }),
             },
           },
-          description: "invalid id parameter",
+          description: "invalid ID parameter",
         },
         401: {
           content: {
@@ -239,7 +239,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
               schema: errorResponseSchema({ message: responseMessage("request payload").invalid }),
             },
           },
-          description: "invalid request payload or id parameter",
+          description: "invalid request payload or ID parameter",
         },
         401: {
           content: {

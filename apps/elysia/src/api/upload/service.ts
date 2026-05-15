@@ -9,7 +9,7 @@ import { Prisma } from "@/src/generated/prisma/client";
 import { logger, prisma } from "@/src/libs";
 import { createPaginationMeta } from "@/src/utils";
 
-import { TQuerySchema } from "./schema";
+import { TQuerySchema } from "./type";
 
 const UPLOAD_DIR = join(process.cwd(), "uploads");
 

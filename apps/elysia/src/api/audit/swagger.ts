@@ -116,13 +116,13 @@ export const docs = (label: string): Record<"getAll" | "getArchives", DocumentDe
           schema: { example: "admin", type: "string" },
         },
         {
-          description: "filter entries from this time (inclusive) using hh:mm format.",
+          description: "filter entries from this time (inclusive) using HH:mm format.",
           in: "query",
           name: "timeFrom",
           schema: { example: "09:00", type: "string" },
         },
         {
-          description: "filter entries until this time (inclusive) using hh:mm format.",
+          description: "filter entries until this time (inclusive) using HH:mm format.",
           in: "query",
           name: "timeTo",
           schema: { example: "14:30", type: "string" },

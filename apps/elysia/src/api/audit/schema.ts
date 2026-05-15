@@ -7,7 +7,7 @@ export const querySchema = paginationQuerySchema.extend({
   actor: z.string().optional(),
   archiveDate: z
     .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, { message: "archive date must be in YYYY-MM-DD format" })
+    .regex(/^\d{4}-\d{2}-\d{2}$/, { message: schemaMessage.string.format("archive date", "YYYY-MM-DD") })
     .optional(),
   level: z.enum(["INFO", "ERROR"], { message: schemaMessage.string.enum("level") }).optional(),
   method: z.enum(["DELETE", "GET", "PATCH", "POST", "PUT"], { message: schemaMessage.string.enum("method") }).optional(),
@@ -20,11 +20,11 @@ export const querySchema = paginationQuerySchema.extend({
     .optional(),
   timeFrom: z
     .string()
-    .regex(/^\d{2}:\d{2}$/, { message: "time from must be in hh:mm format" })
+    .regex(/^\d{2}:\d{2}$/, { message: schemaMessage.string.format("time from", "HH:mm") })
     .optional(),
   timeTo: z
     .string()
-    .regex(/^\d{2}:\d{2}$/, { message: "time to must be in hh:mm format" })
+    .regex(/^\d{2}:\d{2}$/, { message: schemaMessage.string.format("time to", "HH:mm") })
     .optional(),
 });
 
