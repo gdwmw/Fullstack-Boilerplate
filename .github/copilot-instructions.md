@@ -150,33 +150,31 @@ Konfigurasi ESLint memberi `--max-warnings 0`, jadi semua warning = build break.
 Auto-formatted oleh `perfectionist/sort-imports`. Urutannya:
 
 ```
-1. type imports (`import type ...`)
-2. value-builtin + value-external (alphabetical, satu grup)
-3. type-internal (`@/...`, `@repo/...`)
-4. value-internal (`@/...`, `@repo/...`)
-5. type-parent / type-sibling / type-index
-6. value-parent / value-sibling / value-index
+1. semua import pakai `import` biasa (jangan gunakan `import type` atau `import { type ... }`)
+2. builtin + external (alphabetical, satu grup)
+3. internal (`@/...`, `@repo/...`)
+4. parent / sibling / index
 ```
 
 Contoh tipikal:
 
 ```ts
-import type { FC, ReactElement } from "react";
+import { FC, ReactElement } from "react";
 
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 
-import type { IUsersModel } from "@repo/types";
+import { IUsersModel } from "@repo/types";
 
 import { schemaMessage } from "@repo/constants";
 import { twm } from "@/src/libs/twm";
 
-import type { TPayloadSchema } from "./type";
+import { TPayloadSchema } from "./type";
 
 import { payloadSchema } from "./schema";
 ```
 
-Setiap grup dipisah satu baris kosong. Jangan campur urutan manual — biarkan ESLint auto-fix.
+Setiap grup dipisah satu baris kosong. Jangan gunakan `import type` maupun `import { type ... }`; cukup `import` biasa agar konsisten dengan aturan project. Jangan campur urutan manual — biarkan ESLint auto-fix.
 
 ---
 
@@ -207,7 +205,7 @@ Setiap folder yang sudah memiliki `index.ts` adalah barrel export — pertahanka
 
   ```tsx
   // app/(authed)/(user)/profile/page.tsx
-  import type { FC, ReactElement } from "react";
+  import { FC, ReactElement } from "react";
 
   import { ProfileLayout } from "./_layout";
 
@@ -218,7 +216,7 @@ Setiap folder yang sudah memiliki `index.ts` adalah barrel export — pertahanka
   Untuk yang punya props (mis. root layout):
 
   ```tsx
-  import type { FC, PropsWithChildren, ReactElement } from "react";
+  import { FC, PropsWithChildren, ReactElement } from "react";
 
   type T = Readonly<PropsWithChildren>;
 
@@ -349,7 +347,7 @@ Setiap folder yang sudah memiliki `index.ts` adalah barrel export — pertahanka
 - Konstanta `const label = "..."` di tiap file untuk logging.
 
   ```ts
-  import type { IUsersModel } from "@repo/types";
+  import { IUsersModel } from "@repo/types";
 
   import { deleteApi, getApi, ISuccessResponse, postApi, TQueryParams } from "./base";
 
@@ -583,7 +581,7 @@ new Elysia().use(examplesRoute).listen(env.PORT);
 
   ```ts
   // packages/types/src/users.ts
-  import type { UsersModel } from "@/elysia/src/generated/prisma/models";
+  import { UsersModel } from "@/elysia/src/generated/prisma/models";
 
   export const USER_OMIT_FIELDS = { password: true } as const;
   export interface IUsersModel extends Omit<UsersModel, "password"> {}
