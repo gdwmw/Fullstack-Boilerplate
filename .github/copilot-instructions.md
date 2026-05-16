@@ -201,6 +201,20 @@ Setiap folder yang sudah memiliki `index.ts` adalah barrel export — pertahanka
 ### Komponen
 
 - **Selalu** `FC` dengan return type eksplisit (`ReactElement`, `null | ReactElement`, `Promise<ReactElement>`, `ReactNode` sesuai kebutuhan).
+
+- **Jangan gunakan namespace `React.`** (contoh: `React.Ref`, `React.FormEvent`). Import tipe yang dibutuhkan langsung dari `react` (contoh: `Ref`, `SyntheticEvent`).
+
+  ```tsx
+  // ✅
+  import { Ref, SyntheticEvent } from "react";
+  const onSubmit = (e: SyntheticEvent<HTMLFormElement>) => e.preventDefault();
+  const elRef = ref as Ref<HTMLElement>;
+
+  // ❌
+  const onSubmit = (e: React.FormEvent) => e.preventDefault();
+  const elRef = ref as React.Ref<HTMLElement>;
+  ```
+
 - Page / layout / server component App Router: jangan destructure props di parameter. Pattern wajib:
 
   ```tsx
@@ -371,6 +385,10 @@ Setiap folder yang sudah memiliki `index.ts` adalah barrel export — pertahanka
 ### Styling
 
 - Gunakan `twm(...)` untuk komponen reusable atau class composition yang dipakai lintas tempat. Untuk page/layout/module non-reusable, className biasa atau template literal kondisional diperbolehkan.
+- Konvensi prop `className` untuk reusable component:
+  - Jika komponen hanya punya satu wrapper utama, gunakan `className?: string`.
+  - Jika komponen punya beberapa slot yang perlu di-override terpisah, gunakan `className?: { <slotA>?: string; <slotB>?: string }`.
+  - Hindari membuat beberapa prop class terpisah seperti `inputClassName`, `labelClassName`, dll. untuk kasus reusable; satukan lewat `className` object per slot.
 - Tema gelap pakai `dark:` variant. Selalu sediakan dark mode style untuk warna teks/background dasar.
 - Class yang reusable per komponen → ekspor `<Name>TWM` agar bisa dipakai elemen lain (lihat contoh `ExampleATWM` di section Komponen di atas).
 
