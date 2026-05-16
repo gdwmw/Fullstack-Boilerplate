@@ -1,41 +1,41 @@
 # Copilot Instructions for Fullstack-Boilerplate
 
 Panduan ini wajib diikuti untuk semua perubahan kode agar konsisten dengan pola repository.
-Saat menulis kode baru, **selalu lihat dulu file sejenis di sekitarnya** dan ikuti pola yang sudah ada — jangan invent pola baru.
+Saat menulis kode baru, **selalu lihat file sejenis di sekitarnya terlebih dahulu** dan ikuti pola yang sudah ada. Jangan membuat pola baru sendiri.
 
 ---
 
-## 1. Scope Project
+## 1. Cakupan Proyek
 
-Monorepo Turborepo + pnpm workspace, runtime Node 22+ (Bun untuk backend), TypeScript strict.
+Monorepo ini menggunakan Turborepo + pnpm workspace, runtime Node 22+ (Bun untuk backend), dan TypeScript strict.
 
 | Path                     | Isi                                                                                                       |
 | ------------------------ | --------------------------------------------------------------------------------------------------------- |
 | `apps/next`              | Frontend Next.js App Router (React 19, Tailwind v4, React Query, Jotai, NextAuth, react-hook-form + Zod). |
 | `apps/elysia`            | Backend Elysia.js (Bun runtime, Prisma + PostgreSQL, Redis/ioredis, Pino, JWT).                           |
-| `packages/constants`     | Constant lintas app (`schemaMessage`).                                                                    |
+| `packages/constants`     | Konstanta lintas app (`schemaMessage`).                                                                   |
 | `packages/schemas`       | Zod schema lintas app (auth dll.).                                                                        |
 | `packages/types`         | Type lintas app (wrapper Prisma model).                                                                   |
 | `packages/utils`         | Util lintas app (`logTemplate`, `parseDurationToMs`).                                                     |
 | `packages/eslint-config` | Shared ESLint flat config (`base`, `next`, `elysia`).                                                     |
 
-Sebelum menulis kode, baca config ESLint shared (`packages/eslint-config/src/{base,next,elysia}.js`) dan tsconfig per app — semuanya menetapkan aturan yang dipakai contoh-contoh di bawah.
+Sebelum menulis kode, baca konfigurasi ESLint shared (`packages/eslint-config/src/{base,next,elysia}.js`) dan `tsconfig` per app. Seluruh aturan pada file tersebut menjadi acuan untuk contoh-contoh di bawah.
 
 ---
 
 ## 2. TypeScript
 
-- Mode `strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`, `useUnknownInCatchVariables` aktif. Catch error bertipe `unknown` → narrow dulu sebelum dipakai. Akses array/record bertipe `T | undefined` → guard dulu.
+- Mode `strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`, dan `useUnknownInCatchVariables` aktif. Error pada `catch` bertipe `unknown` harus di-narrow terlebih dahulu. Akses array/record bertipe `T | undefined` juga harus di-guard terlebih dahulu.
 - Hindari `any`. Pakai `unknown` + narrowing kalau benar-benar dinamis.
-- Naming type:
+- Penamaan tipe:
   - `interface` → prefix `I` (contoh: `IUsersModel`, `IPaginationMeta`, `IExampleA`). Pakai untuk object contract yang akan di-`extend`/`implement`.
   - `type` → prefix `T` (contoh: `TPayloadSchema`, `TLoginSchema`, `TCurrencyCode`). Pakai untuk union, mapped, utility, hasil `z.infer`, atau alias singkat lokal komponen.
-- Type yang berasal dari Zod:
+- Tipe yang berasal dari Zod:
   ```ts
   export const payloadSchema = z.object({ name: z.string() });
   export type TPayloadSchema = z.infer<typeof payloadSchema>;
   ```
-- Catch error harus di-narrow:
+- Error pada `catch` harus di-narrow:
   ```ts
   try {
     /* ... */
@@ -50,7 +50,7 @@ Sebelum menulis kode, baca config ESLint shared (`packages/eslint-config/src/{ba
   if (!first) return null;
   // first sekarang bertipe T
   ```
-- **Khusus props komponen di `apps/next/src/components/**`**: konvensi project pakai single-letter `interface I { ... }`. Kalau ada lebih dari satu interface lokal di file yang sama, baru gunakan nama spesifik dengan prefix `I`.
+- **Khusus props komponen di `apps/next/src/components/**`**: konvensi project menggunakan single-letter `interface I { ... }`. Jika ada lebih dari satu interface lokal pada file yang sama, gunakan nama yang lebih spesifik dengan prefix `I`.
 
   ```tsx
   interface I {
@@ -65,9 +65,9 @@ Sebelum menulis kode, baca config ESLint shared (`packages/eslint-config/src/{ba
 
 ## 3. Style & ESLint
 
-Konfigurasi ESLint memberi `--max-warnings 0`, jadi semua warning = build break. Aturan utama yang sering kena:
+Konfigurasi ESLint menggunakan `--max-warnings 0`, jadi semua warning akan membuat build gagal. Aturan utama yang paling sering terkena:
 
-- `prefer-const`, `prefer-template`, `prefer-arrow-callback`, `arrow-body-style: as-needed`, `func-style: expression` → selalu arrow function expression dengan `const`.
+- `prefer-const`, `prefer-template`, `prefer-arrow-callback`, `arrow-body-style: as-needed`, `func-style: expression` → selalu gunakan arrow function expression dengan `const`.
 
   ```ts
   // ✅
@@ -82,7 +82,7 @@ Konfigurasi ESLint memberi `--max-warnings 0`, jadi semua warning = build break.
   };
   ```
 
-- `no-nested-ternary` → split ternary menjadi variabel atau early return.
+- `no-nested-ternary` → pecah ternary menjadi variabel atau early return.
 
   ```ts
   // ❌
@@ -96,7 +96,7 @@ Konfigurasi ESLint memberi `--max-warnings 0`, jadi semua warning = build break.
   };
   ```
 
-- `complexity: 25`, `max-params: 4` → kalau lebih, pisah jadi helper atau gunakan single object param `{ ... }`.
+- `complexity: 25`, `max-params: 4` → jika melebihi batas, pisahkan menjadi helper atau gunakan single object param `{ ... }`.
 
   ```ts
   // ❌ 5 param
@@ -111,7 +111,7 @@ Konfigurasi ESLint memberi `--max-warnings 0`, jadi semua warning = build break.
   ```
 
 - `eqeqeq: always` → `===` / `!==`.
-- `@typescript-eslint/no-unused-vars`: argumen/var/catch yang sengaja unused harus diawali `_`.
+- `@typescript-eslint/no-unused-vars`: argumen/variabel/catch yang sengaja unused harus diawali `_`.
   ```ts
   const { password: _password, ...safeUser } = userRecord;
   ```
@@ -145,9 +145,9 @@ Konfigurasi ESLint memberi `--max-warnings 0`, jadi semua warning = build break.
   <div className={`rounded-md p-4 ${isActive ? "bg-blue-500" : ""} ${className}`} />
   ```
 
-### Urutan & Grup Import
+### Urutan dan Grup Import
 
-Auto-formatted oleh `perfectionist/sort-imports`. Urutannya:
+Diurutkan otomatis oleh `perfectionist/sort-imports`. Urutannya:
 
 ```
 1. semua import pakai `import` biasa (jangan gunakan `import type` atau `import { type ... }`)
@@ -174,7 +174,7 @@ import { TPayloadSchema } from "./type";
 import { payloadSchema } from "./schema";
 ```
 
-Setiap grup dipisah satu baris kosong. Jangan gunakan `import type` maupun `import { type ... }`; cukup `import` biasa agar konsisten dengan aturan project. Jangan campur urutan manual — biarkan ESLint auto-fix.
+Setiap grup dipisahkan oleh satu baris kosong. Jangan gunakan `import type` maupun `import { type ... }`; cukup `import` biasa agar konsisten dengan aturan project. Jangan mencampur urutan manual, biarkan ESLint melakukan auto-fix.
 
 ---
 
@@ -192,7 +192,7 @@ Setiap grup dipisah satu baris kosong. Jangan gunakan `import type` maupun `impo
 | Folder kebab-case dipakai bila nama panjang |                                                   | `handle-prisma-error/`                                       |
 | Folder Next App Router                      | sesuai konvensi Next                              | `(authed)/(user)/profile/page.tsx`, `_layout/`, `_example/`  |
 
-Setiap folder yang sudah memiliki `index.ts` adalah barrel export — pertahankan pola itu saat menambah file baru.
+Setiap folder yang sudah memiliki `index.ts` adalah barrel export. Pertahankan pola tersebut saat menambah file baru.
 
 ---
 
@@ -215,7 +215,7 @@ Setiap folder yang sudah memiliki `index.ts` adalah barrel export — pertahanka
   const elRef = ref as React.Ref<HTMLElement>;
   ```
 
-- Page / layout / server component App Router: jangan destructure props di parameter. Pattern wajib:
+- Page/layout/server component App Router: jangan destructure props di parameter. Pola wajib:
 
   ```tsx
   // app/(authed)/(user)/profile/page.tsx
@@ -244,7 +244,7 @@ Setiap folder yang sudah memiliki `index.ts` adalah barrel export — pertahanka
 
 - Hindari alias props yang tidak perlu (contoh `const boardId = props.boardId`) jika nilainya hanya diteruskan atau dipakai langsung tanpa transformasi.
 
-- Komponen di `components/templates/**` dengan props sederhana boleh akses lewat `props.X`:
+- Komponen di `components/templates/**` dengan props sederhana boleh diakses lewat `props.X`:
 
   ```tsx
   interface I {
@@ -260,7 +260,7 @@ Setiap folder yang sudah memiliki `index.ts` adalah barrel export — pertahanka
   );
   ```
 
-- Komponen di `components/elements/**` (interaktif / banyak prop) boleh destructure di parameter:
+- Komponen di `components/elements/**` (interaktif/banyak prop) boleh destructure di parameter:
 
   ```tsx
   interface I extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -273,7 +273,7 @@ Setiap folder yang sudah memiliki `index.ts` adalah barrel export — pertahanka
   );
   ```
 
-- **Variant component**: ekspor const list options + type union + helper `<Name>TWM` + komponen utama:
+- **Variant component**: ekspor daftar opsi `const` + union type + helper `<Name>TWM` + komponen utama:
 
   ```tsx
   export const EXAMPLE_A_COLORS = ["blue", "green", "red"] as const;
@@ -301,11 +301,11 @@ Setiap folder yang sudah memiliki `index.ts` adalah barrel export — pertahanka
 ### Default Export Rule
 
 - Pages, layouts, dan file `_layout/index.tsx` Next App Router pakai `export default` (sesuai konvensi Next).
-- Reusable component di `components/**` **dilarang** `export default` kecuali memang harus di-`next/dynamic`. Pakai named export.
+- Reusable component di `components/**` **dilarang** menggunakan `export default` kecuali memang harus di-`next/dynamic`. Gunakan named export.
 
 ### Routing & Layout
 
-- Halaman: `app/<route>/page.tsx`. Title pakai `metadata.title`.
+- Halaman: `app/<route>/page.tsx`. Judul menggunakan `metadata.title`.
 - Untuk halaman kompleks, gunakan pola layered:
 
   ```
@@ -334,7 +334,7 @@ Setiap folder yang sudah memiliki `index.ts` adalah barrel export — pertahanka
 
 ### State, Form, Data
 
-- Global state ringan: Jotai atom di `context/`.
+- Global state ringan: gunakan Jotai atom di `context/`.
 
   ```ts
   import { atom, useAtom } from "jotai";
@@ -352,15 +352,15 @@ Setiap folder yang sudah memiliki `index.ts` adalah barrel export — pertahanka
   const form = useForm<TLoginFormSchema>({ resolver: zodResolver(loginFormSchema(true)) });
   ```
 - Server state: `@tanstack/react-query` (`useMutation`, `useQuery`).
-- HTTP client: **wajib** lewat helper di `apps/next/src/utils/api/`. Jangan panggil `axios` langsung di komponen kecuali untuk health check.
+- HTTP client: **wajib** melalui helper di `apps/next/src/utils/api/`. Jangan panggil `axios` langsung di komponen, kecuali untuk health check.
 
 ### API Client Pattern (`apps/next/src/utils/api/`)
 
-- File per domain: `users.ts`, `upload.ts`, `audit.ts`, `example.ts`. Domain dengan banyak endpoint (auth) pakai folder + `index.ts` barrel + file per endpoint (`login.ts`, `logout.ts`, `me.ts`, dst.).
+- File per domain: `users.ts`, `upload.ts`, `audit.ts`, `example.ts`. Domain dengan banyak endpoint (auth) menggunakan folder + `index.ts` (barrel) + file per endpoint (`login.ts`, `logout.ts`, `me.ts`, dst.).
 - Function naming **UPPERCASE method prefix**: `GETUsers`, `GETUsersById`, `POSTLogin`, `PUTUsers`, `PATCHExample`, `DELETEUpload`.
-- Helper dasar: `getApi`, `postApi`, `putApi`, `patchApi`, `deleteApi` dari `./base`. `auth: false` hanya untuk endpoint publik (login/register).
-- Definisikan interface payload (`I<Name>Payload`) dan response (`I<Name>Response` atau pakai `IXxxModel` dari `@repo/types`) di file yang sama.
-- Konstanta `const label = "..."` di tiap file untuk logging.
+- Helper dasar: `getApi`, `postApi`, `putApi`, `patchApi`, `deleteApi` dari `./base`. Gunakan `auth: false` hanya untuk endpoint publik (login/register).
+- Definisikan interface payload (`I<Name>Payload`) dan response (`I<Name>Response` atau `IXxxModel` dari `@repo/types`) di file yang sama.
+- Tambahkan konstanta `const label = "..."` pada tiap file untuk logging.
 
   ```ts
   import { IUsersModel } from "@repo/types";
@@ -384,7 +384,7 @@ Setiap folder yang sudah memiliki `index.ts` adalah barrel export — pertahanka
 
 ### Styling
 
-- Gunakan `twm(...)` untuk komponen reusable atau class composition yang dipakai lintas tempat. Untuk page/layout/module non-reusable, className biasa atau template literal kondisional diperbolehkan.
+- Gunakan `twm(...)` untuk komponen reusable atau class composition yang dipakai lintas tempat. Untuk page/layout/module non-reusable, `className` biasa atau template literal kondisional tetap diperbolehkan.
 - Konvensi prop `className` untuk reusable component:
   - Jika komponen hanya punya satu wrapper utama, gunakan `className?: string`.
   - Jika komponen punya beberapa slot yang perlu di-override terpisah, gunakan `className?: { <slotA>?: string; <slotB>?: string }`.
@@ -590,9 +590,9 @@ new Elysia().use(examplesRoute).listen(env.PORT);
 
 ## 7. Shared Packages
 
-- Tambah ke `packages/<x>` hanya bila kode **dipakai oleh ≥2 app** atau jelas-jelas reusable lintas konteks.
-- Export wajib via `src/index.ts` (barrel).
-- Schema lintas app → `@repo/schemas`. Frontend lalu re-export di `_layout/modules/schema.ts` lokal bila perlu rename/extend:
+- Tambahkan ke `packages/<x>` hanya jika kode **dipakai oleh ≥2 app** atau jelas-jelas reusable lintas konteks.
+- Export wajib melalui `src/index.ts` (barrel).
+- Schema lintas app → `@repo/schemas`. Frontend dapat melakukan re-export pada `_layout/modules/schema.ts` lokal jika perlu rename/extend:
   ```ts
   // app/<route>/_layout/modules/schema.ts
   export { loginFormSchema, type TLoginFormSchema } from "@repo/schemas";
@@ -607,15 +607,15 @@ new Elysia().use(examplesRoute).listen(env.PORT);
   export interface IUsersModel extends Omit<UsersModel, "password"> {}
   ```
 
-- Util murni JS/TS yang tidak depend ke Bun/Node-only API → `@repo/utils`.
+- Util murni JS/TS yang tidak bergantung pada Bun/Node-only API → `@repo/utils`.
 
 ---
 
 ## 8. Environment
 
-- Backend: `apps/elysia/src/environment.ts` validasi via Zod. Tambah variabel baru di sini, lalu di `turbo.json` `globalEnv`, dan `.env.example`.
-- Frontend: `apps/next/src/environments/env.client.ts` (NEXT*PUBLIC*\*) dan `env.server.ts`. Public env diakses lewat `clientEnv`.
-- Jangan akses `process.env` langsung di kode aplikasi — selalu lewat object hasil parse.
+- Backend: `apps/elysia/src/environment.ts` divalidasi via Zod. Tambahkan variabel baru di sini, lalu update `turbo.json` (`globalEnv`) dan `.env.example`.
+- Frontend: `apps/next/src/environments/env.client.ts` (`NEXT_PUBLIC_*`) dan `env.server.ts`. Public env diakses lewat `clientEnv`.
+- Jangan akses `process.env` langsung di kode aplikasi. Selalu gunakan object hasil parse.
 
   ```ts
   // ✅
@@ -646,7 +646,7 @@ new Elysia().use(examplesRoute).listen(env.PORT);
   // schemaMessage.string.email("email") → "email must be a valid email"
   // schemaMessage.string.min("name", 1) → "name must contain at least 1 character"
   ```
-- **Teks UI frontend** (label, placeholder, judul, tombol, copy text): kapitalisasi natural sesuai konteks tampilan (Title Case / sentence case). Contoh: "Change Password", "UPDATE", "Confirm Password". Bukan all lowercase.
+- **Teks UI frontend** (label, placeholder, judul, tombol, copy text): gunakan kapitalisasi natural sesuai konteks tampilan (Title Case/sentence case). Contoh: "Change Password", "UPDATE", "Confirm Password". Jangan all lowercase.
 
 ---
 
@@ -680,7 +680,7 @@ new Elysia().use(examplesRoute).listen(env.PORT);
 
 ---
 
-## 11. File yang TIDAK Boleh Diedit Manual
+## 11. File yang Tidak Boleh Diedit Manual
 
 - `apps/elysia/src/generated/**` (Prisma client generated).
 - `apps/next/storybook-static/**` (build Storybook).
@@ -691,25 +691,17 @@ new Elysia().use(examplesRoute).listen(env.PORT);
 
 ## 12. Gaya Perubahan
 
-- **Sekecil mungkin.** Jangan refactor area tidak terkait, jangan bersih-bersih kosmetik di luar scope task.
-- Jangan ubah public API existing kecuali memang dibutuhkan task.
-- **Reuse dulu** sebelum bikin baru: cek `@repo/utils`, `@repo/schemas`, `@repo/types`, `@repo/constants`, lalu folder `utils/`, `hooks/`, `components/`, `libs/` per app. Baru bikin baru bila tidak ada.
-- Scope penempatan kode baru:
+- **Sekecil mungkin.** Jangan refactor area yang tidak terkait, dan jangan melakukan bersih-bersih kosmetik di luar scope task.
+- Jangan ubah public API yang sudah ada, kecuali memang dibutuhkan oleh task.
+- **Reuse dulu** sebelum membuat baru: cek `@repo/utils`, `@repo/schemas`, `@repo/types`, `@repo/constants`, lalu folder `utils/`, `hooks/`, `components/`, `libs/` per app. Buat kode baru hanya jika belum tersedia.
+- Cakupan penempatan kode baru:
   - Lintas app → `packages/*`.
   - Satu app saja → `apps/<app>/src/<utils|hooks|components|...>`.
   - Spesifik 1 fitur/route → lokal di folder fitur (mis. `app/<route>/_layout/modules/...`).
-- Sesuaikan style penamaan, typing, struktur return, dan urutan property dengan file sekitar. Bila ragu, cari file paling mirip lalu jiplak strukturnya.
+- Sesuaikan style penamaan, typing, struktur return, dan urutan property dengan file sekitar. Jika ragu, cari file paling mirip lalu ikuti strukturnya.
 
 ---
 
 ## 13. Checklist Sebelum Selesai
 
-- [ ] Import sudah rapi sesuai grup & urutan (auto-fixed by ESLint).
-- [ ] Tidak ada placement file yang melanggar struktur per section di atas.
-- [ ] Domain backend baru punya 6 file lengkap (`route`, `service`, `schema`, `type`, `swagger`, `index`).
-- [ ] LABEL backend uppercase, response & error message via helper, lowercase tone.
-- [ ] Komponen Next pakai `FC`, return type eksplisit, page/layout pakai `props.X`, default export hanya untuk page/layout.
-- [ ] Class Tailwind di komponen reusable via `twm`; variant component punya `<Name>TWM`.
-- [ ] API client baru pakai prefix `GET/POST/PUT/PATCH/DELETE` + `getApi/postApi/...` helper.
-- [ ] Test relevan ditambah/diperbarui di `test/` terdekat.
-- [ ] `pnpm lint` dan `pnpm check-types` pass tanpa warning baru.
+- [ ] Jalankan `pnpm lint:fix`, `pnpm prettier`, `pnpm lint` dan `pnpm check-types`.
