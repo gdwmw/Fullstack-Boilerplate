@@ -26,6 +26,15 @@ const parseSubjectToUserId = (sub: unknown) => {
   return sub;
 };
 
+const parseLoginMethod = (body: unknown): "email" | "username" => {
+  if (!body || typeof body !== "object" || !("method" in body)) {
+    return "username";
+  }
+
+  const method = (body as { method?: unknown }).method;
+  return method === "email" ? "email" : "username";
+};
+
 const parseJwtStringField = (value: unknown) => (typeof value === "string" && value.length > 0 ? value : null);
 const parseJwtExp = (value: unknown) => (typeof value === "number" ? value : null);
 
@@ -109,7 +118,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
   .post(
     "/login",
     async ({ accessJwt, body, refreshJwt, set }) => {
-      const payload = loginSchema((body as { method: "email" | "username" }).method).parse(body);
+      const payload = loginSchema(parseLoginMethod(body)).parse(body);
 
       const res = await service.login(payload);
 

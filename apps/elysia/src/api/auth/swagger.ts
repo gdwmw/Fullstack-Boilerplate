@@ -122,8 +122,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
     },
 
     logout: {
-      description:
-        "logout current session. refresh token is read from HttpOnly cookie. access token is optional but will be blocklisted if provided.",
+      description: "logout current session. access token is optional but will be blocklisted if provided.",
       responses: {
         200: {
           content: {
@@ -172,7 +171,21 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
     },
 
     refresh: {
-      description: "rotate refresh token and issue a new access token. refresh token is read from HttpOnly cookie.",
+      description: "rotate refresh token and issue a new access token using refresh token from request body.",
+      requestBody: {
+        content: {
+          "application/json": {
+            schema: {
+              properties: {
+                refreshToken: { example: "<refresh-token>", minLength: 1, type: "string" },
+              },
+              required: ["refreshToken"],
+              type: "object",
+            },
+          },
+        },
+        required: true,
+      },
       responses: {
         200: {
           content: {
@@ -185,7 +198,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
         401: {
           content: {
             "application/json": {
-              schema: errorResponseSchema({ message: responseMessage("refresh token").required }),
+              schema: errorResponseSchema({ message: `${responseMessage("refresh token").invalid} or ${responseMessage("refresh token").expired}` }),
             },
           },
           description: "refresh token invalid or expired",

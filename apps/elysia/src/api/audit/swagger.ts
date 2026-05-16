@@ -8,6 +8,7 @@ export const docs = (label: string): Record<"getAll" | "getArchives", DocumentDe
       properties: {
         data,
         message: { example: message, nullable: true, type: "string" },
+        meta: { nullable: true, type: "object" },
         success: { example: true, type: "boolean" },
       },
       type: "object",
@@ -164,10 +165,20 @@ export const docs = (label: string): Record<"getAll" | "getArchives", DocumentDe
           },
           description: "audit logs retrieved successfully",
         },
+        400: {
+          content: {
+            "application/json": {
+              schema: errorResponseSchema({ message: responseMessage("request query").invalid }),
+            },
+          },
+          description: "invalid request query",
+        },
         401: {
           content: {
             "application/json": {
-              schema: errorResponseSchema({ message: responseMessage("access token").required }),
+              schema: errorResponseSchema({
+                message: `${responseMessage("access token").invalid} or ${responseMessage("access token").expired}`,
+              }),
             },
           },
           description: "unauthorized",
@@ -205,10 +216,20 @@ export const docs = (label: string): Record<"getAll" | "getArchives", DocumentDe
           },
           description: "audit archives retrieved successfully",
         },
+        400: {
+          content: {
+            "application/json": {
+              schema: errorResponseSchema({ message: responseMessage("request query").invalid }),
+            },
+          },
+          description: "invalid request query",
+        },
         401: {
           content: {
             "application/json": {
-              schema: errorResponseSchema({ message: responseMessage("access token").required }),
+              schema: errorResponseSchema({
+                message: `${responseMessage("access token").invalid} or ${responseMessage("access token").expired}`,
+              }),
             },
           },
           description: "unauthorized",

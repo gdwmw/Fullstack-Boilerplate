@@ -1,17 +1,10 @@
 import { USER_OMIT_FIELDS } from "@repo/types";
-import { parseDurationToMs } from "@repo/utils";
 
-import { env } from "@/src/environment";
 import { prisma, redis } from "@/src/libs";
 
 import { TChangePasswordSchema, TLoginSchema, TRegisterSchema } from "./type";
 
-const ACCESS_TOKEN_EXPIRES_IN = env.JWT_ACCESS_EXPIRES_IN;
-const REFRESH_TOKEN_EXPIRES_IN = env.JWT_REFRESH_EXPIRES_IN;
-
 export const service = {
-  ACCESS_TOKEN_EXPIRES_IN,
-
   async addToBlocklist(jti: string, expiresAt: Date) {
     const ttlSeconds = Math.floor((expiresAt.getTime() - Date.now()) / 1000);
     if (ttlSeconds > 0) {
@@ -38,10 +31,6 @@ export const service = {
       omit: { ...USER_OMIT_FIELDS, imageId: true },
       where: { id },
     });
-  },
-
-  getRefreshTokenMaxAgeSeconds() {
-    return Math.floor(parseDurationToMs(REFRESH_TOKEN_EXPIRES_IN) / 1000);
   },
 
   async getUserById(id: string) {
@@ -72,8 +61,6 @@ export const service = {
 
     return user;
   },
-
-  REFRESH_TOKEN_EXPIRES_IN,
 
   async register(data: TRegisterSchema) {
     const hashedPassword = await Bun.password.hash(data.password);

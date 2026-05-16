@@ -3,30 +3,16 @@ import { DocumentDecoration } from "elysia";
 import { responseMessage } from "@/src/constants";
 
 export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "upload", DocumentDecoration> => {
-  const successResponseSchema = ({ data, message }: { data: Record<string, unknown>; message: string }) =>
-    ({
-      properties: {
-        data,
-        message: { example: message, nullable: true, type: "string" },
-        success: { example: true, type: "boolean" },
-      },
-      type: "object",
-    }) as const;
+  const unauthorizedMessage = `${responseMessage("access token").required} or ${responseMessage("access token").invalid} or ${
+    responseMessage("access token").expired
+  }`;
 
-  const successResponseWithMetaSchema = ({
-    data,
-    message,
-    meta,
-  }: {
-    data: Record<string, unknown>;
-    message: string;
-    meta: Record<string, unknown>;
-  }) =>
+  const successResponseSchema = ({ data, message, meta }: { data: Record<string, unknown>; message: string; meta?: Record<string, unknown> }) =>
     ({
       properties: {
         data,
         message: { example: message, nullable: true, type: "string" },
-        meta,
+        meta: meta ?? { nullable: true, type: "object" },
         success: { example: true, type: "boolean" },
       },
       type: "object",
@@ -86,7 +72,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
         401: {
           content: {
             "application/json": {
-              schema: errorResponseSchema({ message: responseMessage("access token").required }),
+              schema: errorResponseSchema({ message: unauthorizedMessage }),
             },
           },
           description: "unauthorized",
@@ -125,8 +111,8 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
         200: {
           content: {
             "application/json": {
-              schema: successResponseWithMetaSchema({
-                data: { items: {}, type: "array" },
+              schema: successResponseSchema({
+                data: { items: { type: "object" }, type: "array" },
                 message: responseMessage(label).retrieved,
                 meta: paginationMetaSchema,
               }),
@@ -134,10 +120,18 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
           },
           description: "files retrieved successfully",
         },
+        400: {
+          content: {
+            "application/json": {
+              schema: errorResponseSchema({ message: responseMessage("request query").invalid }),
+            },
+          },
+          description: "invalid request query",
+        },
         401: {
           content: {
             "application/json": {
-              schema: errorResponseSchema({ message: responseMessage("access token").required }),
+              schema: errorResponseSchema({ message: unauthorizedMessage }),
             },
           },
           description: "unauthorized",
@@ -181,7 +175,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
         401: {
           content: {
             "application/json": {
-              schema: errorResponseSchema({ message: responseMessage("access token").required }),
+              schema: errorResponseSchema({ message: unauthorizedMessage }),
             },
           },
           description: "unauthorized",
@@ -234,7 +228,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
         401: {
           content: {
             "application/json": {
-              schema: errorResponseSchema({ message: responseMessage("access token").required }),
+              schema: errorResponseSchema({ message: unauthorizedMessage }),
             },
           },
           description: "unauthorized",
