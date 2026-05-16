@@ -71,16 +71,6 @@ export const APIConnectionChecker: FC = (): ReactElement => {
               </ExampleA>
             </div>
 
-            <div className="flex items-center gap-3 rounded-md border border-gray-200 bg-gray-100 p-2 dark:border-gray-600 dark:bg-gray-700">
-              <div className="flex min-h-8 min-w-8 items-center justify-center rounded-full bg-green-500 text-white">
-                <Check size={18} />
-              </div>
-              <div className="overflow-hidden">
-                <h2 className="text-sm font-semibold sm:text-base dark:text-white">Connected</h2>
-                <span className="block max-w-50 truncate text-xs text-gray-600 sm:max-w-xs dark:text-gray-300">NEXT_PUBLIC_EXAMPLE_URL</span>
-              </div>
-            </div>
-
             {ENVIRONMENT_DATA_VARIABLES.map((dt, i) => (
               <div
                 className="flex items-center gap-3 rounded-md border border-gray-200 bg-gray-100 p-2 dark:border-gray-600 dark:bg-gray-700"

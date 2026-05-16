@@ -63,11 +63,19 @@ const AccessTokenRefreshGuard: FC = (): null | ReactElement => {
 
     const refresh = async () => {
       try {
-        const res = await POSTRefresh();
+        const refreshToken = session.data?.user?.refreshToken;
+
+        if (!refreshToken) {
+          signOut();
+          return;
+        }
+
+        const res = await POSTRefresh(refreshToken);
         const refreshedUser = res?.data;
         const newAccessToken = refreshedUser?.accessToken;
+        const newRefreshToken = refreshedUser?.refreshToken;
 
-        if (!refreshedUser || !newAccessToken) {
+        if (!refreshedUser || !newAccessToken || !newRefreshToken) {
           signOut();
           return;
         }
@@ -80,6 +88,7 @@ const AccessTokenRefreshGuard: FC = (): null | ReactElement => {
             ...refreshedUser,
             accessToken: newAccessToken,
             accessTokenExpiresAt: newExpiresAt,
+            refreshToken: newRefreshToken,
             sessionExpiresAt: session.data?.user?.sessionExpiresAt,
             sessionStartedAt: session.data?.user?.sessionStartedAt,
             status: session.data?.user?.status ?? "authenticated",

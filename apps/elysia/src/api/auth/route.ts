@@ -1,3 +1,4 @@
+import { encryptToken } from "@repo/utils";
 import Elysia, { HTTPHeaders, StatusMap } from "elysia";
 
 import { ERROR_RESPONSE, responseMessage, SUCCESS_RESPONSE } from "@/src/constants";
@@ -10,12 +11,8 @@ import { docs } from "./swagger";
 
 const LABEL = "authentication";
 
-const REFRESH_COOKIE_NAME = env.JWT_REFRESH_COOKIE_NAME;
-const REFRESH_COOKIE_PATH = env.JWT_REFRESH_COOKIE_PATH;
-const REFRESH_COOKIE_SAME_SITE = env.JWT_REFRESH_COOKIE_SAME_SITE;
-const REFRESH_COOKIE_SECURE = env.JWT_REFRESH_COOKIE_SECURE;
+const REFRESH_TOKEN_COOKIE_SECRET = env.REFRESH_TOKEN_COOKIE_SECRET;
 
-type THeadersMap = Record<string, string | undefined>;
 type TJwtPayload = null | Record<string, unknown> | undefined;
 interface IResponseSet {
   cookie?: Record<string, unknown>;
@@ -32,30 +29,6 @@ const parseSubjectToUserId = (sub: unknown) => {
 const parseJwtStringField = (value: unknown) => (typeof value === "string" && value.length > 0 ? value : null);
 const parseJwtExp = (value: unknown) => (typeof value === "number" ? value : null);
 
-const readRefreshTokenFromCookie = (cookieHeader: string | undefined) => {
-  if (!cookieHeader) return null;
-  const cookies = cookieHeader.split(";").map((cookie) => cookie.trim());
-  for (const cookie of cookies) {
-    const [key, ...valueParts] = cookie.split("=");
-    if (key === REFRESH_COOKIE_NAME) {
-      return decodeURIComponent(valueParts.join("="));
-    }
-  }
-
-  return null;
-};
-
-const createRefreshCookie = (refreshToken: string) => {
-  const maxAge = service.getRefreshTokenMaxAgeSeconds();
-  const secure = REFRESH_COOKIE_SECURE ? "; Secure" : "";
-  return `${REFRESH_COOKIE_NAME}=${encodeURIComponent(refreshToken)}; Path=${REFRESH_COOKIE_PATH}; HttpOnly; SameSite=${REFRESH_COOKIE_SAME_SITE}; Max-Age=${maxAge}${secure}`;
-};
-
-const clearRefreshCookie = () => {
-  const secure = REFRESH_COOKIE_SECURE ? "; Secure" : "";
-  return `${REFRESH_COOKIE_NAME}=; Path=${REFRESH_COOKIE_PATH}; HttpOnly; SameSite=${REFRESH_COOKIE_SAME_SITE}; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT${secure}`;
-};
-
 const issueAccessAndRefreshTokens = async ({
   accessJwt,
   refreshJwt,
@@ -71,9 +44,10 @@ const issueAccessAndRefreshTokens = async ({
   const refreshJti = crypto.randomUUID();
   const accessToken = await accessJwt.sign({ jti: crypto.randomUUID(), sub: String(userId) });
   const refreshToken = await refreshJwt.sign({ jti: refreshJti, sub: String(userId) });
+  const encryptedRefreshToken = await encryptToken(refreshToken, REFRESH_TOKEN_COOKIE_SECRET);
   return {
     accessToken,
-    refreshToken,
+    encryptedRefreshToken,
   };
 };
 
@@ -121,12 +95,11 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
       const res = await service.register(payload);
 
       const tokens = await issueAccessAndRefreshTokens({ accessJwt, refreshJwt, userId: res.id });
-      set.headers["set-cookie"] = createRefreshCookie(tokens.refreshToken);
 
       set.status = 201;
 
       return SUCCESS_RESPONSE({
-        data: { ...res, accessToken: tokens.accessToken },
+        data: { ...res, accessToken: tokens.accessToken, refreshToken: tokens.encryptedRefreshToken },
         message: responseMessage("register").success,
       });
     },
@@ -148,10 +121,9 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
       }
 
       const tokens = await issueAccessAndRefreshTokens({ accessJwt, refreshJwt, userId: res.id });
-      set.headers["set-cookie"] = createRefreshCookie(tokens.refreshToken);
 
       return SUCCESS_RESPONSE({
-        data: { ...res, accessToken: tokens.accessToken },
+        data: { ...res, accessToken: tokens.accessToken, refreshToken: tokens.encryptedRefreshToken },
         message: responseMessage("login").success,
       });
     },
@@ -160,12 +132,11 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
   )
   .post(
     "/refresh",
-    async ({ accessJwt, headers, refreshJwt, set }) => {
-      const cookieHeader = (headers as THeadersMap).cookie;
-      const refreshToken = readRefreshTokenFromCookie(cookieHeader);
+    async ({ accessJwt, body, refreshJwt, set }) => {
+      const bodyToken = (body as { refreshToken?: string } | null)?.refreshToken;
+      const refreshToken = typeof bodyToken === "string" && bodyToken.length > 0 ? bodyToken : null;
 
       if (!refreshToken) {
-        set.headers["set-cookie"] = clearRefreshCookie();
         set.status = 401;
         return ERROR_RESPONSE({
           message: responseMessage("refresh token").required,
@@ -178,7 +149,6 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
       const refreshExp = parseJwtExp((decoded as TJwtPayload)?.exp);
 
       if (!decoded || !userId || !refreshJti || !refreshExp) {
-        set.headers["set-cookie"] = clearRefreshCookie();
         set.status = 401;
         return ERROR_RESPONSE({
           message: `${responseMessage("refresh token").invalid} or ${responseMessage("refresh token").expired}`,
@@ -186,7 +156,6 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
       }
 
       if (await service.isBlocklisted(refreshJti)) {
-        set.headers["set-cookie"] = clearRefreshCookie();
         set.status = 401;
         return ERROR_RESPONSE({
           message: responseMessage("refresh token").invalid,
@@ -198,16 +167,14 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
       const user = await service.getUserById(userId);
 
       if (!user) {
-        set.headers["set-cookie"] = clearRefreshCookie();
         set.status = 404;
         return ERROR_RESPONSE({ message: responseMessage("users").notFound });
       }
 
       await service.addToBlocklist(refreshJti, new Date(refreshExp * 1000));
-      set.headers["set-cookie"] = createRefreshCookie(tokens.refreshToken);
 
       return SUCCESS_RESPONSE({
-        data: { ...user, accessToken: tokens.accessToken },
+        data: { ...user, accessToken: tokens.accessToken, refreshToken: tokens.encryptedRefreshToken },
         message: responseMessage("token").updated,
       });
     },
@@ -216,20 +183,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
   )
   .post(
     "/logout",
-    async ({ accessJwt, headers, refreshJwt, set }) => {
-      const cookieHeader = (headers as THeadersMap).cookie;
-      const refreshToken = readRefreshTokenFromCookie(cookieHeader);
-
-      if (refreshToken) {
-        const decodedRefresh = await refreshJwt.verify(refreshToken);
-        const refreshJti = parseJwtStringField((decodedRefresh as TJwtPayload)?.jti);
-        const refreshExp = parseJwtExp((decodedRefresh as TJwtPayload)?.exp);
-
-        if (refreshJti && refreshExp) {
-          await service.addToBlocklist(refreshJti, new Date(refreshExp * 1000));
-        }
-      }
-
+    async ({ accessJwt, headers }) => {
       const authorization = headers.authorization;
       const bearerToken = authorization?.startsWith("Bearer ") ? authorization.slice(7) : undefined;
 
@@ -247,8 +201,6 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
           await service.addToBlocklist(decodedAccess.jti, new Date(decodedAccess.exp * 1000));
         }
       }
-
-      set.headers["set-cookie"] = clearRefreshCookie();
 
       return SUCCESS_RESPONSE({ data: null, message: responseMessage("logout").success });
     },

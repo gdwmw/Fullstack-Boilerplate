@@ -38,6 +38,7 @@ export const options: NextAuthOptions = {
           imageId: u.imageId ?? null,
           name: u.name,
           phone: u.phone,
+          refreshToken: u.refreshToken,
           role: u.role,
           sessionExpiresAt,
           sessionStartedAt,

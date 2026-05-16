@@ -1,10 +1,6 @@
 import "dotenv/config";
 import { z } from "zod";
 
-const booleanFromString = z
-  .union([z.boolean(), z.enum(["true", "false"])])
-  .transform((value) => (typeof value === "boolean" ? value : value === "true"));
-
 const parseOriginList = (value: string): string[] => {
   const trimmed = value.trim();
 
@@ -39,10 +35,6 @@ const envSchema = z.object({
   ELYSIA_PORT: z.coerce.number().int().positive(),
   JWT_ACCESS_EXPIRES_IN: z.string().min(1).default("15m"),
   JWT_ACCESS_SECRET: z.string().min(32, "JWT_ACCESS_SECRET must be at least 32 characters"),
-  JWT_REFRESH_COOKIE_NAME: z.string().min(1).default("refreshToken"),
-  JWT_REFRESH_COOKIE_PATH: z.string().min(1).default("/auth"),
-  JWT_REFRESH_COOKIE_SAME_SITE: z.enum(["Lax", "Strict", "None"]).default("Lax"),
-  JWT_REFRESH_COOKIE_SECURE: booleanFromString.default(false),
   JWT_REFRESH_EXPIRES_IN: z.string().min(1).default("7d"),
   JWT_REFRESH_SECRET: z.string().min(32, "JWT_REFRESH_SECRET must be at least 32 characters"),
   LOG_DIR: z.string().min(1).default("./backups/logs"),
@@ -50,6 +42,7 @@ const envSchema = z.object({
   LOG_RETENTION_DAYS: z.coerce.number().int().positive().default(365),
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   REDIS_URL: z.string().min(1, "REDIS_URL is required"),
+  REFRESH_TOKEN_COOKIE_SECRET: z.string().min(32, "REFRESH_TOKEN_COOKIE_SECRET must be at least 32 characters"),
 });
 
 const parsed = envSchema.safeParse(process.env);
