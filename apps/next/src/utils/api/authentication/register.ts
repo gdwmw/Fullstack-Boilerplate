@@ -1,5 +1,7 @@
+import { ISuccessResponse } from "@repo/types";
+
 import { IAuthResponse } from ".";
-import { ISuccessResponse, postApi } from "../base";
+import { postApi } from "../base";
 
 export interface IRegisterPayload {
   email: string;
@@ -23,7 +25,7 @@ export const POSTRegister = async (payload: IRegisterPayload): Promise<ISuccessR
     data: {
       ...res.data,
       status: "authenticated",
-    },
+    } as IAuthResponse,
     message: res.message,
     success: true,
   };

@@ -1,32 +1,13 @@
+import { IErrorResponse, IQueryParams, ISuccessResponse } from "@repo/types";
 import { logTemplate } from "@repo/utils";
-import axios, { AxiosRequestHeaders, AxiosResponse, Method } from "axios";
+import axios, { AxiosRequestConfig, AxiosRequestHeaders, AxiosResponse, Method } from "axios";
 
 import { clientEnv } from "@/src/environments/env.client";
 import { getSession } from "@/src/utils";
 
 const API_URL = clientEnv.NEXT_PUBLIC_BASE_API_URL;
 
-export type TQueryParams = Record<string, unknown>;
-
-export interface IPaginationMeta {
-  page: number;
-  pageSize: number;
-  totalData: number;
-  totalPage?: number;
-}
-
-export interface ISuccessResponse<T> {
-  data: T;
-  message: string;
-  meta?: IPaginationMeta | null;
-  success: true;
-}
-
-export interface IErrorResponse {
-  code: null | string;
-  message: null | string;
-  success: false;
-}
+export type TQueryParams = AxiosRequestConfig["params"] & Partial<IQueryParams>;
 
 interface I {
   auth?: boolean;
@@ -49,7 +30,7 @@ export const apiRequest = async <T>({ auth = true, ...props }: I): Promise<ISucc
         ...props.headers,
       },
       method: props.method,
-      params: props.params,
+      params: props.params ?? {},
       url: `${API_URL}${props.endpoint}`,
       withCredentials: true,
     });

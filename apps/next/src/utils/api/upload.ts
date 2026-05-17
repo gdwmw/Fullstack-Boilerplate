@@ -1,6 +1,6 @@
-import { IFilesModel } from "@repo/types";
+import { IFilesModel, ISuccessResponse } from "@repo/types";
 
-import { deleteApi, getApi, ISuccessResponse, postApi, TQueryParams } from "./base";
+import { deleteApi, getApi, postApi, TQueryParams } from "./base";
 
 export interface IUploadPayload {
   file: File;

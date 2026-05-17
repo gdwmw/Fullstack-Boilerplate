@@ -1,4 +1,6 @@
-import { ISuccessResponse, postApi } from "../base";
+import { ISuccessResponse } from "@repo/types";
+
+import { postApi } from "../base";
 
 const label = "logout";
 

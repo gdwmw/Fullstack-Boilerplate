@@ -1,6 +1,6 @@
-import { IUsersModel } from "@repo/types";
+import { ISuccessResponse, IUsersModel } from "@repo/types";
 
-import { ISuccessResponse, postApi } from "../base";
+import { postApi } from "../base";
 
 export interface IPasswordPayload {
   newPassword: string;

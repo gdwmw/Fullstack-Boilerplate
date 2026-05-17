@@ -1,4 +1,6 @@
-import { deleteApi, getApi, ISuccessResponse, patchApi, postApi, putApi, TQueryParams } from "./base";
+import { ISuccessResponse } from "@repo/types";
+
+import { deleteApi, getApi, patchApi, postApi, putApi, TQueryParams } from "./base";
 
 interface IExampleCommon {
   email: string;

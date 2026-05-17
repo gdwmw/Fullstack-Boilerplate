@@ -3,12 +3,12 @@ import { DocumentDecoration } from "elysia";
 import { responseMessage } from "@/src/constants";
 
 export const docs = (label: string): Record<"getAll" | "getArchives", DocumentDecoration> => {
-  const successResponseSchema = ({ data, message }: { data: Record<string, unknown>; message: string }) =>
+  const successResponseSchema = ({ data, message, meta }: { data: Record<string, unknown>; message: string; meta?: Record<string, unknown> }) =>
     ({
       properties: {
         data,
         message: { example: message, nullable: true, type: "string" },
-        meta: { nullable: true, type: "object" },
+        meta: meta ?? { nullable: true, type: "object" },
         success: { example: true, type: "boolean" },
       },
       type: "object",
@@ -73,14 +73,8 @@ export const docs = (label: string): Record<"getAll" | "getArchives", DocumentDe
   };
 
   const getAllDataSchema = {
-    properties: {
-      data: {
-        items: auditLogEntrySchema,
-        type: "array",
-      },
-      meta: auditLogMetaSchema,
-    },
-    type: "object",
+    items: auditLogEntrySchema,
+    type: "array",
   };
 
   const getArchivesDataSchema = {
@@ -160,6 +154,7 @@ export const docs = (label: string): Record<"getAll" | "getArchives", DocumentDe
               schema: successResponseSchema({
                 data: getAllDataSchema,
                 message: responseMessage(label).retrieved,
+                meta: auditLogMetaSchema,
               }),
             },
           },

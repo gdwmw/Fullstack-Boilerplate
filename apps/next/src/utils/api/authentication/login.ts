@@ -1,5 +1,7 @@
+import { ISuccessResponse } from "@repo/types";
+
 import { IAuthResponse } from ".";
-import { ISuccessResponse, postApi } from "../base";
+import { postApi } from "../base";
 
 export interface ILoginPayload {
   identifier: string;
@@ -21,7 +23,7 @@ export const POSTLogin = async (payload: ILoginPayload): Promise<ISuccessRespons
     data: {
       ...res.data,
       status: "authenticated",
-    },
+    } as IAuthResponse,
     message: res.message,
     success: true,
   };

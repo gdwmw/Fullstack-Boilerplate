@@ -1,12 +1,6 @@
 import { schemaMessage } from "@repo/constants";
+import { IMeta, IQueryParams } from "@repo/types";
 import { z } from "zod";
-
-export interface IPaginationMeta {
-  page: number;
-  pageSize: number;
-  totalData: number;
-  totalPage: number;
-}
 
 export const paginationQuerySchema = z.object({
   page: z.coerce
@@ -24,14 +18,14 @@ export const paginationQuerySchema = z.object({
     .default(50),
 });
 
-export const createPaginationMeta = ({ page, pageSize, totalData }: Omit<IPaginationMeta, "totalPage">): IPaginationMeta => ({
+export const createPaginationMeta = ({ page, pageSize, totalData }: Omit<IMeta, "totalPage">): IMeta => ({
   page,
   pageSize,
   totalData,
   totalPage: Math.ceil(totalData / pageSize),
 });
 
-export const paginateArray = <T>({ items, page, pageSize }: { items: T[]; page: number; pageSize: number }) => {
+export const paginateArray = <T>({ items, page, pageSize }: { items: T[] } & IQueryParams) => {
   const totalData = items.length;
   const skip = (page - 1) * pageSize;
 

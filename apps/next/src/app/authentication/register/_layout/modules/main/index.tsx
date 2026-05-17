@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { IErrorResponse } from "@repo/types";
 import { logTemplate } from "@repo/utils";
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -11,7 +12,7 @@ import { FC, HTMLInputTypeAttribute, KeyboardEvent, ReactElement, useState } fro
 import { SubmitHandler, useForm } from "react-hook-form";
 
 import { Container, ExampleATWM, ExampleInput, SubmitButton } from "@/src/components";
-import { IErrorResponse, inputValidations, POSTRegister } from "@/src/utils";
+import { inputValidations, POSTRegister } from "@/src/utils";
 
 import { registerSchema, TRegisterSchema } from "../schema";
 

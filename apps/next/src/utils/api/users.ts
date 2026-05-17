@@ -1,6 +1,6 @@
-import { IUsersModel } from "@repo/types";
+import { ISuccessResponse, IUsersModel } from "@repo/types";
 
-import { deleteApi, getApi, ISuccessResponse, putApi, TQueryParams } from "./base";
+import { deleteApi, getApi, putApi, TQueryParams } from "./base";
 
 export interface IUserPayload extends Omit<IUsersModel, "createdAt" | "id" | "image" | "imageId" | "role" | "updatedAt"> {
   imageId?: IUsersModel["imageId"];

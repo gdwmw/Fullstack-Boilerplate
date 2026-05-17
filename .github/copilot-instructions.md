@@ -176,6 +176,22 @@ import { payloadSchema } from "./schema";
 
 Setiap grup dipisahkan oleh satu baris kosong. Jangan gunakan `import type` maupun `import { type ... }`; cukup `import` biasa agar konsisten dengan aturan project. Jangan mencampur urutan manual, biarkan ESLint melakukan auto-fix.
 
+### Barrel Export (`index.ts`)
+
+- **Jangan gunakan `export type`** di barrel export. Gunakan `export * from` saja.
+
+  ```ts
+  // ✅ di barrel (index.ts)
+  export * from "./audit";
+  export * from "./types";
+  export * from "./users";
+
+  // ❌ jangan
+  export type { TSomeType } from "./types";
+  export type * from "./types";
+  export { someFunction } from "./utils";
+  ```
+
 ---
 
 ## 4. Konvensi Penamaan File & Folder
@@ -358,6 +374,7 @@ Setiap folder yang sudah memiliki `index.ts` adalah barrel export. Pertahankan p
 
 - File per domain: `users.ts`, `upload.ts`, `audit.ts`, `example.ts`. Domain dengan banyak endpoint (auth) menggunakan folder + `index.ts` (barrel) + file per endpoint (`login.ts`, `logout.ts`, `me.ts`, dst.).
 - Function naming **UPPERCASE method prefix**: `GETUsers`, `GETUsersById`, `POSTLogin`, `PUTUsers`, `PATCHExample`, `DELETEUpload`.
+- Semua endpoint daftar / `getAll` **wajib** menerima pagination query yang sudah distandardisasi. Gunakan tipe query pagination yang sesuai contract backend.
 - Helper dasar: `getApi`, `postApi`, `putApi`, `patchApi`, `deleteApi` dari `./base`. Gunakan `auth: false` hanya untuk endpoint publik (login/register).
 - Definisikan interface payload (`I<Name>Payload`) dan response (`I<Name>Response` atau `IXxxModel` dari `@repo/types`) di file yang sama.
 - Tambahkan konstanta `const label = "..."` pada tiap file untuk logging.
@@ -536,6 +553,7 @@ export * from "./route";
 ### Response & Error
 
 - Sukses: `SUCCESS_RESPONSE({ data, message: responseMessage(LABEL).<key>, meta? })`.
+- Semua endpoint daftar / `getAll` **wajib** memakai pagination query yang tervalidasi dan **wajib** mengembalikan `meta` paginasi. Jangan kirim list tanpa `meta` untuk response koleksi.
 - Pesan: gunakan `responseMessage(label).<key>` — jangan tulis manual. Kalau butuh frasa baru, tambahkan key di `apps/elysia/src/constants/responseMessage.ts` lalu update test-nya.
 
   ```ts

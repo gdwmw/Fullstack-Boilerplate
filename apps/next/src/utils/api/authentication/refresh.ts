@@ -1,7 +1,8 @@
+import { ISuccessResponse } from "@repo/types";
 import axios from "axios";
 
 import { IAuthResponse } from ".";
-import { ISuccessResponse, postApi } from "../base";
+import { postApi } from "../base";
 
 const label = "refresh";
 

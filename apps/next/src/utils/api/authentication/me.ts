@@ -1,6 +1,6 @@
-import { IUsersModel } from "@repo/types";
+import { ISuccessResponse, IUsersModel } from "@repo/types";
 
-import { getApi, ISuccessResponse } from "../base";
+import { getApi } from "../base";
 
 const label = "me";
 

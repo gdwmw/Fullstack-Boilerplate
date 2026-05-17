@@ -1,4 +1,6 @@
-import { getApi, IPaginationMeta, ISuccessResponse, TQueryParams } from "./base";
+import { IMeta, ISuccessResponse } from "@repo/types";
+
+import { getApi, TQueryParams } from "./base";
 
 interface IAuditLogUser {
   email: null | string;
@@ -32,7 +34,7 @@ export interface IAuditArchiveEntry {
 
 export interface IAuditLogListResponse {
   data: IAuditLogEntry[];
-  meta: IPaginationMeta;
+  meta: IMeta;
 }
 
 interface IArchiveQueryParams extends TQueryParams {
@@ -45,8 +47,6 @@ interface ILogQueryParams extends TQueryParams {
   archiveDate?: string;
   level?: "ERROR" | "INFO";
   method?: "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
-  page?: number;
-  pageSize?: number;
   path?: string;
   statusCode?: number;
   timeFrom?: string;

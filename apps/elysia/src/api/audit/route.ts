@@ -27,7 +27,7 @@ export const auditRoutes = new Elysia({ prefix: "/audit" })
     async ({ query }) => {
       const params = querySchema.parse(query);
       const res = await service.getAll(params);
-      return SUCCESS_RESPONSE({ data: res, message: responseMessage(LABEL).retrieved });
+      return SUCCESS_RESPONSE({ data: res.data, message: responseMessage(LABEL).retrieved, meta: res.meta });
     },
     { detail: docs(LABEL).getAll },
   );

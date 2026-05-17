@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { IErrorResponse } from "@repo/types";
 import { logTemplate } from "@repo/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -12,7 +13,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 
 import { Avatar, Container, ExampleATWM, ExampleInput, SubmitButton } from "@/src/components";
 import { clientEnv } from "@/src/environments/env.client";
-import { DELETEUpload, GETMe, IErrorResponse, inputValidations, POSTUpload, PUTUsers } from "@/src/utils";
+import { DELETEUpload, GETMe, inputValidations, POSTUpload, PUTUsers } from "@/src/utils";
 
 import { profileSchema, TProfileSchema } from "../schema";
 
@@ -138,6 +139,11 @@ export const Main: FC = (): ReactElement => {
           file: dt.image[0],
         });
 
+        if (!uploadResponse.data) {
+          logTemplate.WARN("upload image failed!", "/upload");
+          throw new Error("failed to upload image");
+        }
+
         imageId = uploadResponse.data.id;
       }
 
@@ -148,6 +154,10 @@ export const Main: FC = (): ReactElement => {
         phone: dt.phone,
         username: dt.username,
       });
+
+      if (!userResponse.data) {
+        throw new Error("failed to update profile");
+      }
 
       return userResponse.data;
     },

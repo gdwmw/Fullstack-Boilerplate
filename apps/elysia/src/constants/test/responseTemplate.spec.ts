@@ -19,7 +19,7 @@ describe("SUCCESS_RESPONSE", () => {
   describe("with valid data", () => {
     it("should return success true with data and message", () => {
       const result = SUCCESS_RESPONSE({ data: { id: 1 }, message: "ok" });
-      expect(result).toEqual({ data: { id: 1 }, message: "ok", meta: null, success: true });
+      expect(result).toEqual({ data: { id: 1 }, message: "ok", success: true });
     });
 
     it("should return success true with empty object", () => {
@@ -59,19 +59,19 @@ describe("SUCCESS_RESPONSE", () => {
       expect(result.meta).toEqual({ page: 1, pageSize: 50, totalData: 120, totalPage: 3 });
     });
 
-    it("should include meta without totalPage", () => {
+    it("should include meta with totalPage", () => {
       const result = SUCCESS_RESPONSE({
         data: [{ id: 1 }],
         message: "ok",
-        meta: { page: 1, pageSize: 10, totalData: 50 },
+        meta: { page: 1, pageSize: 10, totalData: 50, totalPage: 5 },
       });
 
-      expect(result.meta).toEqual({ page: 1, pageSize: 10, totalData: 50 });
+      expect(result.meta).toEqual({ page: 1, pageSize: 10, totalData: 50, totalPage: 5 });
     });
 
-    it("should default meta to null when not provided", () => {
+    it("should omit meta when not provided", () => {
       const result = SUCCESS_RESPONSE({ data: {}, message: "ok" });
-      expect(result.meta).toBeNull();
+      expect(result).not.toHaveProperty("meta");
     });
   });
 
@@ -104,9 +104,9 @@ describe("SUCCESS_RESPONSE", () => {
       expect(result.success).toBe(true);
     });
 
-    it("should handle empty string message", () => {
+    it("should return null for empty string message", () => {
       const result = SUCCESS_RESPONSE({ data: { id: 1 }, message: "" });
-      expect(result.message).toBe("");
+      expect(result.message).toBeNull();
     });
   });
 
@@ -115,13 +115,12 @@ describe("SUCCESS_RESPONSE", () => {
       const result = SUCCESS_RESPONSE({ data: null, message: null });
       expect(result).toHaveProperty("data");
       expect(result).toHaveProperty("message");
-      expect(result).toHaveProperty("meta");
       expect(result).toHaveProperty("success");
     });
 
-    it("should have exactly 4 properties", () => {
+    it("should have exactly 3 properties without meta", () => {
       const result = SUCCESS_RESPONSE({ data: {}, message: "ok" });
-      expect(Object.keys(result).length).toBe(4);
+      expect(Object.keys(result).length).toBe(3);
     });
   });
 });
@@ -130,13 +129,13 @@ describe("ERROR_RESPONSE", () => {
   describe("with basic error", () => {
     it("should return success false with message", () => {
       const result = ERROR_RESPONSE({ message: "something went wrong" });
-      expect(result).toEqual({ code: null, message: "something went wrong", success: false });
+      expect(result).toEqual({ message: "something went wrong", success: false });
     });
 
-    it("should return success false when error is not provided", () => {
+    it("should omit code when error is not provided", () => {
       const result = ERROR_RESPONSE({ message: "error" });
       expect(result.success).toBe(false);
-      expect(result.code).toBeNull();
+      expect(result).not.toHaveProperty("code");
     });
 
     it("should handle null message", () => {
@@ -172,33 +171,41 @@ describe("ERROR_RESPONSE", () => {
   });
 
   describe("with non-Prisma errors", () => {
-    it("should return null code for generic Error", () => {
+    it("should omit code for generic Error", () => {
       const result = ERROR_RESPONSE({ error: new Error("generic"), message: "error" });
-      expect(result.code).toBeNull();
+      expect(result).not.toHaveProperty("code");
       expect(result.success).toBe(false);
     });
 
-    it("should return null code for TypeError", () => {
+    it("should omit code for TypeError", () => {
       const result = ERROR_RESPONSE({ error: new TypeError("type error"), message: "error" });
-      expect(result.code).toBeNull();
+      expect(result).not.toHaveProperty("code");
     });
 
-    it("should return null code for plain object error", () => {
+    it("should omit code for plain object error", () => {
       const result = ERROR_RESPONSE({ error: { message: "custom" }, message: "error" });
-      expect(result.code).toBeNull();
+      expect(result).not.toHaveProperty("code");
     });
   });
 
   describe("response structure", () => {
     it("should always have required properties", () => {
       const result = ERROR_RESPONSE({ message: "error" });
-      expect(result).toHaveProperty("code");
       expect(result).toHaveProperty("message");
       expect(result).toHaveProperty("success");
     });
 
-    it("should have exactly 3 properties", () => {
+    it("should have exactly 2 properties without Prisma code", () => {
       const result = ERROR_RESPONSE({ message: "error" });
+      expect(Object.keys(result).length).toBe(2);
+    });
+
+    it("should have exactly 3 properties with Prisma code", () => {
+      const prismaError = new Prisma.PrismaClientKnownRequestError("Unique constraint failed", {
+        clientVersion: "",
+        code: "P2002",
+      });
+      const result = ERROR_RESPONSE({ error: prismaError, message: "conflict" });
       expect(Object.keys(result).length).toBe(3);
     });
   });
