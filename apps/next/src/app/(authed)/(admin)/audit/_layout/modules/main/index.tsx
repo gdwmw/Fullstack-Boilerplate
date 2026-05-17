@@ -7,7 +7,7 @@ import { Controller, useForm, useWatch } from "react-hook-form";
 
 import { Container, ExampleA, ExampleDatePicker, ExampleInput, ExampleSelect, Header } from "@/src/components";
 import { useModal } from "@/src/hooks";
-import { GETAuditArchives, GETAuditLogs, IAuditArchiveEntry, IAuditLogEntry } from "@/src/utils";
+import { GETAuditArchives, GETAuditLogs, IAuditArchiveEntry } from "@/src/utils";
 
 import { AuditDetailModal } from "./batches";
 import { AuditArchiveList, AuditPagination, AuditTable } from "./components";
@@ -156,7 +156,7 @@ export const Main: FC<I> = (props): ReactElement => {
         timeTo: appliedFilters.timeTo,
       });
 
-      return res.data;
+      return res;
     },
     queryKey,
   });
@@ -226,7 +226,7 @@ export const Main: FC<I> = (props): ReactElement => {
           timeTo: appliedFilters.timeTo,
         });
 
-        return res.data;
+        return res;
       },
       queryKey: [
         "audit-logs",
@@ -419,7 +419,7 @@ export const Main: FC<I> = (props): ReactElement => {
               <div className="flex flex-1 flex-col gap-2 overflow-hidden">
                 <AuditTable
                   isLoading={auditQuery.isLoading}
-                  logs={logs as IAuditLogEntry[]}
+                  logs={logs}
                   onDetailClick={openModal}
                   resolvedSelectedDateKey={resolvedSelectedDateKey}
                 />

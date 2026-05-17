@@ -187,6 +187,18 @@ export const docs = (label: string): Record<"getAll" | "getArchives", DocumentDe
       description: "get the available audit log archives grouped by date.",
       parameters: [
         {
+          description: "page number for pagination.",
+          in: "query",
+          name: "page",
+          schema: { default: 1, example: 1, minimum: 1, type: "integer" },
+        },
+        {
+          description: "maximum number of archives to return per page.",
+          in: "query",
+          name: "pageSize",
+          schema: { default: 50, example: 50, maximum: 100, minimum: 1, type: "integer" },
+        },
+        {
           description: "optional month filter for archives.",
           in: "query",
           name: "month",
@@ -206,6 +218,7 @@ export const docs = (label: string): Record<"getAll" | "getArchives", DocumentDe
               schema: successResponseSchema({
                 data: getArchivesDataSchema,
                 message: responseMessage("audit archives").retrieved,
+                meta: auditLogMetaSchema,
               }),
             },
           },

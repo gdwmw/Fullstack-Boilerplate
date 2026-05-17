@@ -28,7 +28,7 @@ export const querySchema = paginationQuerySchema.extend({
     .optional(),
 });
 
-export const archiveQuerySchema = z.object({
+export const archiveQuerySchema = paginationQuerySchema.extend({
   month: z.coerce.number().int().min(1).max(12).optional(),
   year: z.coerce.number().int().min(2000).max(9999).optional(),
 });

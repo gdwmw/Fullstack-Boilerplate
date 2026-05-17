@@ -175,7 +175,57 @@ const parseCompressedLogFile = async (filePath: string): Promise<ILogEntry[]> =>
 };
 
 export const service = {
-  async getAll({ actor, archiveDate, level, method, page, pageSize, path, statusCode, timeFrom, timeTo }: TQuerySchema) {
+  async getAllArchives({ month, page, pageSize, year }: TArchiveQuerySchema) {
+    const logDir = getLogDirectory();
+
+    let files: string[];
+
+    try {
+      files = (await readdir(logDir))
+        .filter((file) => isRequestLogFileName(file))
+        .sort()
+        .reverse();
+    } catch {
+      return paginateArray({ items: [], page, pageSize });
+    }
+
+    const archiveMap = new Map<string, IArchiveEntry>();
+
+    for (const file of files) {
+      const dateKey = parseArchiveDateFromFileName(file);
+
+      if (!dateKey) {
+        continue;
+      }
+
+      if (archiveMap.has(dateKey)) {
+        continue;
+      }
+
+      const archiveDate = parseArchiveDate(dateKey);
+
+      if (year && archiveDate.getFullYear() !== year) {
+        continue;
+      }
+
+      if (month && archiveDate.getMonth() + 1 !== month) {
+        continue;
+      }
+
+      archiveMap.set(dateKey, {
+        dateKey,
+        label: getArchiveLabel(dateKey),
+      });
+    }
+
+    return paginateArray({
+      items: Array.from(archiveMap.values()).sort((left, right) => right.dateKey.localeCompare(left.dateKey)),
+      page,
+      pageSize,
+    });
+  },
+
+  async getAllLogs({ actor, archiveDate, level, method, page, pageSize, path, statusCode, timeFrom, timeTo }: TQuerySchema) {
     const logDir = getLogDirectory();
     const selectedTimeFrom = parseTimeFilter(timeFrom);
     const selectedTimeTo = parseTimeFilter(timeTo);
@@ -226,51 +276,5 @@ export const service = {
     });
 
     return paginateArray({ items: filtered, page, pageSize });
-  },
-
-  async getArchives({ month, year }: TArchiveQuerySchema): Promise<IArchiveEntry[]> {
-    const logDir = getLogDirectory();
-
-    let files: string[];
-
-    try {
-      files = (await readdir(logDir))
-        .filter((file) => isRequestLogFileName(file))
-        .sort()
-        .reverse();
-    } catch {
-      return [];
-    }
-
-    const archiveMap = new Map<string, IArchiveEntry>();
-
-    for (const file of files) {
-      const dateKey = parseArchiveDateFromFileName(file);
-
-      if (!dateKey) {
-        continue;
-      }
-
-      if (archiveMap.has(dateKey)) {
-        continue;
-      }
-
-      const archiveDate = parseArchiveDate(dateKey);
-
-      if (year && archiveDate.getFullYear() !== year) {
-        continue;
-      }
-
-      if (month && archiveDate.getMonth() + 1 !== month) {
-        continue;
-      }
-
-      archiveMap.set(dateKey, {
-        dateKey,
-        label: getArchiveLabel(dateKey),
-      });
-    }
-
-    return Array.from(archiveMap.values()).sort((left, right) => right.dateKey.localeCompare(left.dateKey));
   },
 };

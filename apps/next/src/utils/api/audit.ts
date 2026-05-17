@@ -1,6 +1,11 @@
-import { IMeta, ISuccessResponse } from "@repo/types";
+import { ISuccessResponse } from "@repo/types";
 
 import { getApi, TQueryParams } from "./base";
+
+export interface IAuditArchiveEntry {
+  dateKey: string;
+  label: string;
+}
 
 interface IAuditLogUser {
   email: null | string;
@@ -25,16 +30,6 @@ export interface IAuditLogEntry {
   ts: string;
   userAgent: string;
   users?: IAuditLogUser | null;
-}
-
-export interface IAuditArchiveEntry {
-  dateKey: string;
-  label: string;
-}
-
-export interface IAuditLogListResponse {
-  data: IAuditLogEntry[];
-  meta: IMeta;
 }
 
 interface IArchiveQueryParams extends TQueryParams {
@@ -62,8 +57,8 @@ export const GETAuditArchives = async (params?: IArchiveQueryParams): Promise<IS
     params: params,
   });
 
-export const GETAuditLogs = async (params?: ILogQueryParams): Promise<ISuccessResponse<IAuditLogListResponse>> =>
-  getApi<IAuditLogListResponse>({
+export const GETAuditLogs = async (params?: ILogQueryParams): Promise<ISuccessResponse<IAuditLogEntry[]>> =>
+  getApi<IAuditLogEntry[]>({
     endpoint: "/audit",
     label: label,
     params: params,
