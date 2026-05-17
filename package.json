@@ -6,9 +6,11 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "start": "turbo run start",
+    "prod:start:next": "pnpm --filter nextjs start",
+    "prod:start:elysia": "pnpm --filter elysiajs start",
     "generate": "turbo run generate",
     "migrate": "turbo run migrate",
+    "format": "turbo run format",
     "storybook:build": "turbo run storybook:build",
     "vitest:run": "turbo run vitest:run",
     "lint": "turbo run lint",

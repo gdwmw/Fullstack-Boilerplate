@@ -143,11 +143,37 @@ pnpm dev
 
 - ▶️ `pnpm dev` - run all apps in development mode
 - 🏗️ `pnpm build` - build all apps/packages
-- 🧹 `pnpm lint` - lint the entire workspace
-- 🔍 `pnpm check-types` - TypeScript type-check
+- 🌐 `pnpm prod:start:next` - run Next.js production server directly
+- ⚙️ `pnpm prod:start:elysia` - run Elysia.js production server directly
 - ⚙️ `pnpm generate` - generate Prisma client
 - 🗄️ `pnpm migrate` - run Prisma migrations
+- 🧽 `pnpm format` - run workspace format task
+- 🧹 `pnpm lint` - lint the entire workspace
 - 🎨 `pnpm prettier` - format codebase
+- 🔍 `pnpm check-types` - TypeScript type-check
+
+---
+
+## 🚢 Production Run Recommendation
+
+For production, use Turborepo for build orchestration, then run each app directly (not through Turborepo runtime task).
+
+1. **Build all apps/packages**
+
+```bash
+pnpm build
+```
+
+2. **Run each app process directly**
+
+```bash
+pnpm prod:start:next
+pnpm prod:start:elysia
+```
+
+3. **Use a process manager/container in production**
+
+Use PM2, systemd, Docker, Kubernetes, or tmux for process supervision, monitoring, and scaling.
 
 ---
 
