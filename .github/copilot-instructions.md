@@ -128,7 +128,7 @@ Konfigurasi ESLint menggunakan `--max-warnings 0`, jadi semua warning akan membu
     };
     ```
   - **Imports** dipisah newline antar grup, urut alphabetical, internal pattern `@/` dan `@repo/`.
-- **Tailwind**: gunakan helper `twm` untuk komponen reusable (terutama di `components/**`) atau saat class perlu dikomposisikan lintas tempat. Untuk layout/page/module yang non-reusable, className biasa atau template literal diperbolehkan. Plugin `better-tailwindcss` tetap aktif (`callees: ["twm"]`, variabel `*TWM`).
+- **Tailwind**: gunakan helper `twm` untuk komponen reusable (terutama di `components/**`) atau saat ada potensi class utility bertabrakan/override. Jika hanya conditional class sederhana tanpa bentrok utility, utamakan `className={[...].join(" ")}`. Untuk layout/page/module yang non-reusable, className biasa tetap diperbolehkan. Plugin `better-tailwindcss` tetap aktif (`callees: ["twm"]`, variabel `*TWM`).
 
   ```ts
   // libs/twm.ts (tipikal isinya)
@@ -401,7 +401,9 @@ Setiap folder yang sudah memiliki `index.ts` adalah barrel export. Pertahankan p
 
 ### Styling
 
-- Gunakan `twm(...)` untuk komponen reusable atau class composition yang dipakai lintas tempat. Untuk page/layout/module non-reusable, `className` biasa atau template literal kondisional tetap diperbolehkan.
+- Gunakan `twm(...)` untuk komponen reusable atau class composition yang dipakai lintas tempat, khususnya saat ada potensi utility bertabrakan (contoh `px-*`, `text-*`, `bg-*` saling override).
+- Jika class hanya conditional sederhana dan tidak berpotensi bentrok, gunakan `className={[...].join(" ")}` agar intent lebih jelas.
+- Hindari class `transition*` secara default. Tambahkan hanya jika benar-benar dibutuhkan oleh UX atau diminta eksplisit.
 - Konvensi prop `className` untuk reusable component:
   - Jika komponen hanya punya satu wrapper utama, gunakan `className?: string`.
   - Jika komponen punya beberapa slot yang perlu di-override terpisah, gunakan `className?: { <slotA>?: string; <slotB>?: string }`.

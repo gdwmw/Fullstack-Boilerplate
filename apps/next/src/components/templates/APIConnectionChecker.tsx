@@ -77,7 +77,10 @@ export const APIConnectionChecker: FC = (): ReactElement => {
                 key={dt}
               >
                 <div
-                  className={`flex min-h-8 min-w-8 items-center justify-center rounded-full text-white ${connection[i] ? "bg-green-500" : "bg-red-500"}`}
+                  className={[
+                    "flex min-h-8 min-w-8 items-center justify-center rounded-full text-white",
+                    connection[i] ? "bg-green-500" : "bg-red-500",
+                  ].join(" ")}
                 >
                   {connection[i] ? <Check size={18} /> : <X size={18} />}
                 </div>

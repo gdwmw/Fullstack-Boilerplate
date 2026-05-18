@@ -46,6 +46,17 @@ export const nextConfig = defineConfig([
       ],
       "better-tailwindcss/no-unnecessary-whitespace": ["warn"],
       curly: ["warn"],
+      "no-restricted-syntax": [
+        "warn",
+        {
+          message: 'avoid template literal for className; use twm(...) or className={[...].join(" ")}',
+          selector: 'JSXAttribute[name.name="className"] > JSXExpressionContainer > TemplateLiteral',
+        },
+        {
+          message: 'avoid template literal for className; use twm(...) or className={[...].join(" ")}',
+          selector: 'Property[key.name="className"] > TemplateLiteral',
+        },
+      ],
       "react/display-name": "warn",
       "react/jsx-fragments": "warn",
       "react/jsx-no-undef": "warn",

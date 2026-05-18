@@ -30,7 +30,13 @@ type T = Readonly<PropsWithChildren>;
 const RootLayout: FC<T> = (props): ReactElement => (
   <html lang="en" suppressHydrationWarning>
     <body
-      className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${roboto.variable} font-inter bg-gray-100 antialiased dark:bg-gray-900`}
+      className={[
+        geistSans.variable,
+        geistMono.variable,
+        inter.variable,
+        roboto.variable,
+        "font-inter bg-gray-100 antialiased dark:bg-gray-900",
+      ].join(" ")}
     >
       <NextThemesProvider>
         <ReactQueryProvider>

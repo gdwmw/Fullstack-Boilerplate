@@ -18,7 +18,7 @@ export const Main: FC = async (): Promise<ReactElement> => {
           label="Home Page"
         />
 
-        <nav className={`w-full ${session ? "space-y-3" : "flex gap-3"}`}>
+        <nav className={["w-full", session ? "space-y-3" : "flex gap-3"].join(" ")}>
           {session ? (
             <div className="flex flex-wrap justify-center gap-3">
               <ChangeThemeButton className="min-w-16" color="blue" cookie={themeCookie?.value ?? ""} size="sm" variant="outline" />
