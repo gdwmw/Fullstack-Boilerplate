@@ -404,6 +404,7 @@ Setiap folder yang sudah memiliki `index.ts` adalah barrel export. Pertahankan p
 - Gunakan `twm(...)` untuk komponen reusable atau class composition yang dipakai lintas tempat, khususnya saat ada potensi utility bertabrakan (contoh `px-*`, `text-*`, `bg-*` saling override).
 - Jika class hanya conditional sederhana dan tidak berpotensi bentrok, gunakan `className={[...].join(" ")}` agar intent lebih jelas.
 - Hindari class `transition*` secara default. Tambahkan hanya jika benar-benar dibutuhkan oleh UX atau diminta eksplisit.
+- **Jangan gunakan atribut `aria-*`** (contoh: `aria-label`, `aria-hidden`, `aria-expanded`, dll.) kecuali diminta eksplisit.
 - Konvensi prop `className` untuk reusable component:
   - Jika komponen hanya punya satu wrapper utama, gunakan `className?: string`.
   - Jika komponen punya beberapa slot yang perlu di-override terpisah, gunakan `className?: { <slotA>?: string; <slotB>?: string }`.

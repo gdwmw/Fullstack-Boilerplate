@@ -71,8 +71,8 @@ export const ExampleATWM = ({ className, color, disabled, size, variant }: IExam
     className,
   );
 
-export const ExampleA: FC<IExampleA> = ({ className, color, disabled, size, variant, ...props }): ReactElement => (
-  <button className={ExampleATWM({ className, color, disabled, size, variant })} data-testid="example-a" disabled={disabled} {...props}>
+export const ExampleA: FC<IExampleA> = ({ className, color, disabled, size, type = "button", variant, ...props }): ReactElement => (
+  <button className={ExampleATWM({ className, color, disabled, size, variant })} data-testid="example-a" disabled={disabled} type={type} {...props}>
     {props.children}
   </button>
 );
