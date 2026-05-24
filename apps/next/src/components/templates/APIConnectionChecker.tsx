@@ -51,7 +51,7 @@ export const APIConnectionChecker: FC = (): ReactElement => {
         }
         return checkConnection(url, i);
       });
-      void Promise.allSettled(tasks);
+      Promise.allSettled(tasks);
     };
 
     handleCheckConnection();

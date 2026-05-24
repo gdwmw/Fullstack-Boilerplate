@@ -1,3 +1,4 @@
+import { changePasswordSchema, loginSchema, registerSchema } from "@repo/schemas";
 import { encryptToken } from "@repo/utils";
 import Elysia, { HTTPHeaders, StatusMap } from "elysia";
 
@@ -5,7 +6,6 @@ import { ERROR_RESPONSE, responseMessage, SUCCESS_RESPONSE } from "@/src/constan
 import { env } from "@/src/environment";
 import { accessJwtPlugin, getBearerToken, handlePrismaError, refreshJwtPlugin, verifyAccessToken } from "@/src/utils";
 
-import { changePasswordSchema, loginSchema, registerSchema } from "./schema";
 import { service } from "./service";
 import { docs } from "./swagger";
 

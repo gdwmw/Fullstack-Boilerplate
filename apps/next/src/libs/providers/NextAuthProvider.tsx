@@ -1,6 +1,7 @@
 "use client";
 
 import { parseDurationToMs } from "@repo/utils";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { SessionProvider, signOut, useSession } from "next-auth/react";
 import { FC, PropsWithChildren, ReactElement, useEffect } from "react";
 
@@ -46,6 +47,14 @@ const RefreshSessionGuard: FC = (): null | ReactElement => {
 
 const AccessTokenRefreshGuard: FC = (): null | ReactElement => {
   const session = useSession();
+  const queryClient = useQueryClient();
+
+  const refreshTokenMutation = useMutation({
+    mutationFn: (refreshToken: string) => POSTRefresh(refreshToken),
+    onError: () => {
+      signOut();
+    },
+  });
 
   useEffect(() => {
     if (session.status !== "authenticated") {
@@ -61,7 +70,7 @@ const AccessTokenRefreshGuard: FC = (): null | ReactElement => {
     const refreshAt = accessTokenExpiresAt - parseDurationToMs(REFRESH_BUFFER_MS);
     const timeUntilRefresh = refreshAt - Date.now();
 
-    const refresh = async () => {
+    const handleRefresh = async () => {
       try {
         const refreshToken = session.data?.user?.refreshToken;
 
@@ -70,7 +79,7 @@ const AccessTokenRefreshGuard: FC = (): null | ReactElement => {
           return;
         }
 
-        const res = await POSTRefresh(refreshToken);
+        const res = await refreshTokenMutation.mutateAsync(refreshToken);
         const refreshedUser = res?.data;
         const newAccessToken = refreshedUser?.accessToken;
         const newRefreshToken = refreshedUser?.refreshToken;
@@ -94,17 +103,19 @@ const AccessTokenRefreshGuard: FC = (): null | ReactElement => {
             status: session.data?.user?.status ?? "authenticated",
           },
         });
+
+        queryClient.invalidateQueries();
       } catch {
         signOut();
       }
     };
 
     if (timeUntilRefresh <= 0) {
-      refresh();
+      handleRefresh();
       return;
     }
 
-    const timeoutId = globalThis.setTimeout(refresh, timeUntilRefresh);
+    const timeoutId = globalThis.setTimeout(handleRefresh, timeUntilRefresh);
 
     return () => {
       globalThis.clearTimeout(timeoutId);

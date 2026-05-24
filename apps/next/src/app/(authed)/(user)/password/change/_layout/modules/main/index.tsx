@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { changePasswordFormSchema, TChangePasswordFormSchema } from "@repo/schemas";
 import { IErrorResponse } from "@repo/types";
 import { logTemplate } from "@repo/utils";
 import { useMutation } from "@tanstack/react-query";
@@ -13,12 +14,10 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { Container, ExampleInput, SubmitButton } from "@/src/components";
 import { POSTChangePassword, POSTLogout } from "@/src/utils";
 
-import { changePasswordSchema, TChangePasswordSchema } from "../schema";
-
 interface IFormField {
   label: string;
   maxLength?: number;
-  name: keyof TChangePasswordSchema;
+  name: keyof TChangePasswordFormSchema;
   type: HTMLInputTypeAttribute;
 }
 
@@ -51,12 +50,12 @@ export const Main: FC = (): ReactElement => {
     handleSubmit,
     register,
     reset,
-  } = useForm<TChangePasswordSchema>({
-    resolver: zodResolver(changePasswordSchema),
+  } = useForm<TChangePasswordFormSchema>({
+    resolver: zodResolver(changePasswordFormSchema),
   });
 
   const changePasswordMutation = useMutation({
-    mutationFn: async (dt: TChangePasswordSchema) => {
+    mutationFn: async (dt: TChangePasswordFormSchema) => {
       const { confirmPassword: _confirmPassword, ...changePasswordPayload } = dt;
       await POSTChangePassword(changePasswordPayload);
       await POSTLogout();
@@ -74,7 +73,7 @@ export const Main: FC = (): ReactElement => {
     },
   });
 
-  const onSubmit: SubmitHandler<TChangePasswordSchema> = (dt) => {
+  const onSubmit: SubmitHandler<TChangePasswordFormSchema> = (dt) => {
     setErrorMessage("");
 
     if (getValues("newPassword") !== getValues("confirmPassword")) {

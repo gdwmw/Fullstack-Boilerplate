@@ -111,6 +111,19 @@ Konfigurasi ESLint menggunakan `--max-warnings 0`, jadi semua warning akan membu
   ```
 
 - `eqeqeq: always` → `===` / `!==`.
+- **Jangan gunakan `void`** — baik untuk membuang Promise maupun untuk tipe return. Panggil fungsi async langsung tanpa `void`, atau gunakan `await` jika hasil/error-nya perlu ditunggu.
+
+  ```ts
+  // ❌
+  void publishEvent(data);
+
+  // ✅ — fire and forget
+  publishEvent(data);
+
+  // ✅ — jika perlu menunggu hasilnya
+  await publishEvent(data);
+  ```
+
 - `@typescript-eslint/no-unused-vars`: argumen/variabel/catch yang sengaja unused harus diawali `_`.
   ```ts
   const { password: _password, ...safeUser } = userRecord;
@@ -176,9 +189,18 @@ import { payloadSchema } from "./schema";
 
 Setiap grup dipisahkan oleh satu baris kosong. Jangan gunakan `import type` maupun `import { type ... }`; cukup `import` biasa agar konsisten dengan aturan project. Jangan mencampur urutan manual, biarkan ESLint melakukan auto-fix.
 
+### Preferensi Import via Barrel
+
+- Jika sebuah folder sudah menyediakan barrel export (`index.ts`), **utamakan import dari level folder** dan hindari direct import ke file internal.
+- Contoh: gunakan `@/src/libs` alih-alih `@/src/libs/pino`, selama symbol yang dibutuhkan sudah di-export dari barrel.
+- Direct import ke file internal hanya dipakai jika symbol tersebut memang belum di-export dari `index.ts`. Jika dibutuhkan lintas file, tambahkan export di barrel terlebih dahulu.
+- Pengecualian: untuk kebutuhan **lazy loading / `next/dynamic`** atau kebutuhan framework lain yang memang mengharuskan referensi module file spesifik, direct import ke file internal diperbolehkan.
+
 ### Barrel Export (`index.ts`)
 
 - **Jangan gunakan `export type`** di barrel export. Gunakan `export * from` saja.
+- Untuk deklarasi lokal di file non-barrel, gunakan inline named export (contoh: `export const startKanbanRedisSubscriber = ...`) dan hindari pola `export { startKanbanRedisSubscriber };` di bagian bawah file.
+- Pengecualian: `export { ... }` tetap boleh untuk kebutuhan re-export antar module atau compatibility tertentu yang memang membutuhkan export list.
 
   ```ts
   // ✅ di barrel (index.ts)
@@ -363,7 +385,8 @@ Setiap folder yang sudah memiliki `index.ts` adalah barrel export. Pertahankan p
   };
   ```
 
-- Form: `react-hook-form` + `zodResolver`. Schema lintas app dari `@repo/schemas`, atau lokal di `_layout/modules/schema.ts` yang re-export schema repo.
+- Form: `react-hook-form` + `zodResolver`. Jika schema berasal dari package shared, import langsung dari `@repo/schemas` (jangan re-export lagi via file schema lokal).
+- File `_layout/modules/schema.ts` hanya untuk schema yang benar-benar spesifik fitur lokal dan tidak tersedia di shared package.
   ```tsx
   const form = useForm<TLoginFormSchema>({ resolver: zodResolver(loginFormSchema(true)) });
   ```
@@ -434,6 +457,9 @@ Wajib mengikuti file set ini:
 | `type.ts`    | `export type TXxxSchema = z.infer<typeof xxxSchema>;` (+ interface lokal kalau perlu).                                                                             |
 | `swagger.ts` | `export const docs = (label: string): Record<...DocumentDecoration> => ({ ... });` — schema response, security, summary, tags.                                     |
 | `index.ts`   | `export * from "./route";`                                                                                                                                         |
+
+- Jika schema berasal dari shared package, import langsung dari `@repo/schemas` di file yang membutuhkan (frontend maupun backend).
+- File schema lokal (`app/<route>/_layout/modules/schema.ts` atau `apps/elysia/src/api/<domain>/schema.ts`) hanya untuk schema yang benar-benar lokal fitur/domain, bukan sebagai lapisan re-export dari package.
 
 Tambahan wajib di `route.ts`:
 
@@ -613,11 +639,7 @@ new Elysia().use(examplesRoute).listen(env.PORT);
 
 - Tambahkan ke `packages/<x>` hanya jika kode **dipakai oleh ≥2 app** atau jelas-jelas reusable lintas konteks.
 - Export wajib melalui `src/index.ts` (barrel).
-- Schema lintas app → `@repo/schemas`. Frontend dapat melakukan re-export pada `_layout/modules/schema.ts` lokal jika perlu rename/extend:
-  ```ts
-  // app/<route>/_layout/modules/schema.ts
-  export { loginFormSchema, type TLoginFormSchema } from "@repo/schemas";
-  ```
+- Schema lintas app → `@repo/schemas`. Jika memakai schema dari packages, gunakan import langsung dari package tersebut (frontend maupun backend) dan jangan re-export lagi lewat file schema lokal.
 - Type yang membungkus Prisma model → `@repo/types`:
 
   ```ts

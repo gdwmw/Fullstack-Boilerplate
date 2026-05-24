@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { loginFormSchema, TLoginFormSchema } from "@repo/schemas";
 import { logTemplate } from "@repo/utils";
 import { useMutation } from "@tanstack/react-query";
 import { ArrowLeftRight, Eye, EyeOff } from "lucide-react";
@@ -11,8 +12,6 @@ import { FC, ReactElement, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 
 import { Container, ExampleATWM, ExampleInput, SubmitButton } from "@/src/components";
-
-import { loginSchema, TLoginSchema } from "../schema";
 
 export const Main: FC = (): ReactElement => {
   const router = useRouter();
@@ -25,12 +24,12 @@ export const Main: FC = (): ReactElement => {
     handleSubmit,
     register,
     reset,
-  } = useForm<TLoginSchema>({
-    resolver: zodResolver(loginSchema(loginWithEmail)),
+  } = useForm<TLoginFormSchema>({
+    resolver: zodResolver(loginFormSchema(loginWithEmail)),
   });
 
   const loginMutation = useMutation({
-    mutationFn: async (dt: TLoginSchema) => {
+    mutationFn: async (dt: TLoginFormSchema) => {
       const method = loginWithEmail ? "email" : "username";
 
       const res = await signIn("credentials", {
@@ -58,7 +57,7 @@ export const Main: FC = (): ReactElement => {
     },
   });
 
-  const onSubmit: SubmitHandler<TLoginSchema> = (dt) => {
+  const onSubmit: SubmitHandler<TLoginFormSchema> = (dt) => {
     setErrorMessage("");
     loginMutation.mutate(dt);
   };

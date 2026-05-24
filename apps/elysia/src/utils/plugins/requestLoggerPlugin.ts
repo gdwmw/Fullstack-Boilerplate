@@ -238,7 +238,7 @@ const getRequestAuditLogger = () => {
 
     destination.once("close", () => {
       if (previousLogPath) {
-        void compressLogFile(previousLogPath);
+        compressLogFile(previousLogPath);
       }
     });
 
@@ -250,7 +250,7 @@ const getRequestAuditLogger = () => {
 
   const filePath = join(logDirectory, fileName);
 
-  void compressArchivedLogFiles({ currentFileName: fileName, directory: logDirectory });
+  compressArchivedLogFiles({ currentFileName: fileName, directory: logDirectory });
 
   const destination = pino.destination({
     append: true,

@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { registerFormSchema, TRegisterFormSchema } from "@repo/schemas";
 import { IErrorResponse } from "@repo/types";
 import { logTemplate } from "@repo/utils";
 import { useMutation } from "@tanstack/react-query";
@@ -14,13 +15,11 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { Container, ExampleATWM, ExampleInput, SubmitButton } from "@/src/components";
 import { inputValidations, POSTRegister } from "@/src/utils";
 
-import { registerSchema, TRegisterSchema } from "../schema";
-
 interface IFormField {
   isPassword?: boolean;
   label: string;
   maxLength?: number;
-  name: keyof TRegisterSchema;
+  name: keyof TRegisterFormSchema;
   onKeyDown?: (e: KeyboardEvent) => void;
   type: HTMLInputTypeAttribute;
 }
@@ -78,12 +77,12 @@ export const Main: FC = (): ReactElement => {
     handleSubmit,
     register,
     reset,
-  } = useForm<TRegisterSchema>({
-    resolver: zodResolver(registerSchema),
+  } = useForm<TRegisterFormSchema>({
+    resolver: zodResolver(registerFormSchema),
   });
 
   const registerMutation = useMutation({
-    mutationFn: async (dt: TRegisterSchema) => {
+    mutationFn: async (dt: TRegisterFormSchema) => {
       const { confirmPassword: _confirmPassword, ...registerPayload } = dt;
       await POSTRegister(registerPayload);
       return true;
@@ -100,7 +99,7 @@ export const Main: FC = (): ReactElement => {
     },
   });
 
-  const onSubmit: SubmitHandler<TRegisterSchema> = (dt) => {
+  const onSubmit: SubmitHandler<TRegisterFormSchema> = (dt) => {
     setErrorMessage("");
 
     if (getValues("password") !== getValues("confirmPassword")) {

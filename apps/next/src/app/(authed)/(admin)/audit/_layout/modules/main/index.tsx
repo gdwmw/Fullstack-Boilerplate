@@ -211,7 +211,7 @@ export const Main: FC<I> = (props): ReactElement => {
 
     const nextPage = page + 1;
 
-    void queryClient.prefetchQuery({
+    queryClient.prefetchQuery({
       queryFn: async () => {
         const res = await GETAuditLogs({
           actor: appliedFilters.actor,
