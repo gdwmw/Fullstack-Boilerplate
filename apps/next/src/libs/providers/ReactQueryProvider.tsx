@@ -11,8 +11,10 @@ export const ReactQueryProvider: FC<Readonly<PropsWithChildren>> = ({ children }
         defaultOptions: {
           queries: {
             gcTime: parseDurationToMs("5m"),
-            retry: (count, error) =>
-              (error as { status?: number }).status !== undefined && (error as { status?: number }).status! >= 500 && count < 4,
+            retry: (count, error) => {
+              const status = (error as { status?: number }).status;
+              return status !== undefined && status >= 500 && count < 4;
+            },
             staleTime: parseDurationToMs("60s"),
           },
         },

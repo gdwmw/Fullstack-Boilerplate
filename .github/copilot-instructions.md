@@ -50,6 +50,20 @@ Sebelum menulis kode, baca konfigurasi ESLint shared (`packages/eslint-config/sr
   if (!first) return null;
   // first sekarang bertipe T
   ```
+- **Jangan gunakan non-null assertion operator `!`**. Selalu lakukan type narrowing yang proper:
+
+  ```ts
+  // ❌ hindari
+  const value = props.data!.id;
+  const item = items[0]!;
+  await fetchData(props.id!);
+
+  // ✅ parameter di dalam if block setelah guard
+  if (props.boardDocumentId) {
+    queryFn: async () => await getBoard(props.boardDocumentId ?? "");
+  }
+  ```
+
 - **Khusus props komponen di `apps/next/src/components/**`**: konvensi project menggunakan single-letter `interface I { ... }`. Jika ada lebih dari satu interface lokal pada file yang sama, gunakan nama yang lebih spesifik dengan prefix `I`.
 
   ```tsx

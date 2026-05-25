@@ -62,7 +62,8 @@ const isTimeWithinRange = ({ candidate, from, to }: { candidate: number; from?: 
     return candidate >= from;
   }
 
-  return candidate <= to!;
+  if (to !== undefined) return candidate <= to;
+  return true;
 };
 
 const parseArchiveDateFromFileName = (fileName: string): null | string => {

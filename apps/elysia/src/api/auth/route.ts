@@ -75,7 +75,16 @@ const getAuthenticatedUserId = async ({
     return { error: verifyResponse, userId: null };
   }
 
-  const bearerToken = getBearerToken(headers.authorization)!;
+  const bearerToken = getBearerToken(headers.authorization);
+
+  if (!bearerToken) {
+    set.status = 401;
+    return {
+      error: ERROR_RESPONSE({ message: responseMessage("access token").required }),
+      userId: null,
+    };
+  }
+
   const decoded = await accessJwt.verify(bearerToken);
   const sub = decoded && typeof decoded === "object" && "sub" in decoded ? decoded.sub : undefined;
   const userId = parseSubjectToUserId(sub);
