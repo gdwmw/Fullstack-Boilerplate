@@ -7,3 +7,11 @@ allowBuilds:
   prisma: true
   sharp: true
   unrs-resolver: true
+minimumReleaseAgeExclude:
+  - '@turbo/darwin-64@2.9.15'
+  - '@turbo/darwin-arm64@2.9.15'
+  - '@turbo/linux-64@2.9.15'
+  - '@turbo/linux-arm64@2.9.15'
+  - '@turbo/windows-64@2.9.15'
+  - '@turbo/windows-arm64@2.9.15'
+  - turbo@2.9.15
