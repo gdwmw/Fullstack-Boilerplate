@@ -222,37 +222,27 @@ import { TPayloadSchema } from "./type";
 import { payloadSchema } from "./schema";
 ```
 
-### 3.8 Barrel Exports
+### 3.8 Direct Imports (No Barrel Exports)
 
-- **NEVER** use `export type` in barrel files. Use only `export * from`.
-- For local declarations in non-barrel files, use inline named exports (`export const myFn = ...`). Avoid bottom-of-file `export { myFn }` patterns.
-- Re-exports between modules may use `export { ... }` when necessary.
+**NEVER** use barrel exports (`index.ts` that re-exports from other modules). Always import directly from the source file:
 
 ```ts
-// ✅ CORRECT — in barrel (index.ts)
-export * from "./audit";
-export * from "./types";
-export * from "./users";
-
-// ❌ WRONG
-export type { TSomeType } from "./types";
-export type * from "./types";
-export { someFunction } from "./utils";
-```
-
-### 3.9 Barrel Import Preference
-
-If a folder has a barrel export (`index.ts`), import from the folder level, not from internal files:
-
-```ts
-// ✅ CORRECT
-import { twm } from "@/src/libs";
-
-// ❌ WRONG — direct internal import when barrel exists
+// ✅ CORRECT — direct import
 import { twm } from "@/src/libs/twm";
+import { prisma } from "@/src/libs/prisma";
+import { logger } from "@/src/libs/pino";
+import { responseMessage } from "@/src/constants/responseMessage";
+import { ERROR_RESPONSE } from "@/src/constants/responseTemplate";
+import { protectedRoutePlugin } from "@/src/utils/plugins/protectedRoutePlugin";
+
+// ❌ WRONG — barrel import
+import { twm } from "@/src/libs";
+import { prisma, logger } from "@/src/libs";
+import { responseMessage, ERROR_RESPONSE } from "@/src/constants";
+import { protectedRoutePlugin } from "@/src/utils";
 ```
 
-Exception: direct internal imports are allowed for `next/dynamic` or framework requirements that need a specific file path.
+For local declarations, use inline named exports (`export const myFn = ...`). Avoid bottom-of-file `export { myFn }` patterns.
 
 ---
 
@@ -269,8 +259,6 @@ Exception: direct internal imports are allowed for `next/dynamic` or framework r
 | Nested element folders                 | single-letter groups `A/`, `B/`, `C/` | `components/elements/example/A/ExampleA.tsx`   |
 | Long folder names                      | kebab-case                            | `handle-prisma-error/`                         |
 | Next App Router folders                | Next conventions                      | `(authed)/(user)/profile/page.tsx`, `_layout/` |
-
-Every folder with an `index.ts` is a barrel export. Maintain this pattern when adding new files.
 
 ---
 
@@ -465,7 +453,7 @@ Route groups `(authed)`, `(admin)`, `(user)` are used for auth scoping.
 
 ### 6.1 File Organization
 
-One file per domain: `users.ts`, `upload.ts`, `audit.ts`. Domains with many endpoints (auth) use a folder + `index.ts` barrel + file per endpoint.
+One file per domain: `users.ts`, `upload.ts`, `audit.ts`. Domains with many endpoints (auth) use a folder + file per endpoint.
 
 ### 6.2 Function Naming
 
@@ -516,7 +504,7 @@ Key rules:
 
 ### 7.1 twm Usage
 
-Use `twm(...)` from `@/src/libs` for:
+Use `twm(...)` from `@/src/libs/twm` for:
 
 - Reusable components
 - Class composition with potential utility conflicts (e.g., `px-*`, `text-*`, `bg-*` overrides)
@@ -586,7 +574,6 @@ Every domain in `api/<domain>/` **MUST** have these files:
 | `schema.ts`  | Zod schemas (`payloadSchema`, `paramSchema`, `querySchema`, etc.) using `schemaMessage` from `@repo/constants` |
 | `type.ts`    | `export type TXxxSchema = z.infer<typeof xxxSchema>;` (+ local interfaces if needed)                           |
 | `swagger.ts` | `export const docs = (label: string): Record<...DocumentDecoration> => ({ ... })`                              |
-| `index.ts`   | `export * from "./route";`                                                                                     |
 
 ### 9.2 Schema
 
@@ -620,7 +607,7 @@ export type TPayloadSchema = z.infer<typeof payloadSchema>;
 
 ```ts
 // apps/elysia/src/api/examples/service.ts
-import { prisma } from "@/src/libs";
+import { prisma } from "@/src/libs/prisma";
 
 import { TPayloadSchema } from "./type";
 
@@ -641,7 +628,7 @@ export const service = {
 // apps/elysia/src/api/examples/swagger.ts
 import { DocumentDecoration } from "elysia";
 
-import { responseMessage } from "@/src/constants";
+import { responseMessage } from "@/src/constants/responseMessage";
 
 export const docs = (label: string): Record<"create" | "getById", DocumentDecoration> => ({
   create: {
@@ -668,8 +655,9 @@ export const docs = (label: string): Record<"create" | "getById", DocumentDecora
 // apps/elysia/src/api/examples/route.ts
 import { Elysia } from "elysia";
 
-import { responseMessage, SUCCESS_RESPONSE } from "@/src/constants";
-import { protectedRoutePlugin } from "@/src/utils/plugins";
+import { SUCCESS_RESPONSE } from "@/src/constants/responseTemplate";
+import { responseMessage } from "@/src/constants/responseMessage";
+import { protectedRoutePlugin } from "@/src/utils/plugins/protectedRoutePlugin";
 
 import { paramSchema, payloadSchema } from "./schema";
 import { service } from "./service";
@@ -701,11 +689,11 @@ export const examplesRoute = new Elysia({ prefix: "/examples" })
 
 ### 9.7 Route Registration
 
-Add new routes to `apps/elysia/src/api/index.ts` (barrel) and mount with `.use(...)` in `apps/elysia/src/index.ts`:
+Add new routes and mount with `.use(...)` in `apps/elysia/src/index.ts`:
 
 ```ts
 // apps/elysia/src/index.ts
-import { examplesRoute } from "@/src/api";
+import { examplesRoute } from "@/src/api/examples/route";
 
 new Elysia().use(examplesRoute).listen(env.PORT);
 ```
@@ -720,7 +708,7 @@ new Elysia().use(examplesRoute).listen(env.PORT);
 
 ### 9.9 Plugin Pattern
 
-- One file per plugin in `utils/plugins/<name>Plugin.ts`, barrel-exported from `utils/plugins/index.ts`.
+- One file per plugin in `utils/plugins/<name>Plugin.ts`.
 - Always attach `protectedRoutePlugin(LABEL)` on auth-required routes.
 - Logging: use `logger` from `libs/pino.ts`. First arg = structured fields (`scope`, `code`, etc.), second = message string.
 
