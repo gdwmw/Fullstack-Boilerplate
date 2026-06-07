@@ -4,10 +4,20 @@ import { X } from "lucide-react";
 import { FC, ReactElement, ReactNode } from "react";
 import { createPortal } from "react-dom";
 
-import { Container, ExampleA, Header } from "@/src/components";
-import { IAuditLogEntry } from "@/src/utils";
+import { ExampleA } from "@/src/components/elements/example/A/ExampleA";
+import { Container } from "@/src/components/templates/Container";
+import { Header } from "@/src/components/templates/Header";
+import { IAuditLogEntry } from "@/src/utils/api/audit";
 
-import { durationClassName, getBrowserName, getDisplayIp, getOSName, levelClassName, methodClassName, statusClassName } from "../../components";
+import {
+  durationClassName,
+  getBrowserName,
+  getDisplayIp,
+  getOSName,
+  levelClassName,
+  methodClassName,
+  statusClassName,
+} from "../../components/AuditTable";
 
 type TAuditPayload = null | Record<string, unknown>;
 type TAuditUser = IAuditLogEntry["users"];

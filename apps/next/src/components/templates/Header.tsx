@@ -1,6 +1,6 @@
 import { FC, ReactElement } from "react";
 
-import { twm } from "@/src/libs";
+import { twm } from "@/src/libs/twm";
 
 interface I {
   className?: {

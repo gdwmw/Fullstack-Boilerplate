@@ -3,7 +3,7 @@ import { logTemplate } from "@repo/utils";
 import axios, { AxiosRequestConfig, AxiosRequestHeaders, AxiosResponse, Method } from "axios";
 
 import { clientEnv } from "@/src/environments/env.client";
-import { getSession } from "@/src/utils";
+import { getSession } from "@/src/utils/server/session";
 
 const API_URL = clientEnv.NEXT_PUBLIC_BASE_API_URL;
 

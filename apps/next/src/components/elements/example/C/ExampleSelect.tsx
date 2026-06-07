@@ -1,8 +1,10 @@
 import { DetailedHTMLProps, FC, forwardRef, ReactElement, SelectHTMLAttributes } from "react";
 
-import { twm } from "@/src/libs";
+import { twm } from "@/src/libs/twm";
 
-import { ExampleErrorMessage, ExampleInputsContainer, ExampleLabel, IExampleLabel } from "./elements";
+import { ExampleErrorMessage } from "./elements/ExampleErrorMessage";
+import { ExampleInputsContainer } from "./elements/ExampleInputsContainer";
+import { ExampleLabel, IExampleLabel } from "./elements/ExampleLabel";
 
 interface I
   extends

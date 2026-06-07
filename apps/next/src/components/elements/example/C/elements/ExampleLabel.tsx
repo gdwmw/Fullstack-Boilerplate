@@ -1,7 +1,7 @@
 import { CircleAlert } from "lucide-react";
 import { FC, PropsWithChildren, ReactElement } from "react";
 
-import { twm } from "@/src/libs";
+import { twm } from "@/src/libs/twm";
 
 import { TExampleCColor } from "../type";
 

@@ -2,7 +2,7 @@ import { User } from "lucide-react";
 import Image from "next/image";
 import { FC, ReactElement } from "react";
 
-import { twm } from "@/src/libs";
+import { twm } from "@/src/libs/twm";
 
 export const AVATAR_SIZE_OPTIONS = ["lg", "md", "sm"] as const;
 export type TAvatarSize = (typeof AVATAR_SIZE_OPTIONS)[number];

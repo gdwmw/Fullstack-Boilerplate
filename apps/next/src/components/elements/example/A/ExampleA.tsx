@@ -1,6 +1,6 @@
 import { ButtonHTMLAttributes, DetailedHTMLProps, FC, ReactElement } from "react";
 
-import { twm } from "@/src/libs";
+import { twm } from "@/src/libs/twm";
 
 export const EXAMPLEA_VARIANT_OPTIONS = ["ghost", "outline", "solid"] as const;
 export const EXAMPLEA_COLOR_OPTIONS = ["red", "green", "blue", "black", "white", "gray"] as const;

@@ -1,8 +1,9 @@
 import { Metadata } from "next";
 import { FC, ReactElement } from "react";
 
-import { Container, Header } from "@/src/components";
-import { getAllSession } from "@/src/utils";
+import { Container } from "@/src/components/templates/Container";
+import { Header } from "@/src/components/templates/Header";
+import { getAllSession } from "@/src/utils/server/session";
 
 export const metadata: Metadata = {
   title: "Admin (Example)",

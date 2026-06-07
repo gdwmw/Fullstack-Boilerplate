@@ -2,7 +2,7 @@ import { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Crown } from "lucide-react";
 import { fn } from "storybook/test";
 
-import { ExampleA, EXAMPLEA_COLOR_OPTIONS, EXAMPLEA_SIZE_OPTIONS, EXAMPLEA_VARIANT_OPTIONS } from ".";
+import { ExampleA, EXAMPLEA_COLOR_OPTIONS, EXAMPLEA_SIZE_OPTIONS, EXAMPLEA_VARIANT_OPTIONS } from "./ExampleA";
 
 const meta: Meta<typeof ExampleA> = {
   args: { onClick: fn(() => alert("Clicked!")) },

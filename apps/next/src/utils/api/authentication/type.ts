@@ -19,10 +19,3 @@ export interface INextAuthResponse extends Partial<Omit<IUsersModel, "email" | "
   sessionStartedAt?: number;
   status?: string;
 }
-
-export * from "./login";
-export * from "./logout";
-export * from "./me";
-export * from "./password";
-export * from "./refresh";
-export * from "./register";

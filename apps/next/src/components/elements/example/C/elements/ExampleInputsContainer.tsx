@@ -1,6 +1,6 @@
 import { FC, PropsWithChildren, ReactElement } from "react";
 
-import { twm } from "@/src/libs";
+import { twm } from "@/src/libs/twm";
 
 interface I extends Readonly<PropsWithChildren> {
   className?: string;

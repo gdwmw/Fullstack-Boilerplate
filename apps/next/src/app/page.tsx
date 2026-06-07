@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { FC, ReactElement } from "react";
 
-import { DEFAULT_ROBOTS, SITE_CREATOR, SITE_DESCRIPTION, SITE_IMAGE, SITE_NAME, SITE_URL } from "@/src/constants";
+import { DEFAULT_ROBOTS, SITE_CREATOR, SITE_DESCRIPTION, SITE_IMAGE, SITE_NAME, SITE_URL } from "@/src/constants/metadata";
 
 import { Main } from "./_layout/modules/main/index-example";
 

@@ -1,9 +1,9 @@
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
 import { ReactElement } from "react";
 
-import { GETMe } from "@/src/utils";
+import { GETMe } from "@/src/utils/api/authentication/me";
 
-import { Main } from "./modules";
+import { Main } from "./modules/main";
 
 const ProfileLayout = async (): Promise<ReactElement> => {
   const queryClient = new QueryClient();

@@ -4,9 +4,8 @@ import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { FC, ReactElement } from "react";
 
-import { setCookie } from "@/src/utils";
-
-import { ExampleA, IExampleA } from "..";
+import { ExampleA, IExampleA } from "@/src/components/elements/example/A/ExampleA";
+import { setCookie } from "@/src/utils/server/cookies";
 
 interface I extends IExampleA {
   cookie: string;

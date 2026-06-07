@@ -5,12 +5,19 @@ import { format } from "date-fns";
 import { FC, ReactElement, useEffect, useMemo, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 
-import { Container, ExampleA, ExampleDatePicker, ExampleInput, ExampleSelect, Header } from "@/src/components";
-import { useModal } from "@/src/hooks";
-import { GETAuditArchives, GETAuditLogs, IAuditArchiveEntry } from "@/src/utils";
+import { ExampleA } from "@/src/components/elements/example/A/ExampleA";
+import { ExampleDatePicker } from "@/src/components/elements/example/C/ExampleDatePicker";
+import { ExampleInput } from "@/src/components/elements/example/C/ExampleInput";
+import { ExampleSelect } from "@/src/components/elements/example/C/ExampleSelect";
+import { Container } from "@/src/components/templates/Container";
+import { Header } from "@/src/components/templates/Header";
+import { useModal } from "@/src/hooks/useModal";
+import { GETAuditArchives, GETAuditLogs, IAuditArchiveEntry } from "@/src/utils/api/audit";
 
-import { AuditDetailModal } from "./batches";
-import { AuditArchiveList, AuditPagination, AuditTable } from "./components";
+import { AuditDetailModal } from "./batches/modal";
+import { AuditArchiveList } from "./components/AuditArchiveList";
+import { AuditPagination } from "./components/AuditPagination";
+import { AuditTable } from "./components/AuditTable";
 
 const LEVEL_OPTIONS = ["ERROR", "INFO"] as const;
 const METHOD_OPTIONS = ["DELETE", "GET", "PATCH", "POST", "PUT"] as const;

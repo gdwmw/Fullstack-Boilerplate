@@ -8,9 +8,8 @@ import { FC, ReactElement, useState } from "react";
 
 import loadingBlack from "@/public/assets/animations/loadings/Loading-B.svg";
 import loadingWhite from "@/public/assets/animations/loadings/Loading-W.svg";
-import { POSTLogout } from "@/src/utils";
-
-import { ExampleA, IExampleA } from "..";
+import { ExampleA, IExampleA } from "@/src/components/elements/example/A/ExampleA";
+import { POSTLogout } from "@/src/utils/api/authentication/logout";
 
 export const LogoutButton: FC<IExampleA> = ({ ...props }): ReactElement => {
   const { systemTheme } = useTheme();

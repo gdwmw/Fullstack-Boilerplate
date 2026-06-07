@@ -1,7 +1,8 @@
 import { ChevronRight } from "lucide-react";
 import { FC, ReactElement } from "react";
 
-import { ExampleA, ExampleSelect } from "@/src/components";
+import { ExampleA } from "@/src/components/elements/example/A/ExampleA";
+import { ExampleSelect } from "@/src/components/elements/example/C/ExampleSelect";
 
 interface IArchiveEntry {
   dateKey: string;

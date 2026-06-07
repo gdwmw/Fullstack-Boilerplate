@@ -1,6 +1,6 @@
 import { FC, ReactElement } from "react";
 
-import { ExampleA } from "@/src/components";
+import { ExampleA } from "@/src/components/elements/example/A/ExampleA";
 
 interface IMeta {
   page: number;

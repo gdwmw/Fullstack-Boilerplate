@@ -3,9 +3,11 @@
 import { FC, ReactElement } from "react";
 import DatePicker, { DatePickerProps } from "react-datepicker";
 
-import { twm } from "@/src/libs";
+import { twm } from "@/src/libs/twm";
 
-import { ExampleErrorMessage, ExampleInputsContainer, ExampleLabel, IExampleLabel } from "./elements";
+import { ExampleErrorMessage } from "./elements/ExampleErrorMessage";
+import { ExampleInputsContainer } from "./elements/ExampleInputsContainer";
+import { ExampleLabel, IExampleLabel } from "./elements/ExampleLabel";
 
 import "@/src/styles/datepicker.css";
 

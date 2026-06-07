@@ -2,9 +2,8 @@ import { ChevronLeft } from "lucide-react";
 import Link, { LinkProps } from "next/link";
 import { FC, ReactElement, ReactNode } from "react";
 
-import { twm } from "@/src/libs";
-
-import { ExampleATWM } from "..";
+import { ExampleATWM } from "@/src/components/elements/example/A/ExampleA";
+import { twm } from "@/src/libs/twm";
 
 interface I extends Omit<LinkProps, "href"> {
   children: ReactNode;

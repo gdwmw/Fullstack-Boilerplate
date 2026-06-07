@@ -1,10 +1,12 @@
 import { Metadata, Viewport } from "next";
 import { FC, PropsWithChildren, ReactElement } from "react";
 
-import { APIConnectionChecker } from "../components";
+import { APIConnectionChecker } from "../components/templates/APIConnectionChecker";
 import { clientEnv } from "../environments/env.client";
 import "../environments/env.server";
-import { NextAuthProvider, NextThemesProvider, ReactQueryProvider } from "../libs";
+import { NextAuthProvider } from "../libs/providers/NextAuthProvider";
+import { NextThemesProvider } from "../libs/providers/NextThemesProvider";
+import { ReactQueryProvider } from "../libs/providers/ReactQueryProvider";
 import { geistMono, geistSans, inter, roboto } from "./fonts";
 import "./globals.css";
 

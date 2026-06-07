@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 import { FC, ReactElement } from "react";
 
-import { getAllSession } from "@/src/utils";
+import { getAllSession } from "@/src/utils/server/session";
 
-import { Main } from "./modules";
+import { Main } from "./modules/main";
 
 const LoginLayout: FC = async (): Promise<ReactElement> => {
   const session = await getAllSession();

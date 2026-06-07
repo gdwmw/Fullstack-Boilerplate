@@ -1,7 +1,7 @@
 import { format, isValid } from "date-fns";
 import { FC, ReactElement } from "react";
 
-import { ExampleA } from "@/src/components";
+import { ExampleA } from "@/src/components/elements/example/A/ExampleA";
 
 interface ILogEntry {
   durationMs: number;

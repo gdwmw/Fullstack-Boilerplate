@@ -11,9 +11,16 @@ import { useRouter } from "next/navigation";
 import { FC, HTMLInputTypeAttribute, KeyboardEvent, ReactElement, useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 
-import { Avatar, Container, ExampleATWM, ExampleInput, SubmitButton } from "@/src/components";
+import { ExampleATWM } from "@/src/components/elements/example/A/ExampleA";
+import { ExampleInput } from "@/src/components/elements/example/C/ExampleInput";
+import { Avatar } from "@/src/components/templates/Avatar";
+import { Container } from "@/src/components/templates/Container";
+import { SubmitButton } from "@/src/components/templates/SubmitButton";
 import { clientEnv } from "@/src/environments/env.client";
-import { DELETEUpload, GETMe, inputValidations, POSTUpload, PUTUsers } from "@/src/utils";
+import { GETMe } from "@/src/utils/api/authentication/me";
+import { DELETEUpload, POSTUpload } from "@/src/utils/api/upload";
+import { PUTUsers } from "@/src/utils/api/users";
+import { inputValidations } from "@/src/utils/validations";
 
 import { profileSchema, TProfileSchema } from "../schema";
 

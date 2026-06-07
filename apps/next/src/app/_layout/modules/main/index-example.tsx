@@ -2,8 +2,13 @@ import { User } from "lucide-react";
 import Link from "next/link";
 import { FC, ReactElement } from "react";
 
-import { ChangeThemeButton, Container, ExampleATWM, Header, LogoutButton } from "@/src/components";
-import { getCookie, getSession } from "@/src/utils";
+import { ExampleATWM } from "@/src/components/elements/example/A/ExampleA";
+import { ChangeThemeButton } from "@/src/components/templates/ChangeThemeButton";
+import { Container } from "@/src/components/templates/Container";
+import { Header } from "@/src/components/templates/Header";
+import { LogoutButton } from "@/src/components/templates/LogoutButton";
+import { getCookie } from "@/src/utils/server/cookies";
+import { getSession } from "@/src/utils/server/session";
 
 export const Main: FC = async (): Promise<ReactElement> => {
   const session = await getSession("status");

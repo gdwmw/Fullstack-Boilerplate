@@ -2,9 +2,9 @@ import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query
 import { isAxiosError } from "axios";
 import { ReactElement } from "react";
 
-import { GETAuditArchives } from "@/src/utils";
+import { GETAuditArchives } from "@/src/utils/api/audit";
 
-import { Main } from "./modules";
+import { Main } from "./modules/main";
 
 const AuditLayout = async (): Promise<ReactElement> => {
   const defaultPageSize = 50;

@@ -1,7 +1,7 @@
 import { ISuccessResponse } from "@repo/types";
 
-import { IAuthResponse } from ".";
 import { postApi } from "../base";
+import { IAuthResponse } from "./type";
 
 export interface IRegisterPayload {
   email: string;

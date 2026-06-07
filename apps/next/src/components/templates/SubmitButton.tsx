@@ -2,7 +2,7 @@ import Image from "next/image";
 import { FC, ReactElement } from "react";
 
 import loadingWhite from "@/public/assets/animations/loadings/Loading-W.svg";
-import { ExampleA, IExampleA } from "@/src/components";
+import { ExampleA, IExampleA } from "@/src/components/elements/example/A/ExampleA";
 
 export const SubmitButton: FC<{ label: string } & IExampleA> = ({ disabled, label, ...props }): ReactElement => (
   <ExampleA disabled={disabled} type="submit" {...props}>

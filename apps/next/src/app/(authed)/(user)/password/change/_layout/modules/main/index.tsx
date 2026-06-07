@@ -11,8 +11,11 @@ import { signOut } from "next-auth/react";
 import { FC, HTMLInputTypeAttribute, ReactElement, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 
-import { Container, ExampleInput, SubmitButton } from "@/src/components";
-import { POSTChangePassword, POSTLogout } from "@/src/utils";
+import { ExampleInput } from "@/src/components/elements/example/C/ExampleInput";
+import { Container } from "@/src/components/templates/Container";
+import { SubmitButton } from "@/src/components/templates/SubmitButton";
+import { POSTLogout } from "@/src/utils/api/authentication/logout";
+import { POSTChangePassword } from "@/src/utils/api/authentication/password";
 
 interface IFormField {
   label: string;

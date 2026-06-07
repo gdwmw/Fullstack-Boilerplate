@@ -1,4 +1,4 @@
-import { INextAuthResponse } from "../utils";
+import { INextAuthResponse } from "../utils/api/authentication/type";
 
 import "next-auth";
 import "next-auth/jwt";

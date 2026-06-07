@@ -1,6 +1,6 @@
 import { DetailedHTMLProps, FC, HTMLAttributes, ReactElement } from "react";
 
-import { twm } from "@/src/libs";
+import { twm } from "@/src/libs/twm";
 
 interface IExampleBContainer extends DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement> {}
 

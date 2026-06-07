@@ -4,10 +4,9 @@ import axios from "axios";
 import { Check, Server, X } from "lucide-react";
 import { FC, ReactElement, useEffect, useState } from "react";
 
+import { ExampleA } from "@/src/components/elements/example/A/ExampleA";
 import { clientEnv } from "@/src/environments/env.client";
-import { useModal } from "@/src/hooks";
-
-import { ExampleA } from "../elements";
+import { useModal } from "@/src/hooks/useModal";
 
 const ENVIRONMENT_DATA_VARIABLES = ["NEXT_PUBLIC_BASE_API_URL"];
 const ENVIRONMENT_DATA_VALUES = [clientEnv.NEXT_PUBLIC_BASE_API_URL];

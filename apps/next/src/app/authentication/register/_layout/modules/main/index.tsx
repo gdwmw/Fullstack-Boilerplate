@@ -12,8 +12,12 @@ import { useRouter } from "next/navigation";
 import { FC, HTMLInputTypeAttribute, KeyboardEvent, ReactElement, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 
-import { Container, ExampleATWM, ExampleInput, SubmitButton } from "@/src/components";
-import { inputValidations, POSTRegister } from "@/src/utils";
+import { ExampleATWM } from "@/src/components/elements/example/A/ExampleA";
+import { ExampleInput } from "@/src/components/elements/example/C/ExampleInput";
+import { Container } from "@/src/components/templates/Container";
+import { SubmitButton } from "@/src/components/templates/SubmitButton";
+import { POSTRegister } from "@/src/utils/api/authentication/register";
+import { inputValidations } from "@/src/utils/validations";
 
 interface IFormField {
   isPassword?: boolean;

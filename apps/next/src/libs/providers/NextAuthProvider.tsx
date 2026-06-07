@@ -6,7 +6,7 @@ import { SessionProvider, signOut, useSession } from "next-auth/react";
 import { FC, PropsWithChildren, ReactElement, useEffect } from "react";
 
 import { clientEnv } from "@/src/environments/env.client";
-import { POSTRefresh } from "@/src/utils";
+import { POSTRefresh } from "@/src/utils/api/authentication/refresh";
 
 type T = Readonly<PropsWithChildren>;
 

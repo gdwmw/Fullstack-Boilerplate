@@ -7,7 +7,8 @@ import CredentialsProvider from "next-auth/providers/credentials";
 
 import { clientEnv } from "@/src/environments/env.client";
 import { serverEnv } from "@/src/environments/env.server";
-import { IAuthResponse, ILoginPayload, POSTLogin } from "@/src/utils";
+import { ILoginPayload, POSTLogin } from "@/src/utils/api/authentication/login";
+import { IAuthResponse } from "@/src/utils/api/authentication/type";
 
 const SESSION_EXPIRES_IN = serverEnv.NEXTAUTH_SESSION_EXPIRES_IN;
 const ACCESS_TOKEN_EXPIRES_IN = clientEnv.NEXT_PUBLIC_ACCESS_TOKEN_EXPIRES_IN;
