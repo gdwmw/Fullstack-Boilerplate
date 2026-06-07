@@ -1,7 +1,7 @@
 import { schemaMessage } from "@repo/constants";
 import { z } from "zod";
 
-import { paginationQuerySchema } from "@/src/utils";
+import { paginationQuerySchema } from "@/src/utils/pagination";
 
 export const querySchema = paginationQuerySchema.extend({
   actor: z.string().optional(),

@@ -1,13 +1,13 @@
 import { vi } from "vitest";
 
-vi.mock("@/src/libs", () => ({
+vi.mock("@/src/libs/redis", () => ({
   redis: {
     exists: vi.fn(),
   },
 }));
 
-import { redis } from "@/src/libs";
-import { getBearerToken, verifyResponse } from "@/src/utils";
+import { redis } from "@/src/libs/redis";
+import { getBearerToken, verifyResponse } from "@/src/utils/verifyAccessToken";
 
 const mockRedis = vi.mocked(redis);
 

@@ -4,8 +4,8 @@ import { mkdir, readdir, rm, stat } from "node:fs/promises";
 import { join } from "node:path";
 
 import { env } from "@/src/environment";
-import { logger } from "@/src/libs";
-import { checkZstdAvailability, compressLogFile } from "@/src/utils";
+import { logger } from "@/src/libs/pino";
+import { checkZstdAvailability, compressLogFile } from "@/src/utils/logCompression";
 
 const ONE_DAY_IN_MS = parseDurationToMs("1d");
 const BACKUP_FILE_PREFIX = "postgres-";

@@ -6,8 +6,9 @@ import { getPlaiceholder } from "plaiceholder";
 import sharp from "sharp";
 
 import { Prisma } from "@/src/generated/prisma/client";
-import { logger, prisma } from "@/src/libs";
-import { createPaginationMeta } from "@/src/utils";
+import { logger } from "@/src/libs/pino";
+import { prisma } from "@/src/libs/prisma";
+import { createPaginationMeta } from "@/src/utils/pagination";
 
 import { TQuerySchema } from "./type";
 

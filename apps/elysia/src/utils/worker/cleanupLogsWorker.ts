@@ -4,8 +4,8 @@ import { readdir, rm, stat } from "node:fs/promises";
 import { join } from "node:path";
 
 import { env } from "@/src/environment";
-import { logger } from "@/src/libs";
-import { getLogDirectory, isRequestLogFileName } from "@/src/utils";
+import { logger } from "@/src/libs/pino";
+import { getLogDirectory, isRequestLogFileName } from "@/src/utils/logCompression";
 
 const ONE_DAY_IN_MS = parseDurationToMs("1d");
 

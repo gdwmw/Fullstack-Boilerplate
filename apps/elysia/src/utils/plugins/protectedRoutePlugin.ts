@@ -1,6 +1,7 @@
 import Elysia from "elysia";
 
-import { handlePrismaError, verifyAccessToken } from "@/src/utils";
+import { handlePrismaError } from "@/src/utils/handle-prisma-error/handlePrismaError";
+import { verifyAccessToken } from "@/src/utils/verifyAccessToken";
 
 import { accessJwtPlugin } from "./jwtPlugin";
 

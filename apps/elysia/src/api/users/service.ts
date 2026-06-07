@@ -1,7 +1,7 @@
 import { USER_OMIT_FIELDS } from "@repo/types";
 
-import { prisma } from "@/src/libs";
-import { createPaginationMeta } from "@/src/utils";
+import { prisma } from "@/src/libs/prisma";
+import { createPaginationMeta } from "@/src/utils/pagination";
 
 import { TPayloadSchema, TQuerySchema } from "./type";
 

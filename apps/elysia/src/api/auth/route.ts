@@ -2,9 +2,12 @@ import { changePasswordSchema, loginSchema, registerSchema } from "@repo/schemas
 import { encryptToken } from "@repo/utils";
 import Elysia, { HTTPHeaders, StatusMap } from "elysia";
 
-import { ERROR_RESPONSE, responseMessage, SUCCESS_RESPONSE } from "@/src/constants";
+import { responseMessage } from "@/src/constants/responseMessage";
+import { ERROR_RESPONSE, SUCCESS_RESPONSE } from "@/src/constants/responseTemplate";
 import { env } from "@/src/environment";
-import { accessJwtPlugin, getBearerToken, handlePrismaError, refreshJwtPlugin, verifyAccessToken } from "@/src/utils";
+import { handlePrismaError } from "@/src/utils/handle-prisma-error/handlePrismaError";
+import { accessJwtPlugin, refreshJwtPlugin } from "@/src/utils/plugins/jwtPlugin";
+import { getBearerToken, verifyAccessToken } from "@/src/utils/verifyAccessToken";
 
 import { service } from "./service";
 import { docs } from "./swagger";

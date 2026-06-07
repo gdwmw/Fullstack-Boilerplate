@@ -1,10 +1,18 @@
 import { Elysia } from "elysia";
 import { normalize, resolve, sep } from "path";
 
-import { auditRoutes, authRoutes, uploadRoutes, usersRoutes } from "./api";
+import { auditRoutes } from "./api/audit/route";
+import { authRoutes } from "./api/auth/route";
+import { uploadRoutes } from "./api/upload/route";
+import { usersRoutes } from "./api/users/route";
 import { env } from "./environment";
-import { logger } from "./libs";
-import { checkZstdAvailability, cleanupLogsWorker, corsPlugin, databaseBackupWorker, requestLoggerPlugin, swaggerPlugin } from "./utils";
+import { logger } from "./libs/pino";
+import { checkZstdAvailability } from "./utils/logCompression";
+import { corsPlugin } from "./utils/plugins/corsPlugin";
+import { requestLoggerPlugin } from "./utils/plugins/requestLoggerPlugin";
+import { swaggerPlugin } from "./utils/plugins/swaggerPlugin";
+import { cleanupLogsWorker } from "./utils/worker/cleanupLogsWorker";
+import { databaseBackupWorker } from "./utils/worker/databaseBackupWorker";
 
 const UPLOAD_DIR = resolve(process.cwd(), "uploads");
 

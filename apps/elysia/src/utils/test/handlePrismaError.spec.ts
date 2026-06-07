@@ -1,6 +1,6 @@
 import { vi } from "vitest";
 
-vi.mock("@/src/libs", () => ({
+vi.mock("@/src/libs/pino", () => ({
   logger: {
     error: vi.fn(),
   },
@@ -23,7 +23,7 @@ vi.mock("@/src/generated/prisma/client", () => ({
 import { StatusMap } from "elysia";
 
 import { Prisma } from "@/src/generated/prisma/client";
-import { handlePrismaError } from "@/src/utils";
+import { handlePrismaError } from "@/src/utils/handle-prisma-error/handlePrismaError";
 
 const makeSet = () => ({ headers: {} as Record<string, string>, status: undefined as keyof StatusMap | number | undefined });
 

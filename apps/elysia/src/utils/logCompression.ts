@@ -6,7 +6,7 @@ import { basename, join } from "node:path";
 import { promisify } from "node:util";
 
 import { env } from "@/src/environment";
-import { logger } from "@/src/libs";
+import { logger } from "@/src/libs/pino";
 
 const execFileAsync = promisify(execFile);
 

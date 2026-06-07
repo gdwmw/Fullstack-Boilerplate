@@ -1,6 +1,6 @@
 import { DocumentDecoration } from "elysia";
 
-import { responseMessage } from "@/src/constants";
+import { responseMessage } from "@/src/constants/responseMessage";
 
 export const docs = (label: string): Record<"changePassword" | "login" | "logout" | "me" | "refresh" | "register", DocumentDecoration> => {
   const successResponseSchema = (message: string) =>

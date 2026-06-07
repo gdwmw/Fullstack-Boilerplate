@@ -1,7 +1,8 @@
 import Elysia from "elysia";
 
-import { responseMessage, SUCCESS_RESPONSE } from "@/src/constants";
-import { protectedRoutePlugin } from "@/src/utils";
+import { responseMessage } from "@/src/constants/responseMessage";
+import { SUCCESS_RESPONSE } from "@/src/constants/responseTemplate";
+import { protectedRoutePlugin } from "@/src/utils/plugins/protectedRoutePlugin";
 
 import { paramSchema, querySchema, uploadSchema } from "./schema";
 import { service } from "./service";

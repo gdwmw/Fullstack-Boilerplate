@@ -4,15 +4,11 @@ import { join } from "node:path";
 import pino from "pino";
 
 import { env } from "@/src/environment";
-import { logger, prisma } from "@/src/libs";
-import {
-  compressArchivedLogFiles,
-  compressLogFile,
-  getBearerToken,
-  getLogDirectory,
-  getPrismaErrorMessage,
-  getRequestLogFileName,
-} from "@/src/utils";
+import { logger } from "@/src/libs/pino";
+import { prisma } from "@/src/libs/prisma";
+import { getPrismaErrorMessage } from "@/src/utils/handle-prisma-error/handlePrismaError";
+import { compressArchivedLogFiles, compressLogFile, getLogDirectory, getRequestLogFileName } from "@/src/utils/logCompression";
+import { getBearerToken } from "@/src/utils/verifyAccessToken";
 
 export const requestStartTimes = new WeakMap<Request, number>();
 

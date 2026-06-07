@@ -1,4 +1,4 @@
-import { responseMessage } from "@/src/constants";
+import { responseMessage } from "@/src/constants/responseMessage";
 
 describe("responseMessage", () => {
   describe("with standard input", () => {

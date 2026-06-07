@@ -1,6 +1,6 @@
 import { DocumentDecoration } from "elysia";
 
-import { responseMessage } from "@/src/constants";
+import { responseMessage } from "@/src/constants/responseMessage";
 
 export const docs = (label: string): Record<"getAll" | "getArchives", DocumentDecoration> => {
   const successResponseSchema = ({ data, message, meta }: { data: Record<string, unknown>; message: string; meta?: Record<string, unknown> }) =>

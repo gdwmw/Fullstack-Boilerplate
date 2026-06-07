@@ -2,15 +2,15 @@ import { format } from "date-fns";
 import { readdir, readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 
-import { logger } from "@/src/libs";
+import { logger } from "@/src/libs/pino";
 import {
   decompressLogFileToTemp,
   getLogDirectory,
   getRequestLogFileName,
   isCompressedRequestLogFileName,
   isRequestLogFileName,
-  paginateArray,
-} from "@/src/utils";
+} from "@/src/utils/logCompression";
+import { paginateArray } from "@/src/utils/pagination";
 
 import { IArchiveEntry, ILogEntry, TArchiveQuerySchema, TQuerySchema } from "./type";
 

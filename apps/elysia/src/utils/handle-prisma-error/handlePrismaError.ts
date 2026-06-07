@@ -1,8 +1,9 @@
 import { HTTPHeaders, StatusMap } from "elysia";
 
-import { ERROR_RESPONSE, responseMessage } from "@/src/constants";
+import { responseMessage } from "@/src/constants/responseMessage";
+import { ERROR_RESPONSE } from "@/src/constants/responseTemplate";
 import { Prisma } from "@/src/generated/prisma/client";
-import { logger } from "@/src/libs";
+import { logger } from "@/src/libs/pino";
 
 import { P2002, P2003 } from "./extract";
 

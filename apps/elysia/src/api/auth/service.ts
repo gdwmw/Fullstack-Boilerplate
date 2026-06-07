@@ -1,6 +1,7 @@
 import { USER_OMIT_FIELDS } from "@repo/types";
 
-import { prisma, redis } from "@/src/libs";
+import { prisma } from "@/src/libs/prisma";
+import { redis } from "@/src/libs/redis";
 
 import { TChangePasswordSchema, TLoginSchema, TRegisterSchema } from "./type";
 

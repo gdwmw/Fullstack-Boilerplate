@@ -1,7 +1,8 @@
 import { HTTPHeaders, StatusMap } from "elysia";
 
-import { ERROR_RESPONSE, responseMessage } from "@/src/constants";
-import { redis } from "@/src/libs";
+import { responseMessage } from "@/src/constants/responseMessage";
+import { ERROR_RESPONSE } from "@/src/constants/responseTemplate";
+import { redis } from "@/src/libs/redis";
 
 export const getBearerToken = (authorization?: string) => (authorization?.startsWith("Bearer ") ? authorization.slice(7) : null);
 

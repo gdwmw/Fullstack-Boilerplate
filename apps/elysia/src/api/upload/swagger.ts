@@ -1,6 +1,6 @@
 import { DocumentDecoration } from "elysia";
 
-import { responseMessage } from "@/src/constants";
+import { responseMessage } from "@/src/constants/responseMessage";
 
 export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "upload", DocumentDecoration> => {
   const unauthorizedMessage = `${responseMessage("access token").required} or ${responseMessage("access token").invalid} or ${

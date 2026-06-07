@@ -1,7 +1,7 @@
 import { schemaMessage } from "@repo/constants";
 import { z } from "zod";
 
-import { paginationQuerySchema } from "@/src/utils";
+import { paginationQuerySchema } from "@/src/utils/pagination";
 
 export const payloadSchema = z.object({
   email: z.email({ message: schemaMessage.string.email("email") }),

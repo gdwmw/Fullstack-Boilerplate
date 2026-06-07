@@ -1,7 +1,7 @@
 import { schemaMessage } from "@repo/constants";
 import { z } from "zod";
 
-import { paginationQuerySchema } from "@/src/utils";
+import { paginationQuerySchema } from "@/src/utils/pagination";
 
 const FILE_MAX_SIZE = 10 * 1024 * 1024;
 
