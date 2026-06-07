@@ -1,189 +1,210 @@
-# Copilot Instructions for Fullstack-Boilerplate
+# AI Coding Instructions
 
-Panduan ini wajib diikuti untuk semua perubahan kode agar konsisten dengan pola repository.
-Saat menulis kode baru, **selalu lihat file sejenis di sekitarnya terlebih dahulu** dan ikuti pola yang sudah ada. Jangan membuat pola baru sendiri.
-
----
-
-## 1. Cakupan Proyek
-
-Monorepo ini menggunakan Turborepo + pnpm workspace, runtime Node 22+ (Bun untuk backend), dan TypeScript strict.
-
-| Path                     | Isi                                                                                                       |
-| ------------------------ | --------------------------------------------------------------------------------------------------------- |
-| `apps/next`              | Frontend Next.js App Router (React 19, Tailwind v4, React Query, Jotai, NextAuth, react-hook-form + Zod). |
-| `apps/elysia`            | Backend Elysia.js (Bun runtime, Prisma + PostgreSQL, Redis/ioredis, Pino, JWT).                           |
-| `packages/constants`     | Konstanta lintas app (`schemaMessage`).                                                                   |
-| `packages/schemas`       | Zod schema lintas app (auth dll.).                                                                        |
-| `packages/types`         | Type lintas app (wrapper Prisma model).                                                                   |
-| `packages/utils`         | Util lintas app (`logTemplate`, `parseDurationToMs`).                                                     |
-| `packages/eslint-config` | Shared ESLint flat config (`base`, `next`, `elysia`).                                                     |
-
-Sebelum menulis kode, baca konfigurasi ESLint shared (`packages/eslint-config/src/{base,next,elysia}.js`) dan `tsconfig` per app. Seluruh aturan pada file tersebut menjadi acuan untuk contoh-contoh di bawah.
+This document defines the **mandatory** conventions for all code changes in this monorepo. Before writing any code, read similar files in the surrounding context and match their patterns exactly. Do not invent new patterns.
 
 ---
 
-## 2. TypeScript
+## 1. Project Overview
 
-- Mode `strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`, dan `useUnknownInCatchVariables` aktif. Error pada `catch` bertipe `unknown` harus di-narrow terlebih dahulu. Akses array/record bertipe `T | undefined` juga harus di-guard terlebih dahulu.
-- Hindari `any`. Pakai `unknown` + narrowing kalau benar-benar dinamis.
-- Penamaan tipe:
-  - `interface` → prefix `I` (contoh: `IUsersModel`, `IPaginationMeta`, `IExampleA`). Pakai untuk object contract yang akan di-`extend`/`implement`.
-  - `type` → prefix `T` (contoh: `TPayloadSchema`, `TLoginSchema`, `TCurrencyCode`). Pakai untuk union, mapped, utility, hasil `z.infer`, atau alias singkat lokal komponen.
-- Tipe yang berasal dari Zod:
-  ```ts
-  export const payloadSchema = z.object({ name: z.string() });
-  export type TPayloadSchema = z.infer<typeof payloadSchema>;
-  ```
-- Error pada `catch` harus di-narrow:
-  ```ts
-  try {
-    /* ... */
-  } catch (error) {
-    if (error instanceof Error) logger.error({ error }, error.message);
-    throw error;
-  }
-  ```
-- Akses index bertipe `T | undefined` harus di-guard:
-  ```ts
-  const first = items[0];
-  if (!first) return null;
-  // first sekarang bertipe T
-  ```
-- **Jangan gunakan non-null assertion operator `!`**. Selalu lakukan type narrowing yang proper:
+Monorepo managed by **Turborepo + pnpm workspace**. Node 22+ (Bun for backend). TypeScript strict mode everywhere.
 
-  ```ts
-  // ❌ hindari
-  const value = props.data!.id;
-  const item = items[0]!;
-  await fetchData(props.id!);
+| Path                     | Purpose                                                                                                  |
+| ------------------------ | -------------------------------------------------------------------------------------------------------- |
+| `apps/next`              | Next.js App Router frontend (React 19, Tailwind v4, React Query, Jotai, NextAuth, react-hook-form + Zod) |
+| `apps/elysia`            | Elysia.js backend (Bun runtime, Prisma + PostgreSQL, Redis/ioredis, Pino, JWT)                           |
+| `packages/constants`     | Cross-app constants (`schemaMessage`, `POSITION_STEP`)                                                   |
+| `packages/schemas`       | Cross-app Zod schemas (auth, etc.)                                                                       |
+| `packages/types`         | Cross-app types (Prisma model wrappers like `IKanbanBoard`, `IUsersModel`)                               |
+| `packages/utils`         | Cross-app utilities (`logTemplate`, `parseDurationToMs`)                                                 |
+| `packages/eslint-config` | Shared ESLint flat config (`base`, `next`, `elysia`)                                                     |
 
-  // ✅ parameter di dalam if block setelah guard
-  if (props.boardDocumentId) {
-    queryFn: async () => await getBoard(props.boardDocumentId ?? "");
-  }
-  ```
-
-- **Khusus props komponen di `apps/next/src/components/**`**: konvensi project menggunakan single-letter `interface I { ... }`. Jika ada lebih dari satu interface lokal pada file yang sama, gunakan nama yang lebih spesifik dengan prefix `I`.
-
-  ```tsx
-  interface I {
-    label: string;
-    onClick: () => void;
-  }
-
-  export const SubmitButton: FC<I> = (props): ReactElement => <button onClick={props.onClick}>{props.label}</button>;
-  ```
+**Before writing code**: read the relevant ESLint config (`packages/eslint-config/src/{base,next,elysia}.js`) and `tsconfig` per app. All rules in those files are authoritative.
 
 ---
 
-## 3. Style & ESLint
+## 2. TypeScript Rules
 
-Konfigurasi ESLint menggunakan `--max-warnings 0`, jadi semua warning akan membuat build gagal. Aturan utama yang paling sering terkena:
+### 2.1 Strict Mode Compliance
 
-- `prefer-const`, `prefer-template`, `prefer-arrow-callback`, `arrow-body-style: as-needed`, `func-style: expression` → selalu gunakan arrow function expression dengan `const`.
+`strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`, and `useUnknownInCatchVariables` are all active. This means:
 
-  ```ts
-  // ✅
-  const greet = (name: string): string => `hello ${name}`;
+- `catch` errors are typed `unknown` — always narrow before use.
+- Array/record access returns `T | undefined` — always guard before use.
+- **NEVER** use `any`. Use `unknown` + narrowing for dynamic values.
+- **NEVER** use the non-null assertion operator `!`. Always use proper type narrowing.
 
-  // ❌ function declaration / string concat / body block tak perlu
-  function greet(name: string) {
-    return "hello " + name;
-  }
-  const greet = (name: string) => {
-    return `hello ${name}`;
-  };
-  ```
+```ts
+// ❌ WRONG
+const value = props.data!.id;
+const item = items[0]!;
+await fetchData(props.id!);
 
-- `no-nested-ternary` → pecah ternary menjadi variabel atau early return.
+// ✅ CORRECT
+if (props.data) {
+  const value = props.data.id;
+}
 
-  ```ts
-  // ❌
-  const tone = isError ? "red" : isWarn ? "yellow" : "gray";
+const first = items[0];
+if (!first) return null;
 
-  // ✅
-  const getTone = (): string => {
-    if (isError) return "red";
-    if (isWarn) return "yellow";
-    return "gray";
-  };
-  ```
-
-- `complexity: 25`, `max-params: 4` → jika melebihi batas, pisahkan menjadi helper atau gunakan single object param `{ ... }`.
-
-  ```ts
-  // ❌ 5 param
-  const createUser = (name, email, role, phone, avatar) => {
-    /* ... */
-  };
-
-  // ✅ object param
-  const createUser = (input: { avatar: string; email: string; name: string; phone: string; role: string }) => {
-    /* ... */
-  };
-  ```
-
-- `eqeqeq: always` → `===` / `!==`.
-- **Jangan gunakan `void`** — baik untuk membuang Promise maupun untuk tipe return. Panggil fungsi async langsung tanpa `void`, atau gunakan `await` jika hasil/error-nya perlu ditunggu.
-
-  ```ts
-  // ❌
-  void publishEvent(data);
-
-  // ✅ — fire and forget
-  publishEvent(data);
-
-  // ✅ — jika perlu menunggu hasilnya
-  await publishEvent(data);
-  ```
-
-- `@typescript-eslint/no-unused-vars`: argumen/variabel/catch yang sengaja unused harus diawali `_`.
-  ```ts
-  const { password: _password, ...safeUser } = userRecord;
-  ```
-- **Perfectionist plugin** (alphabetical):
-  - **Object keys di-sort alphabetical** dengan `id` selalu di awal (custom group).
-    ```ts
-    // ✅
-    const user = {
-      id: "u_1",
-      createdAt: new Date(),
-      email: "a@b.com",
-      name: "alice",
-      role: "user",
-    };
-    ```
-  - **Imports** dipisah newline antar grup, urut alphabetical, internal pattern `@/` dan `@repo/`.
-- **Tailwind**: gunakan helper `twm` untuk komponen reusable (terutama di `components/**`) atau saat ada potensi class utility bertabrakan/override. Jika hanya conditional class sederhana tanpa bentrok utility, utamakan `className={[...].join(" ")}`. Untuk layout/page/module yang non-reusable, className biasa tetap diperbolehkan. Plugin `better-tailwindcss` tetap aktif (`callees: ["twm"]`, variabel `*TWM`).
-
-  ```ts
-  // libs/twm.ts (tipikal isinya)
-  import clsx, { ClassValue } from "clsx";
-  import { twMerge } from "tailwind-merge";
-  export const twm = (...inputs: ClassValue[]): string => twMerge(clsx(inputs));
-  ```
-
-  ```tsx
-  // ✅
-  <div className={twm("rounded-md p-4", isActive && "bg-blue-500", className)} />
-
-  // ❌
-  <div className={`rounded-md p-4 ${isActive ? "bg-blue-500" : ""} ${className}`} />
-  ```
-
-### Urutan dan Grup Import
-
-Diurutkan otomatis oleh `perfectionist/sort-imports`. Urutannya:
-
-```
-1. semua import pakai `import` biasa (jangan gunakan `import type` atau `import { type ... }`)
-2. builtin + external (alphabetical, satu grup)
-3. internal (`@/...`, `@repo/...`)
-4. parent / sibling / index
+if (props.boardDocumentId) {
+  await getBoard(props.boardDocumentId);
+}
 ```
 
-Contoh tipikal:
+### 2.2 Catch Error Narrowing
+
+```ts
+try {
+  /* ... */
+} catch (error) {
+  if (error instanceof Error) logger.error({ error }, error.message);
+  throw error;
+}
+```
+
+### 2.3 Type Naming Conventions
+
+| Construct   | Prefix | Usage                                                                 | Example                          |
+| ----------- | ------ | --------------------------------------------------------------------- | -------------------------------- |
+| `interface` | `I`    | Object contracts that will be `extend`ed/`implement`ed                | `IUsersModel`, `IPaginationMeta` |
+| `type`      | `T`    | Unions, mapped types, utility types, `z.infer` results, local aliases | `TPayloadSchema`, `TLoginSchema` |
+
+```ts
+// Zod inferred types
+export const payloadSchema = z.object({ name: z.string() });
+export type TPayloadSchema = z.infer<typeof payloadSchema>;
+```
+
+### 2.4 Component Props Interface (apps/next/src/components/\*\*)
+
+For simple components in the shared `components/` directory, use a single-letter `interface I`:
+
+```tsx
+interface I {
+  label: string;
+  onClick: () => void;
+}
+
+export const SubmitButton: FC<I> = (props): ReactElement => <button onClick={props.onClick}>{props.label}</button>;
+```
+
+If there are multiple local interfaces in the same file, use a more specific name with `I` prefix (e.g., `IHeaderProps`, `IFooterProps`).
+
+### 2.5 Void Usage
+
+**NEVER** use `void` — neither to discard a Promise nor as a return type. Call async functions directly (fire-and-forget) or `await` them.
+
+```ts
+// ❌ WRONG
+void publishEvent(data);
+
+// ✅ CORRECT — fire and forget
+publishEvent(data);
+
+// ✅ CORRECT — when you need the result
+await publishEvent(data);
+```
+
+---
+
+## 3. Code Style & ESLint
+
+ESLint runs with `--max-warnings 0`, so **every warning is a build failure**.
+
+### 3.1 Function Style
+
+Always use arrow function expressions with `const`. Never use function declarations.
+
+```ts
+// ✅ CORRECT
+const greet = (name: string): string => `hello ${name}`;
+
+// ❌ WRONG — function declaration
+function greet(name: string) {
+  return "hello " + name;
+}
+
+// ❌ WRONG — unnecessary body block
+const greet = (name: string) => {
+  return `hello ${name}`;
+};
+```
+
+### 3.2 No Nested Ternaries
+
+Break nested ternaries into variables or early returns:
+
+```ts
+// ❌ WRONG
+const tone = isError ? "red" : isWarn ? "yellow" : "gray";
+
+// ✅ CORRECT
+const getTone = (): string => {
+  if (isError) return "red";
+  if (isWarn) return "yellow";
+  return "gray";
+};
+```
+
+### 3.3 Complexity & Params Limits
+
+- `complexity: 25` — break complex logic into helpers.
+- `max-params: 4` — if a function needs more than 4 params, use a single object param:
+
+```ts
+// ❌ WRONG — 5 params
+const createUser = (name, email, role, phone, avatar) => {
+  /* ... */
+};
+
+// ✅ CORRECT — object param
+const createUser = (input: { avatar: string; email: string; name: string; phone: string; role: string }) => {
+  /* ... */
+};
+```
+
+### 3.4 Strict Equality
+
+Always use `===` / `!==`. Never use `==` / `!=`.
+
+### 3.5 Unused Variables
+
+Prefix intentionally unused arguments/variables/catch bindings with `_`:
+
+```ts
+const { password: _password, ...safeUser } = userRecord;
+```
+
+### 3.6 Perfectionist Plugin (Alphabetical Ordering)
+
+**Object keys**: sorted alphabetically, with `id` always first (custom group):
+
+```ts
+// ✅ CORRECT
+const user = {
+  id: "u_1",
+  createdAt: new Date(),
+  email: "a@b.com",
+  name: "alice",
+  role: "user",
+};
+```
+
+**Imports**: separated by newlines between groups, alphabetical within each group. Internal patterns: `@/` and `@repo/`.
+
+### 3.7 Import Order & Rules
+
+Imports are auto-sorted by `perfectionist/sort-imports`. The order is:
+
+```
+1. ALL imports use regular `import` (NEVER use `import type` or `import { type ... }`)
+2. Builtin + external (alphabetical, one group)
+3. Internal (`@/...`, `@repo/...`)
+4. Parent / sibling / index
+```
+
+Each group is separated by one blank line. Do NOT use `import type` or `import { type ... }` — use plain `import` for everything.
 
 ```ts
 import { FC, ReactElement } from "react";
@@ -201,102 +222,131 @@ import { TPayloadSchema } from "./type";
 import { payloadSchema } from "./schema";
 ```
 
-Setiap grup dipisahkan oleh satu baris kosong. Jangan gunakan `import type` maupun `import { type ... }`; cukup `import` biasa agar konsisten dengan aturan project. Jangan mencampur urutan manual, biarkan ESLint melakukan auto-fix.
+### 3.8 Barrel Exports
 
-### Preferensi Import via Barrel
+- **NEVER** use `export type` in barrel files. Use only `export * from`.
+- For local declarations in non-barrel files, use inline named exports (`export const myFn = ...`). Avoid bottom-of-file `export { myFn }` patterns.
+- Re-exports between modules may use `export { ... }` when necessary.
 
-- Jika sebuah folder sudah menyediakan barrel export (`index.ts`), **utamakan import dari level folder** dan hindari direct import ke file internal.
-- Contoh: gunakan `@/src/libs` alih-alih `@/src/libs/pino`, selama symbol yang dibutuhkan sudah di-export dari barrel.
-- Direct import ke file internal hanya dipakai jika symbol tersebut memang belum di-export dari `index.ts`. Jika dibutuhkan lintas file, tambahkan export di barrel terlebih dahulu.
-- Pengecualian: untuk kebutuhan **lazy loading / `next/dynamic`** atau kebutuhan framework lain yang memang mengharuskan referensi module file spesifik, direct import ke file internal diperbolehkan.
+```ts
+// ✅ CORRECT — in barrel (index.ts)
+export * from "./audit";
+export * from "./types";
+export * from "./users";
 
-### Barrel Export (`index.ts`)
+// ❌ WRONG
+export type { TSomeType } from "./types";
+export type * from "./types";
+export { someFunction } from "./utils";
+```
 
-- **Jangan gunakan `export type`** di barrel export. Gunakan `export * from` saja.
-- Untuk deklarasi lokal di file non-barrel, gunakan inline named export (contoh: `export const startKanbanRedisSubscriber = ...`) dan hindari pola `export { startKanbanRedisSubscriber };` di bagian bawah file.
-- Pengecualian: `export { ... }` tetap boleh untuk kebutuhan re-export antar module atau compatibility tertentu yang memang membutuhkan export list.
+### 3.9 Barrel Import Preference
 
-  ```ts
-  // ✅ di barrel (index.ts)
-  export * from "./audit";
-  export * from "./types";
-  export * from "./users";
+If a folder has a barrel export (`index.ts`), import from the folder level, not from internal files:
 
-  // ❌ jangan
-  export type { TSomeType } from "./types";
-  export type * from "./types";
-  export { someFunction } from "./utils";
-  ```
+```ts
+// ✅ CORRECT
+import { twm } from "@/src/libs";
 
----
+// ❌ WRONG — direct internal import when barrel exists
+import { twm } from "@/src/libs/twm";
+```
 
-## 4. Konvensi Penamaan File & Folder
-
-| Hal                                         | Pola                                              | Contoh                                                       |
-| ------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------ |
-| Komponen React                              | PascalCase, file = nama komponen                  | `Header.tsx`, `ExampleA.tsx`                                 |
-| Hook / util / fungsi                        | camelCase, file = nama export utama               | `useToggle.ts`, `parseDurationToMs.ts`, `responseMessage.ts` |
-| Folder util generik tanpa "fungsi utama"    | konteks/folder sebelumnya                         | `type.ts`, `index.ts`, `metadata.ts`                         |
-| Test                                        | nama modul + `.spec.ts(x)`                        | `useToggle.spec.ts`, `responseMessage.spec.ts`               |
-| Storybook                                   | `<Component>.stories.tsx`                         | `ExampleA.stories.tsx`                                       |
-| Folder domain backend                       | lowercase, plural kalau koleksi                   | `users/`, `auth/`, `audit/`, `upload/`                       |
-| Folder element bertingkat                   | grup huruf tunggal `A/`, `B/`, `C/` di dalam grup | `components/elements/example/A/ExampleA.tsx`                 |
-| Folder kebab-case dipakai bila nama panjang |                                                   | `handle-prisma-error/`                                       |
-| Folder Next App Router                      | sesuai konvensi Next                              | `(authed)/(user)/profile/page.tsx`, `_layout/`, `_example/`  |
-
-Setiap folder yang sudah memiliki `index.ts` adalah barrel export. Pertahankan pola tersebut saat menambah file baru.
+Exception: direct internal imports are allowed for `next/dynamic` or framework requirements that need a specific file path.
 
 ---
 
-## 5. React / Next.js (`apps/next/src`)
+## 4. File & Folder Naming
 
-### Komponen
+| What                                   | Pattern                               | Example                                        |
+| -------------------------------------- | ------------------------------------- | ---------------------------------------------- |
+| React component                        | PascalCase, file = component name     | `Header.tsx`, `CardEditModal.tsx`              |
+| Hook / util / function                 | camelCase, file = main export name    | `useToggle.ts`, `parseDurationToMs.ts`         |
+| Generic util folder (no main function) | context/folder name                   | `type.ts`, `index.ts`, `metadata.ts`           |
+| Test                                   | module name + `.spec.ts(x)`           | `useToggle.spec.ts`, `responseMessage.spec.ts` |
+| Storybook                              | `<Component>.stories.tsx`             | `ExampleA.stories.tsx`                         |
+| Backend domain folder                  | lowercase, plural for collections     | `users/`, `auth/`, `audit/`                    |
+| Nested element folders                 | single-letter groups `A/`, `B/`, `C/` | `components/elements/example/A/ExampleA.tsx`   |
+| Long folder names                      | kebab-case                            | `handle-prisma-error/`                         |
+| Next App Router folders                | Next conventions                      | `(authed)/(user)/profile/page.tsx`, `_layout/` |
 
-- **Selalu** `FC` dengan return type eksplisit (`ReactElement`, `null | ReactElement`, `Promise<ReactElement>`, `ReactNode` sesuai kebutuhan).
+Every folder with an `index.ts` is a barrel export. Maintain this pattern when adding new files.
 
-- **Jangan gunakan namespace `React.`** (contoh: `React.Ref`, `React.FormEvent`). Import tipe yang dibutuhkan langsung dari `react` (contoh: `Ref`, `SyntheticEvent`).
+---
+
+## 5. React / Next.js Conventions (apps/next/src)
+
+### 5.1 Component Declaration
+
+Always use `FC` with an explicit return type (`ReactElement`, `null | ReactElement`, `Promise<ReactElement>`, `ReactNode`).
+
+```tsx
+export const MyComponent: FC<IMyComponent> = (props): ReactElement => <div>{props.name}</div>;
+```
+
+### 5.2 No React Namespace
+
+Never use `React.` prefix for types. Import types directly from `react`:
+
+```tsx
+// ✅ CORRECT
+import { Ref, SyntheticEvent } from "react";
+const onSubmit = (e: SyntheticEvent<HTMLFormElement>) => e.preventDefault();
+
+// ❌ WRONG
+const onSubmit = (e: React.FormEvent) => e.preventDefault();
+```
+
+### 5.3 Page & Layout Components
+
+Pages, layouts, and `_layout/index.tsx` files use `export default`. Do NOT destructure props in the parameter for page/layout server components:
+
+```tsx
+// app/(authed)/(user)/profile/page.tsx
+import { FC, ReactElement } from "react";
+
+import { ProfileLayout } from "./_layout";
+
+const ProfilePage: FC = (): ReactElement => <ProfileLayout />;
+export default ProfilePage;
+```
+
+For components with props (e.g., root layout):
+
+```tsx
+import { FC, PropsWithChildren, ReactElement } from "react";
+
+type T = Readonly<PropsWithChildren>;
+
+const RootLayout: FC<T> = (props): ReactElement => (
+  <html lang="en">
+    <body>{props.children}</body>
+  </html>
+);
+export default RootLayout;
+```
+
+### 5.4 Reusable Component Export Rule
+
+- Pages, layouts, `_layout/index.tsx`: use `export default` (Next.js convention).
+- Reusable components in `components/**`: **MUST** use named exports. **NEVER** use `export default`.
+- For `next/dynamic`, use the `.then()` pattern with named exports — `export default` is NOT required:
 
   ```tsx
-  // ✅
-  import { Ref, SyntheticEvent } from "react";
-  const onSubmit = (e: SyntheticEvent<HTMLFormElement>) => e.preventDefault();
-  const elRef = ref as Ref<HTMLElement>;
+  // ✅ CORRECT — named export + .then() in dynamic import
+  export const CardEditModal: FC<I> = (props): ReactElement => {
+    /* ... */
+  };
 
-  // ❌
-  const onSubmit = (e: React.FormEvent) => e.preventDefault();
-  const elRef = ref as React.Ref<HTMLElement>;
+  const CardEditModalDynamic = dynamic(() => import("../components/CardEditModal").then((mod) => mod.CardEditModal), { ssr: false });
+
+  // ❌ WRONG — do not add export default just for next/dynamic
+  export default CardEditModal;
   ```
 
-- Page/layout/server component App Router: jangan destructure props di parameter. Pola wajib:
+### 5.5 Props Access Pattern
 
-  ```tsx
-  // app/(authed)/(user)/profile/page.tsx
-  import { FC, ReactElement } from "react";
-
-  import { ProfileLayout } from "./_layout";
-
-  const ProfilePage: FC = (): ReactElement => <ProfileLayout />;
-  export default ProfilePage;
-  ```
-
-  Untuk yang punya props (mis. root layout):
-
-  ```tsx
-  import { FC, PropsWithChildren, ReactElement } from "react";
-
-  type T = Readonly<PropsWithChildren>;
-
-  const RootLayout: FC<T> = (props): ReactElement => (
-    <html lang="en">
-      <body>{props.children}</body>
-    </html>
-  );
-  export default RootLayout;
-  ```
-
-- Hindari alias props yang tidak perlu (contoh `const boardId = props.boardId`) jika nilainya hanya diteruskan atau dipakai langsung tanpa transformasi.
-
-- Komponen di `components/templates/**` dengan props sederhana boleh diakses lewat `props.X`:
+- **`components/templates/**`** (simple props): access via `props.X`:
 
   ```tsx
   interface I {
@@ -312,12 +362,12 @@ Setiap folder yang sudah memiliki `index.ts` adalah barrel export. Pertahankan p
   );
   ```
 
-- Komponen di `components/elements/**` (interaktif/banyak prop) boleh destructure di parameter:
+- **`components/elements/**`\*\* (interactive, many props): destructure in parameter:
 
   ```tsx
   interface I extends ButtonHTMLAttributes<HTMLButtonElement> {
-    color?: TExampleAColor;
-    size?: TExampleASize;
+    color?: TButtonColor;
+    size?: TButtonSize;
   }
 
   export const ExampleA: FC<I> = ({ className, color = "blue", size = "md", ...rest }): ReactElement => (
@@ -325,68 +375,70 @@ Setiap folder yang sudah memiliki `index.ts` adalah barrel export. Pertahankan p
   );
   ```
 
-- **Variant component**: ekspor daftar opsi `const` + union type + helper `<Name>TWM` + komponen utama:
+- **Feature-local components** (e.g., `_layout/modules/components/`): follow the pattern of surrounding files. The kanban feature uses `props.X` access pattern.
 
-  ```tsx
-  export const EXAMPLE_A_COLORS = ["blue", "green", "red"] as const;
-  export type TExampleAColor = (typeof EXAMPLE_A_COLORS)[number];
+### 5.6 Variant Component Pattern
 
-  export const EXAMPLE_A_SIZES = ["lg", "md", "sm"] as const;
-  export type TExampleASize = (typeof EXAMPLE_A_SIZES)[number];
+Export a `const` array, union type, `<Name>TWM` helper, and the main component:
 
-  const COLOR_MAP: Record<TExampleAColor, string> = {
-    blue: "bg-blue-500 text-white",
-    green: "bg-green-500 text-white",
-    red: "bg-red-500 text-white",
-  };
+```tsx
+export const EXAMPLE_A_COLORS = ["blue", "green", "red"] as const;
+export type TExampleAColor = (typeof EXAMPLE_A_COLORS)[number];
 
-  const SIZE_MAP: Record<TExampleASize, string> = {
-    lg: "px-6 py-3 text-lg",
-    md: "px-4 py-2 text-base",
-    sm: "px-2 py-1 text-sm",
-  };
+export const EXAMPLE_A_SIZES = ["lg", "md", "sm"] as const;
+export type TExampleASize = (typeof EXAMPLE_A_SIZES)[number];
 
-  export const ExampleATWM = ({ color, size }: { color: TExampleAColor; size: TExampleASize }): string =>
-    twm("rounded-md font-medium", COLOR_MAP[color], SIZE_MAP[size]);
-  ```
+const COLOR_MAP: Record<TExampleAColor, string> = {
+  blue: "bg-blue-500 text-white",
+  green: "bg-green-500 text-white",
+  red: "bg-red-500 text-white",
+};
 
-### Default Export Rule
+const SIZE_MAP: Record<TExampleASize, string> = {
+  lg: "px-6 py-3 text-lg",
+  md: "px-4 py-2 text-base",
+  sm: "px-2 py-1 text-sm",
+};
 
-- Pages, layouts, dan file `_layout/index.tsx` Next App Router pakai `export default` (sesuai konvensi Next).
-- Reusable component di `components/**` **dilarang** menggunakan `export default` kecuali memang harus di-`next/dynamic`. Gunakan named export.
+export const ExampleATWM = ({ color, size }: { color: TExampleAColor; size: TExampleASize }): string =>
+  twm("rounded-md font-medium", COLOR_MAP[color], SIZE_MAP[size]);
+```
 
-### Routing & Layout
+### 5.7 Avoid Unnecessary Prop Aliases
 
-- Halaman: `app/<route>/page.tsx`. Judul menggunakan `metadata.title`.
-- Untuk halaman kompleks, gunakan pola layered:
+Do not create aliases like `const boardId = props.boardId` if the value is only passed through or used directly without transformation. Use `props.boardDocumentId` directly.
 
-  ```
-  app/<route>/page.tsx                     → renders <RouteLayout />
-  app/<route>/_layout/index.tsx            → assembles modules (default export)
-  app/<route>/_layout/modules/<part>/index.tsx
-  app/<route>/_layout/modules/schema.ts    → schema/types lokal feature
-  ```
+### 5.8 Routing & Layout Pattern
 
-  Contoh `_layout/index.tsx`:
+For complex pages, use the layered layout pattern:
 
-  ```tsx
-  import { Aside } from "./modules/aside";
-  import { Main } from "./modules/main";
+```
+app/<route>/page.tsx                     → renders <RouteLayout />
+app/<route>/_layout/index.tsx            → assembles modules (default export)
+app/<route>/_layout/modules/<part>/index.tsx
+app/<route>/_layout/modules/schema.ts    → local feature schema/types
+```
 
-  const ProfileLayout: FC = (): ReactElement => (
-    <div className={twm("flex gap-4")}>
-      <Aside />
-      <Main />
-    </div>
-  );
-  export default ProfileLayout;
-  ```
+Example `_layout/index.tsx`:
 
-- Route group `(authed)`, `(admin)`, `(user)` untuk auth scoping. Auth gating juga dilakukan via NextAuth middleware di `apps/next/src/proxy.ts`.
+```tsx
+import { Aside } from "./modules/aside";
+import { Main } from "./modules/main";
 
-### State, Form, Data
+const ProfileLayout: FC = (): ReactElement => (
+  <div className={twm("flex gap-4")}>
+    <Aside />
+    <Main />
+  </div>
+);
+export default ProfileLayout;
+```
 
-- Global state ringan: gunakan Jotai atom di `context/`.
+Route groups `(authed)`, `(admin)`, `(user)` are used for auth scoping.
+
+### 5.9 State Management
+
+- **Lightweight global state**: Jotai atoms in `context/`:
 
   ```ts
   import { atom, useAtom } from "jotai";
@@ -399,91 +451,144 @@ Setiap folder yang sudah memiliki `index.ts` adalah barrel export. Pertahankan p
   };
   ```
 
-- Form: `react-hook-form` + `zodResolver`. Jika schema berasal dari package shared, import langsung dari `@repo/schemas` (jangan re-export lagi via file schema lokal).
-- File `_layout/modules/schema.ts` hanya untuk schema yang benar-benar spesifik fitur lokal dan tidak tersedia di shared package.
-  ```tsx
-  const form = useForm<TLoginFormSchema>({ resolver: zodResolver(loginFormSchema(true)) });
-  ```
-- Server state: `@tanstack/react-query` (`useMutation`, `useQuery`).
-- HTTP client: **wajib** melalui helper di `apps/next/src/utils/api/`. Jangan panggil `axios` langsung di komponen, kecuali untuk health check.
+- **Server state**: `@tanstack/react-query` (`useMutation`, `useQuery`).
+- **Forms**: `react-hook-form` + `zodResolver`. If the schema comes from a shared package, import directly from `@repo/schemas` — do NOT re-export via a local schema file.
+- **Local schema files** (`_layout/modules/schema.ts`): only for schemas that are truly feature-local and not available in a shared package.
 
-### API Client Pattern (`apps/next/src/utils/api/`)
+### 5.10 HTTP Client
 
-- File per domain: `users.ts`, `upload.ts`, `audit.ts`, `example.ts`. Domain dengan banyak endpoint (auth) menggunakan folder + `index.ts` (barrel) + file per endpoint (`login.ts`, `logout.ts`, `me.ts`, dst.).
-- Function naming **UPPERCASE method prefix**: `GETUsers`, `GETUsersById`, `POSTLogin`, `PUTUsers`, `PATCHExample`, `DELETEUpload`.
-- Semua endpoint daftar / `getAll` **wajib** menerima pagination query yang sudah distandardisasi. Gunakan tipe query pagination yang sesuai contract backend.
-- Helper dasar: `getApi`, `postApi`, `putApi`, `patchApi`, `deleteApi` dari `./base`. Gunakan `auth: false` hanya untuk endpoint publik (login/register).
-- Definisikan interface payload (`I<Name>Payload`) dan response (`I<Name>Response` atau `IXxxModel` dari `@repo/types`) di file yang sama.
-- Tambahkan konstanta `const label = "..."` pada tiap file untuk logging.
-
-  ```ts
-  import { IUsersModel } from "@repo/types";
-
-  import { deleteApi, getApi, ISuccessResponse, postApi, TQueryParams } from "./base";
-
-  const label = "users";
-
-  export interface IUsersPayload {
-    email: string;
-    name: string;
-    role: "admin" | "user";
-  }
-
-  export const GETUsers = (params?: TQueryParams): Promise<ISuccessResponse<IUsersModel[]>> => getApi({ endpoint: "/users", label, params });
-
-  export const POSTUsers = (payload: IUsersPayload): Promise<ISuccessResponse<IUsersModel>> => postApi({ endpoint: "/users", label, payload });
-
-  export const DELETEUsers = (id: string): Promise<ISuccessResponse<null>> => deleteApi({ endpoint: `/users/${id}`, label });
-  ```
-
-### Styling
-
-- Gunakan `twm(...)` untuk komponen reusable atau class composition yang dipakai lintas tempat, khususnya saat ada potensi utility bertabrakan (contoh `px-*`, `text-*`, `bg-*` saling override).
-- Jika class hanya conditional sederhana dan tidak berpotensi bentrok, gunakan `className={[...].join(" ")}` agar intent lebih jelas.
-- Hindari class `transition*` secara default. Tambahkan hanya jika benar-benar dibutuhkan oleh UX atau diminta eksplisit.
-- **Jangan gunakan atribut `aria-*`** (contoh: `aria-label`, `aria-hidden`, `aria-expanded`, dll.) kecuali diminta eksplisit.
-- Konvensi prop `className` untuk reusable component:
-  - Jika komponen hanya punya satu wrapper utama, gunakan `className?: string`.
-  - Jika komponen punya beberapa slot yang perlu di-override terpisah, gunakan `className?: { <slotA>?: string; <slotB>?: string }`.
-  - Hindari membuat beberapa prop class terpisah seperti `inputClassName`, `labelClassName`, dll. untuk kasus reusable; satukan lewat `className` object per slot.
-- Tema gelap pakai `dark:` variant. Selalu sediakan dark mode style untuk warna teks/background dasar.
-- Class yang reusable per komponen → ekspor `<Name>TWM` agar bisa dipakai elemen lain (lihat contoh `ExampleATWM` di section Komponen di atas).
-
-### Path Alias
-
-- `@/...` → root `apps/next` (jadi `@/src/...`, `@/public/...`).
-- `@/elysia/...` → root `apps/elysia` (dipakai untuk konsumsi tipe Prisma generated).
-- `@repo/<package>` → workspace package.
+**MUST** use the helpers in `apps/next/src/utils/api/`. **NEVER** call `axios` directly in components (except health check).
 
 ---
 
-## 6. Backend Elysia (`apps/elysia/src`)
+## 6. API Client Pattern (apps/next/src/utils/api/)
 
-### Struktur Domain (`api/<domain>/`)
+### 6.1 File Organization
 
-Wajib mengikuti file set ini:
+One file per domain: `users.ts`, `upload.ts`, `audit.ts`. Domains with many endpoints (auth) use a folder + `index.ts` barrel + file per endpoint.
 
-| File         | Isi                                                                                                                                                                |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `route.ts`   | `new Elysia({ prefix: "/<domain>" })` + `.use(protectedRoutePlugin(LABEL))` + chain handler. Berisi parsing schema, panggil `service`, balikan `SUCCESS_RESPONSE`. |
-| `service.ts` | `export const service = { async method(...) { ... }, ... }` — satu object literal, akses Prisma/Redis/file system.                                                 |
-| `schema.ts`  | Zod schema (`payloadSchema`, `paramSchema`, `querySchema`, dll.). Pesan error pakai `schemaMessage` dari `@repo/constants`.                                        |
-| `type.ts`    | `export type TXxxSchema = z.infer<typeof xxxSchema>;` (+ interface lokal kalau perlu).                                                                             |
-| `swagger.ts` | `export const docs = (label: string): Record<...DocumentDecoration> => ({ ... });` — schema response, security, summary, tags.                                     |
-| `index.ts`   | `export * from "./route";`                                                                                                                                         |
+### 6.2 Function Naming
 
-- Jika schema berasal dari shared package, import langsung dari `@repo/schemas` di file yang membutuhkan (frontend maupun backend).
-- File schema lokal (`app/<route>/_layout/modules/schema.ts` atau `apps/elysia/src/api/<domain>/schema.ts`) hanya untuk schema yang benar-benar lokal fitur/domain, bukan sebagai lapisan re-export dari package.
-
-Tambahan wajib di `route.ts`:
+Use UPPERCASE method prefix:
 
 ```ts
-const LABEL = "<domain>";
+GETUsers;
+GETUsersById;
+POSTLogin;
+PUTUsers;
+PATCHExample;
+DELETEUpload;
 ```
 
-LABEL **uppercase const string** dipakai untuk `protectedRoutePlugin`, `responseMessage`, dan `docs`.
+### 6.3 Standard Endpoint Implementation
 
-Contoh skeleton minimal satu domain `examples/`:
+```ts
+import { IUsersModel } from "@repo/types";
+
+import { deleteApi, getApi, ISuccessResponse, postApi, TQueryParams } from "./base";
+
+const label = "users";
+
+export interface IUsersPayload {
+  email: string;
+  name: string;
+  role: "admin" | "user";
+}
+
+export const GETUsers = (params?: TQueryParams): Promise<ISuccessResponse<IUsersModel[]>> => getApi({ endpoint: "/users", label, params });
+
+export const POSTUsers = (payload: IUsersPayload): Promise<ISuccessResponse<IUsersModel>> => postApi({ endpoint: "/users", label, payload });
+
+export const DELETEUsers = (id: string): Promise<ISuccessResponse<null>> => deleteApi({ endpoint: `/users/${id}`, label });
+```
+
+Key rules:
+
+- Define `I<Payload>` and `I<Response>` interfaces (or use types from `@repo/types`) in the same file.
+- Add a `const label = "..."` for logging in every file.
+- All list/getAll endpoints **MUST** accept standardized pagination query params.
+- Use the base helpers: `getApi`, `postApi`, `putApi`, `patchApi`, `deleteApi` from `./base`.
+- Use `auth: false` only for public endpoints (login/register).
+
+---
+
+## 7. Styling
+
+### 7.1 twm Usage
+
+Use `twm(...)` from `@/src/libs` for:
+
+- Reusable components
+- Class composition with potential utility conflicts (e.g., `px-*`, `text-*`, `bg-*` overrides)
+- Conditional classes
+
+```tsx
+// ✅ CORRECT
+<div className={twm("rounded-md p-4", isActive && "bg-blue-500", className)} />
+
+// ❌ WRONG — template literal for className
+<div className={`rounded-md p-4 ${isActive ? "bg-blue-500" : ""} ${className}`} />
+```
+
+For simple conditional classes without utility conflicts, `className={[...].join(" ")}` is acceptable.
+
+**NEVER** use template literals for `className`. This is enforced by ESLint rule `no-restricted-syntax`.
+
+### 7.2 Transition Classes
+
+Do **NOT** add `transition*` classes by default. Only add them when explicitly needed for UX or requested.
+
+### 7.3 Aria Attributes
+
+Do **NOT** use `aria-*` attributes (`aria-label`, `aria-hidden`, `aria-expanded`, etc.) unless explicitly requested.
+
+### 7.4 ClassName Prop Convention for Reusable Components
+
+- Single wrapper: `className?: string`
+- Multiple slots: `className?: { <slotA>?: string; <slotB>?: string }`
+- Do **NOT** create separate props like `inputClassName`, `labelClassName`. Unify via a `className` object per slot.
+
+### 7.5 Dark Mode
+
+Use `dark:` variant. Always provide dark mode styles for basic text/background colors.
+
+### 7.6 Export TWM Helpers
+
+Reusable class patterns per component should be exported as `<Name>TWM` so other elements can reuse them:
+
+```ts
+export const ButtonTWM = ({ color, variant }: { color: TButtonColor; variant: TButtonVariant }): string =>
+  twm("rounded-md font-medium", COLOR_MAP[color], VARIANT_MAP[variant]);
+```
+
+---
+
+## 8. Path Aliases
+
+| Alias             | Maps To            | Usage                                  |
+| ----------------- | ------------------ | -------------------------------------- |
+| `@/...`           | `apps/next` root   | `@/src/...`, `@/public/...`            |
+| `@/elysia/...`    | `apps/elysia` root | For consuming Prisma generated types   |
+| `@repo/<package>` | Workspace package  | `@repo/types`, `@repo/constants`, etc. |
+
+---
+
+## 9. Backend Elysia (apps/elysia/src)
+
+### 9.1 Domain Structure
+
+Every domain in `api/<domain>/` **MUST** have these files:
+
+| File         | Content                                                                                                        |
+| ------------ | -------------------------------------------------------------------------------------------------------------- |
+| `route.ts`   | `new Elysia({ prefix: "/<domain>" })` + `.use(protectedRoutePlugin(LABEL))` + handler chain                    |
+| `service.ts` | `export const service = { async method(...) { ... }, ... }` — single object literal                            |
+| `schema.ts`  | Zod schemas (`payloadSchema`, `paramSchema`, `querySchema`, etc.) using `schemaMessage` from `@repo/constants` |
+| `type.ts`    | `export type TXxxSchema = z.infer<typeof xxxSchema>;` (+ local interfaces if needed)                           |
+| `swagger.ts` | `export const docs = (label: string): Record<...DocumentDecoration> => ({ ... })`                              |
+| `index.ts`   | `export * from "./route";`                                                                                     |
+
+### 9.2 Schema
 
 ```ts
 // apps/elysia/src/api/examples/schema.ts
@@ -499,6 +604,8 @@ export const paramSchema = z.object({
 });
 ```
 
+### 9.3 Type
+
 ```ts
 // apps/elysia/src/api/examples/type.ts
 import { z } from "zod";
@@ -508,6 +615,8 @@ import { paramSchema, payloadSchema } from "./schema";
 export type TParamSchema = z.infer<typeof paramSchema>;
 export type TPayloadSchema = z.infer<typeof payloadSchema>;
 ```
+
+### 9.4 Service
 
 ```ts
 // apps/elysia/src/api/examples/service.ts
@@ -526,6 +635,8 @@ export const service = {
 };
 ```
 
+### 9.5 Swagger
+
 ```ts
 // apps/elysia/src/api/examples/swagger.ts
 import { DocumentDecoration } from "elysia";
@@ -535,9 +646,7 @@ import { responseMessage } from "@/src/constants";
 export const docs = (label: string): Record<"create" | "getById", DocumentDecoration> => ({
   create: {
     description: "create new example",
-    responses: {
-      200: { description: responseMessage(label).created },
-    },
+    responses: { 200: { description: responseMessage(label).created } },
     summary: "create example",
     tags: [label],
   },
@@ -552,6 +661,8 @@ export const docs = (label: string): Record<"create" | "getById", DocumentDecora
   },
 });
 ```
+
+### 9.6 Route
 
 ```ts
 // apps/elysia/src/api/examples/route.ts
@@ -588,73 +699,51 @@ export const examplesRoute = new Elysia({ prefix: "/examples" })
   );
 ```
 
-```ts
-// apps/elysia/src/api/examples/index.ts
-export * from "./route";
-```
+### 9.7 Route Registration
 
-### Response & Error
-
-- Sukses: `SUCCESS_RESPONSE({ data, message: responseMessage(LABEL).<key>, meta? })`.
-- Semua endpoint daftar / `getAll` **wajib** memakai pagination query yang tervalidasi dan **wajib** mengembalikan `meta` paginasi. Jangan kirim list tanpa `meta` untuk response koleksi.
-- Pesan: gunakan `responseMessage(label).<key>` — jangan tulis manual. Kalau butuh frasa baru, tambahkan key di `apps/elysia/src/constants/responseMessage.ts` lalu update test-nya.
-
-  ```ts
-  // contoh pemakaian
-  return SUCCESS_RESPONSE({
-    data: user,
-    message: responseMessage("users").created, // → "users created successfully"
-  });
-
-  // dengan meta paginasi
-  return SUCCESS_RESPONSE({
-    data,
-    message: responseMessage("users").fetched,
-    meta: createPaginationMeta({ page, pageSize, totalData: total }),
-  });
-  ```
-
-- Validasi pesan: gunakan `schemaMessage.string.<x>` / `schemaMessage.number.<x>` dari `@repo/constants`.
-  ```ts
-  z.string({ message: schemaMessage.string.required("email") }).email({ message: schemaMessage.string.email("email") });
-  ```
-- Error Prisma: ditangani otomatis oleh `protectedRoutePlugin` → `handlePrismaError`. Tambah/edit mapping di `apps/elysia/src/utils/handle-prisma-error/handlePrismaError.ts` bila perlu.
-- Format pesan: lowercase, lihat aturan di section 9.
-
-### Plugin Pattern
-
-- Setiap plugin Elysia 1 file di `utils/plugins/<name>Plugin.ts`, di-barrel dari `utils/plugins/index.ts`.
-- Wajib pasang `protectedRoutePlugin(LABEL)` di route yang butuh auth.
-- Logging: pakai `logger` dari `libs/pino.ts`. Object pertama untuk structured fields (`scope`, `code`, dll.), string kedua untuk pesan.
-  ```ts
-  logger.info({ scope: LABEL, userId: user.id }, "user logged in");
-  logger.error({ error, scope: LABEL }, "failed to fetch users");
-  ```
-
-### Pendaftaran Route
-
-Tambah route baru ke `apps/elysia/src/api/index.ts` (barrel) dan pasang dengan `.use(...)` di `apps/elysia/src/index.ts`:
+Add new routes to `apps/elysia/src/api/index.ts` (barrel) and mount with `.use(...)` in `apps/elysia/src/index.ts`:
 
 ```ts
-// apps/elysia/src/index.ts (potongan)
+// apps/elysia/src/index.ts
 import { examplesRoute } from "@/src/api";
 
 new Elysia().use(examplesRoute).listen(env.PORT);
 ```
 
-### Path Alias Backend
+### 9.8 Response & Error Handling
 
-- `@/...` / `@/elysia/...` → root `apps/elysia` (dipakai sebagai `@/src/...`, `@/elysia/src/...`).
-- `@repo/<package>` → workspace package.
+- Success: `SUCCESS_RESPONSE({ data, message: responseMessage(LABEL).<key>, meta? })`
+- All list/getAll endpoints **MUST** use validated pagination and return `meta`. Never return a list without `meta`.
+- Messages: use `responseMessage(label).<key>` — never write manually. Add new keys in `apps/elysia/src/constants/responseMessage.ts` if needed.
+- Schema validation messages: use `schemaMessage.string.<x>` / `schemaMessage.number.<x>` from `@repo/constants`.
+- Prisma errors: handled automatically by `protectedRoutePlugin` → `handlePrismaError`. Add/edit mappings in `apps/elysia/src/utils/handle-prisma-error/handlePrismaError.ts` if needed.
+
+### 9.9 Plugin Pattern
+
+- One file per plugin in `utils/plugins/<name>Plugin.ts`, barrel-exported from `utils/plugins/index.ts`.
+- Always attach `protectedRoutePlugin(LABEL)` on auth-required routes.
+- Logging: use `logger` from `libs/pino.ts`. First arg = structured fields (`scope`, `code`, etc.), second = message string.
+
+```ts
+logger.info({ scope: LABEL, userId: user.id }, "user logged in");
+logger.error({ error, scope: LABEL }, "failed to fetch users");
+```
+
+### 9.10 Backend Path Aliases
+
+| Alias                    | Maps To                                              |
+| ------------------------ | ---------------------------------------------------- |
+| `@/...` / `@/elysia/...` | `apps/elysia` root (`@/src/...`, `@/elysia/src/...`) |
+| `@repo/<package>`        | Workspace package                                    |
 
 ---
 
-## 7. Shared Packages
+## 10. Shared Packages
 
-- Tambahkan ke `packages/<x>` hanya jika kode **dipakai oleh ≥2 app** atau jelas-jelas reusable lintas konteks.
-- Export wajib melalui `src/index.ts` (barrel).
-- Schema lintas app → `@repo/schemas`. Jika memakai schema dari packages, gunakan import langsung dari package tersebut (frontend maupun backend) dan jangan re-export lagi lewat file schema lokal.
-- Type yang membungkus Prisma model → `@repo/types`:
+- Add to `packages/<x>` **only** if code is used by **2+ apps** or is clearly reusable across contexts.
+- All exports go through `src/index.ts` (barrel).
+- Cross-app schemas → `@repo/schemas`. Import directly from the package — do NOT re-export via local schema files.
+- Types wrapping Prisma models → `@repo/types`:
 
   ```ts
   // packages/types/src/users.ts
@@ -664,101 +753,106 @@ new Elysia().use(examplesRoute).listen(env.PORT);
   export interface IUsersModel extends Omit<UsersModel, "password"> {}
   ```
 
-- Util murni JS/TS yang tidak bergantung pada Bun/Node-only API → `@repo/utils`.
+- Pure JS/TS utilities (no Bun/Node-only API dependency) → `@repo/utils`.
 
 ---
 
-## 8. Environment
+## 11. Environment
 
-- Backend: `apps/elysia/src/environment.ts` divalidasi via Zod. Tambahkan variabel baru di sini, lalu update `turbo.json` (`globalEnv`) dan `.env.example`.
-- Frontend: `apps/next/src/environments/env.client.ts` (`NEXT_PUBLIC_*`) dan `env.server.ts`. Public env diakses lewat `clientEnv`.
-- Jangan akses `process.env` langsung di kode aplikasi. Selalu gunakan object hasil parse.
+- Backend: `apps/elysia/src/environment.ts` validated via Zod. Add new vars there, then update `turbo.json` (`globalEnv`) and `.env.example`.
+- Frontend: `apps/next/src/environments/env.client.ts` (`NEXT_PUBLIC_*`) and `env.server.ts`. Access public env via `clientEnv`.
+- **NEVER** access `process.env` directly. Always use the parsed env object:
 
   ```ts
-  // ✅
+  // ✅ CORRECT
   import { env } from "@/src/environment";
   const port = env.PORT;
 
-  // ❌
+  // ❌ WRONG
   const port = process.env.PORT;
   ```
 
 ---
 
-## 9. Tone Pesan
+## 12. Message Tone
 
-- **Pesan log, error backend, response message, schema message**: semuanya lowercase, kecuali:
-  - Akronim/singkatan: `API`, `URL`, `ID`, `JWT`, `REST`, `UUID`, `OTP`, `HTTP`.
-  - Nama produk: `Next.js`, `Prisma`, `Redis`, `Elysia`, `MongoDB`, `PostgreSQL`.
-  - Proper noun (nama orang/tempat).
-  - Format tanggal/waktu: tulis token sesuai maknanya (case-sensitive):
-    - `YYYY` = tahun 4 digit, `MM` = bulan, `DD` = tanggal.
-    - `HH` = jam 24-jam (00–23), `hh` = jam 12-jam (01–12, dipakai bersama `AM/PM`).
-    - `mm` = menit, `ss` = detik, `SSS` = milidetik.
-    - Contoh umum: `YYYY-MM-DD`, `HH:mm`, `HH:mm:ss`, `hh:mm A`.
-- Pola backend (semua lowercase + label):
-  ```ts
-  // responseMessage("users").created → "users created successfully"
-  // responseMessage("access token").required → "access token is required"
-  // schemaMessage.string.email("email") → "email must be a valid email"
-  // schemaMessage.string.min("name", 1) → "name must contain at least 1 character"
-  ```
-- **Teks UI frontend** (label, placeholder, judul, tombol, copy text): gunakan kapitalisasi natural sesuai konteks tampilan (Title Case/sentence case). Contoh: "Change Password", "UPDATE", "Confirm Password". Jangan all lowercase.
+All log messages, error messages, backend response messages, and schema messages: **lowercase**, except:
+
+- Acronyms: `API`, `URL`, `ID`, `JWT`, `REST`, `UUID`, `OTP`, `HTTP`
+- Product names: `Next.js`, `Prisma`, `Redis`, `Elysia`, `MongoDB`, `PostgreSQL`
+- Proper nouns (person/place names)
+- Date/time tokens (case-sensitive): `YYYY`, `MM`, `DD`, `HH`, `hh`, `mm`, `ss`, `SSS`
+
+Backend message patterns (always lowercase + label):
+
+```ts
+responseMessage("users").created; // → "users created successfully"
+responseMessage("access token").required; // → "access token is required"
+schemaMessage.string.email("email"); // → "email must be a valid email"
+schemaMessage.string.min("name", 1); // → "name must contain at least 1 character"
+```
+
+Frontend UI text (labels, placeholders, titles, buttons): use natural capitalization (Title Case / sentence case). Example: "Change Password", "Confirm Password". Do **NOT** use all lowercase for UI text.
 
 ---
 
-## 10. Testing
+## 13. Testing
 
-- Vitest. Globals aktif (`describe`, `it`, `expect` tidak perlu di-import).
-- Lokasi test: folder `test/` bersebelahan dengan file modul.
-  - Backend: `apps/elysia/src/<area>/test/<module>.spec.ts`.
-  - Frontend: `apps/next/src/<area>/test/<module>.spec.ts(x)`.
-- Nama file: `<module>.spec.ts(x)`.
-- Saat menambah/mengubah util, schema, hook, atau service, **tambahkan/perbarui test** yang relevan.
+- Framework: **Vitest**. Globals are active (`describe`, `it`, `expect` — no imports needed).
+- Test location: `test/` folder adjacent to the module file.
+  - Backend: `apps/elysia/src/<area>/test/<module>.spec.ts`
+  - Frontend: `apps/next/src/<area>/test/<module>.spec.ts(x)`
+- File name: `<module>.spec.ts(x)`
+- When adding or changing utils, schemas, hooks, or services, **MUST** add or update relevant tests.
 
-  ```ts
-  // contoh struktur test
-  import { responseMessage } from "../responseMessage";
+```ts
+import { responseMessage } from "../responseMessage";
 
-  describe("responseMessage", () => {
-    describe("with label 'users'", () => {
-      const message = responseMessage("users");
+describe("responseMessage", () => {
+  describe("with label 'users'", () => {
+    const message = responseMessage("users");
 
-      it("returns lowercase 'created' message", () => {
-        expect(message.created).toBe("users created successfully");
-      });
+    it("returns lowercase 'created' message", () => {
+      expect(message.created).toBe("users created successfully");
+    });
 
-      it("returns lowercase 'notFound' message", () => {
-        expect(message.notFound).toBe("users not found");
-      });
+    it("returns lowercase 'notFound' message", () => {
+      expect(message.notFound).toBe("users not found");
     });
   });
-  ```
+});
+```
 
 ---
 
-## 11. File yang Tidak Boleh Diedit Manual
+## 14. Files That MUST NOT Be Manually Edited
 
-- `apps/elysia/src/generated/**` (Prisma client generated).
-- `apps/next/storybook-static/**` (build Storybook).
-- `node_modules/**`, `.next/**`, `.turbo/**`, `dist/**`, build artifact lain.
-- `pnpm-lock.yaml` (kecuali via `pnpm install`).
-
----
-
-## 12. Gaya Perubahan
-
-- **Sekecil mungkin.** Jangan refactor area yang tidak terkait, dan jangan melakukan bersih-bersih kosmetik di luar scope task.
-- Jangan ubah public API yang sudah ada, kecuali memang dibutuhkan oleh task.
-- **Reuse dulu** sebelum membuat baru: cek `@repo/utils`, `@repo/schemas`, `@repo/types`, `@repo/constants`, lalu folder `utils/`, `hooks/`, `components/`, `libs/` per app. Buat kode baru hanya jika belum tersedia.
-- Cakupan penempatan kode baru:
-  - Lintas app → `packages/*`.
-  - Satu app saja → `apps/<app>/src/<utils|hooks|components|...>`.
-  - Spesifik 1 fitur/route → lokal di folder fitur (mis. `app/<route>/_layout/modules/...`).
-- Sesuaikan style penamaan, typing, struktur return, dan urutan property dengan file sekitar. Jika ragu, cari file paling mirip lalu ikuti strukturnya.
+- `apps/elysia/src/generated/**` (Prisma client generated)
+- `apps/next/storybook-static/**` (Storybook build)
+- `node_modules/**`, `.next/**`, `.turbo/**`, `dist/**` (build artifacts)
+- `pnpm-lock.yaml` (except via `pnpm install`)
 
 ---
 
-## 13. Checklist Sebelum Selesai
+## 15. Change Discipline
 
-- [ ] Jalankan `pnpm lint:fix`, `pnpm prettier`, `pnpm lint` dan `pnpm check-types`.
+- **Minimal changes only.** Do not refactor unrelated areas. Do not perform cosmetic cleanup outside the task scope.
+- Do not change existing public APIs unless the task requires it.
+- **Reuse before creating**: check `@repo/utils`, `@repo/schemas`, `@repo/types`, `@repo/constants`, then `utils/`, `hooks/`, `components/`, `libs/` per app. Only create new code if nothing exists.
+- Placement rules for new code:
+  - Cross-app → `packages/*`
+  - Single app → `apps/<app>/src/<utils|hooks|components|...>`
+  - Single feature/route → local to feature folder (e.g., `app/<route>/_layout/modules/...`)
+- Match surrounding files' style: naming, typing, return structure, property order. When unsure, find the most similar file and follow its structure exactly.
+
+---
+
+## 16. Pre-Completion Checklist
+
+Before marking any task as complete, run:
+
+```bash
+pnpm lint:fix && pnpm prettier && pnpm lint && pnpm check-types
+```
+
+All four commands must pass with zero errors.

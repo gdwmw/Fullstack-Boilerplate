@@ -3,7 +3,7 @@ import { EyeOff } from "lucide-react";
 import { fn } from "storybook/test";
 
 import { EXAMPLEC_COLOR_OPTIONS } from "../type";
-import StoriesLayout from "./StoriesLayout";
+import { StoriesLayout } from "./StoriesLayout";
 
 const meta: Meta<typeof StoriesLayout> = {
   args: { iconOnClick: fn(() => alert("Clicked!")) },
@@ -81,7 +81,7 @@ export const DatePicker: Story = {
   },
 };
 
-export const TextArea: Story = {
+export const Textarea: Story = {
   args: {
     componentType: "textarea",
     color: "default",

@@ -1,7 +1,7 @@
 import { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Crown } from "lucide-react";
 
-import StoriesLayout from "./StoriesLayout";
+import { StoriesLayout } from "./StoriesLayout";
 
 const meta: Meta<typeof StoriesLayout> = {
   args: {},

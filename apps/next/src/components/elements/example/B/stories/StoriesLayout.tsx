@@ -9,11 +9,9 @@ interface I {
   textColor: string;
 }
 
-const StoriesLayout: FC<I> = (props): ReactElement => (
+export const StoriesLayout: FC<I> = (props): ReactElement => (
   <ExampleBContainer>
     <ExampleBIcon style={{ color: props.iconColor }}>{props.icon}</ExampleBIcon>
     <ExampleBText style={{ color: props.textColor }}>{props.text}</ExampleBText>
   </ExampleBContainer>
 );
-
-export default StoriesLayout;

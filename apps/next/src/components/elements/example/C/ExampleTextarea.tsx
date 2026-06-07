@@ -15,14 +15,14 @@ interface I
   rows?: number;
 }
 
-const ExampleTextAreaTWM = ({ className, disabled }: Omit<I, "color" | "label">) =>
+const ExampleTextareaTWM = ({ className, disabled }: Omit<I, "color" | "label">) =>
   twm(
     "max-h-50 min-h-30 w-full rounded-xs bg-transparent px-1 outline-hidden disabled:cursor-not-allowed",
     disabled && "text-gray-400",
     className?.textarea,
   );
 
-export const ExampleTextArea: FC<I> = forwardRef<HTMLTextAreaElement, I>(
+export const ExampleTextarea: FC<I> = forwardRef<HTMLTextAreaElement, I>(
   ({ className, color, disabled, errorMessage, label, rows, ...props }, ref): ReactElement => (
     <ExampleInputsContainer className={className?.container}>
       <ExampleLabel
@@ -33,7 +33,7 @@ export const ExampleTextArea: FC<I> = forwardRef<HTMLTextAreaElement, I>(
         label={label}
       >
         <textarea
-          className={ExampleTextAreaTWM({ className, disabled })}
+          className={ExampleTextareaTWM({ className, disabled })}
           data-testid="example-textarea"
           disabled={disabled}
           ref={ref}
@@ -47,4 +47,4 @@ export const ExampleTextArea: FC<I> = forwardRef<HTMLTextAreaElement, I>(
   ),
 );
 
-ExampleTextArea.displayName = "ExampleTextArea";
+ExampleTextarea.displayName = "ExampleTextarea";

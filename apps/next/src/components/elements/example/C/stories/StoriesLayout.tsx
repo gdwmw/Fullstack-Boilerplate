@@ -3,7 +3,7 @@ import { FC, ReactElement, ReactNode } from "react";
 import { ExampleDatePicker } from "../ExampleDatePicker";
 import { ExampleInput } from "../ExampleInput";
 import { ExampleSelect } from "../ExampleSelect";
-import { ExampleTextArea } from "../ExampleTextArea";
+import { ExampleTextarea } from "../ExampleTextarea";
 import { TExampleCColor } from "../type";
 
 interface I {
@@ -17,7 +17,7 @@ interface I {
   type?: string;
 }
 
-const StoriesLayout: FC<I> = (props): null | ReactElement => {
+export const StoriesLayout: FC<I> = (props): null | ReactElement => {
   switch (props.componentType) {
     case "datepicker":
       return (
@@ -55,7 +55,7 @@ const StoriesLayout: FC<I> = (props): null | ReactElement => {
     case "textarea":
       return (
         <div className="w-60">
-          <ExampleTextArea color={props.color} disabled={props.disabled} errorMessage={props.errorMessage} label={props.label} />
+          <ExampleTextarea color={props.color} disabled={props.disabled} errorMessage={props.errorMessage} label={props.label} />
         </div>
       );
 
@@ -63,5 +63,3 @@ const StoriesLayout: FC<I> = (props): null | ReactElement => {
       return null;
   }
 };
-
-export default StoriesLayout;
