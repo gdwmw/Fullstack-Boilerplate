@@ -1,0 +1,6 @@
+projectKey=turborepo
+serverUrl=https://sonarqube.zettara.com
+serverVersion=26.4.0.121862
+dashboardUrl=https://sonarqube.zettara.com/dashboard?id=turborepo
+ceTaskId=4643525b-2b4e-4599-8dd7-1c0294525d00
+ceTaskUrl=https://sonarqube.zettara.com/api/ce/task?id=4643525b-2b4e-4599-8dd7-1c0294525d00

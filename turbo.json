@@ -1,0 +1,70 @@
+{
+  "$schema": "https://v2-9-15.turborepo.dev/schema.json",
+  "ui": "tui",
+  "globalEnv": [
+    "NODE_ENV",
+    "ELYSIA_PORT",
+    "DATABASE_URL",
+    "DB_BACKUP_DIR",
+    "DB_BACKUP_RETENTION_DAYS",
+    "LOG_LEVEL",
+    "LOG_DIR",
+    "LOG_RETENTION_DAYS",
+    "JWT_ACCESS_SECRET",
+    "JWT_REFRESH_SECRET",
+    "JWT_ACCESS_EXPIRES_IN",
+    "JWT_REFRESH_EXPIRES_IN",
+    "CORS_ORIGINS",
+    "REDIS_URL",
+    "NEXTAUTH_URL",
+    "NEXTAUTH_SECRET",
+    "NEXT_PUBLIC_REFRESH_BUFFER_MS",
+    "NEXT_PUBLIC_ACCESS_TOKEN_EXPIRES_IN",
+    "NEXTAUTH_SESSION_EXPIRES_IN",
+    "NEXT_PUBLIC_BASE_API_URL",
+    "NEXT_PUBLIC_DEBUG_MODE",
+    "REFRESH_TOKEN_COOKIE_SECRET"
+  ],
+  "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+    },
+    "generate": {
+      "dependsOn": ["^generate"]
+    },
+    "migrate": {
+      "dependsOn": ["^migrate"]
+    },
+    "format": {
+      "dependsOn": ["^format"]
+    },
+    "storybook:build": {
+      "dependsOn": ["^vitest:run"],
+      "outputs": ["storybook-static/**"]
+    },
+    "vitest:run": {
+      "dependsOn": ["^vitest:run"]
+    },
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "lint:fix": {
+      "dependsOn": ["^lint:fix"]
+    },
+    "prettier": {
+      "dependsOn": ["^prettier"]
+    },
+    "check-types": {
+      "dependsOn": ["^check-types"]
+    },
+    "cpenv": {
+      "dependsOn": ["^cpenv"]
+    }
+  }
+}
