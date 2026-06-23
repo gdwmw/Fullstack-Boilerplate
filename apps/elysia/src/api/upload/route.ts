@@ -13,16 +13,6 @@ const LABEL = "upload";
 export const uploadRoutes = new Elysia({ prefix: "/upload" })
   .use(protectedRoutePlugin(LABEL))
 
-  .delete(
-    "/:id",
-    async ({ params }) => {
-      const { id } = paramSchema.parse(params);
-      const res = await service.delete(id);
-      return SUCCESS_RESPONSE({ data: res, message: responseMessage(LABEL).deleted });
-    },
-    { detail: docs(LABEL).delete },
-  )
-
   .get(
     "/",
     async ({ query }) => {
@@ -51,4 +41,14 @@ export const uploadRoutes = new Elysia({ prefix: "/upload" })
       return SUCCESS_RESPONSE({ data: res, message: responseMessage(LABEL).created });
     },
     { detail: docs(LABEL).upload },
+  )
+
+  .delete(
+    "/:id",
+    async ({ params }) => {
+      const { id } = paramSchema.parse(params);
+      const res = await service.delete(id);
+      return SUCCESS_RESPONSE({ data: res, message: responseMessage(LABEL).deleted });
+    },
+    { detail: docs(LABEL).delete },
   );

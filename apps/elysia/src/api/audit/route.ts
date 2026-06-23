@@ -14,16 +14,6 @@ export const auditRoutes = new Elysia({ prefix: "/audit" })
   .use(protectedRoutePlugin(LABEL))
 
   .get(
-    "/archives",
-    async ({ query }) => {
-      const params = archiveQuerySchema.parse(query);
-      const res = await service.getAllArchives(params);
-      return SUCCESS_RESPONSE({ data: res.data, message: responseMessage("audit archives").retrieved, meta: res.meta });
-    },
-    { detail: docs(LABEL).getArchives },
-  )
-
-  .get(
     "/",
     async ({ query }) => {
       const params = querySchema.parse(query);
@@ -31,4 +21,14 @@ export const auditRoutes = new Elysia({ prefix: "/audit" })
       return SUCCESS_RESPONSE({ data: res.data, message: responseMessage(LABEL).retrieved, meta: res.meta });
     },
     { detail: docs(LABEL).getAll },
+  )
+
+  .get(
+    "/archives",
+    async ({ query }) => {
+      const params = archiveQuerySchema.parse(query);
+      const res = await service.getAllArchives(params);
+      return SUCCESS_RESPONSE({ data: res.data, message: responseMessage("audit archives").retrieved, meta: res.meta });
+    },
+    { detail: docs(LABEL).getArchives },
   );

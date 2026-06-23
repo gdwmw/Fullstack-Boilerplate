@@ -9,7 +9,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FC, HTMLInputTypeAttribute, KeyboardEvent, ReactElement, useEffect, useState } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 
 import { ExampleATWM } from "@/src/components/elements/example/A/ExampleA";
 import { ExampleInput } from "@/src/components/elements/example/C/ExampleInput";
@@ -84,11 +84,11 @@ export const Main: FC = (): ReactElement => {
   });
 
   const {
+    control,
     formState: { errors },
     handleSubmit,
     register,
     reset,
-    watch,
   } = useForm<TProfileSchema>({
     defaultValues: {
       email: meQuery.data?.email,
@@ -98,6 +98,8 @@ export const Main: FC = (): ReactElement => {
     },
     resolver: zodResolver(profileSchema),
   });
+
+  const watch = useWatch({ control });
 
   useEffect(() => {
     if (meQuery.data) {
@@ -111,8 +113,7 @@ export const Main: FC = (): ReactElement => {
   }, [meQuery.data, reset]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/incompatible-library
-    const file = watch("image")?.[0];
+    const file = watch?.image?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -120,9 +121,7 @@ export const Main: FC = (): ReactElement => {
       };
       reader.readAsDataURL(file);
     }
-
-    //eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [watch("image")]);
+  }, [watch?.image]);
 
   const updateProfileMutation = useMutation({
     mutationFn: async (dt: TProfileSchema) => {
@@ -147,7 +146,7 @@ export const Main: FC = (): ReactElement => {
         });
 
         if (!uploadResponse.data) {
-          logTemplate.WARN("upload image failed!", "/upload");
+          logTemplate.WARN("upload image failed!", "upload");
           throw new Error("failed to upload image");
         }
 
@@ -173,16 +172,16 @@ export const Main: FC = (): ReactElement => {
       setErrorMessage(axiosError.response?.data?.message ?? "failed to update profile");
       logTemplate.WARN("update profile failed!", "auth/profile");
     },
-    onSuccess: async (updatedUser) => {
+    onSuccess: async (res) => {
       await session.update({
         user: {
           ...session.data?.user,
-          email: updatedUser.email,
-          image: updatedUser.image,
-          imageId: updatedUser.imageId,
-          name: updatedUser.name,
-          phone: updatedUser.phone,
-          username: updatedUser.username,
+          email: res.email,
+          image: res.image,
+          imageId: res.imageId,
+          name: res.name,
+          phone: res.phone,
+          username: res.username,
         },
       });
 

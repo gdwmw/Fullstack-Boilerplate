@@ -16,13 +16,6 @@ export type TFormatKey = (typeof FORMAT_OPTIONS)[number];
 
 export type TFormats = Partial<Record<TFormatKey, IFormats>>;
 
-export const IMAGE_FORMATS: { name: TFormatKey; width: number }[] = [
-  { name: "thumbnail", width: 245 },
-  { name: "small", width: 500 },
-  { name: "medium", width: 750 },
-  { name: "large", width: 1000 },
-];
-
 export interface IFilesModel extends Omit<FilesModel, "formats"> {
   formats: null | TFormats;
 }

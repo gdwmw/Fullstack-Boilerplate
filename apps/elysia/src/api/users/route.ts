@@ -13,16 +13,6 @@ const LABEL = "users";
 export const usersRoutes = new Elysia({ prefix: "/users" })
   .use(protectedRoutePlugin(LABEL))
 
-  .delete(
-    "/:id",
-    async ({ params }) => {
-      const { id } = paramSchema.parse(params);
-      const res = await service.delete(id);
-      return SUCCESS_RESPONSE({ data: res, message: responseMessage(LABEL).deleted });
-    },
-    { detail: docs(LABEL).delete },
-  )
-
   .get(
     "/",
     async ({ query }) => {
@@ -52,4 +42,14 @@ export const usersRoutes = new Elysia({ prefix: "/users" })
       return SUCCESS_RESPONSE({ data: res, message: responseMessage(LABEL).updated });
     },
     { detail: docs(LABEL).put },
+  )
+
+  .delete(
+    "/:id",
+    async ({ params }) => {
+      const { id } = paramSchema.parse(params);
+      const res = await service.delete(id);
+      return SUCCESS_RESPONSE({ data: res, message: responseMessage(LABEL).deleted });
+    },
+    { detail: docs(LABEL).delete },
   );

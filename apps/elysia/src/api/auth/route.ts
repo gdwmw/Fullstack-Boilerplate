@@ -109,6 +109,28 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
   .use(refreshJwtPlugin)
   .onError(({ error, set }) => handlePrismaError(LABEL, error, set))
 
+  .get(
+    "/me",
+    async ({ accessJwt, headers, set }) => {
+      const auth = await getAuthenticatedUserId({ accessJwt, headers, set });
+      if (auth.error) {
+        set.status = 401;
+        return auth.error;
+      }
+
+      const res = await service.getUserById(auth.userId);
+
+      if (!res) {
+        set.status = 404;
+        return ERROR_RESPONSE({ message: responseMessage("users").notFound });
+      }
+
+      return SUCCESS_RESPONSE({ data: res, message: responseMessage("users").retrieved });
+    },
+
+    { detail: docs(LABEL).me },
+  )
+
   .post(
     "/register",
     async ({ accessJwt, body, refreshJwt, set }) => {
@@ -127,6 +149,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
 
     { detail: docs(LABEL).register },
   )
+
   .post(
     "/login",
     async ({ accessJwt, body, refreshJwt, set }) => {
@@ -151,6 +174,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
 
     { detail: docs(LABEL).login },
   )
+
   .post(
     "/refresh",
     async ({ accessJwt, body, refreshJwt, set }) => {
@@ -202,6 +226,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
 
     { detail: docs(LABEL).refresh },
   )
+
   .post(
     "/logout",
     async ({ accessJwt, headers }) => {
@@ -228,27 +253,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
 
     { detail: docs(LABEL).logout },
   )
-  .get(
-    "/me",
-    async ({ accessJwt, headers, set }) => {
-      const auth = await getAuthenticatedUserId({ accessJwt, headers, set });
-      if (auth.error) {
-        set.status = 401;
-        return auth.error;
-      }
 
-      const res = await service.getUserById(auth.userId);
-
-      if (!res) {
-        set.status = 404;
-        return ERROR_RESPONSE({ message: responseMessage("users").notFound });
-      }
-
-      return SUCCESS_RESPONSE({ data: res, message: responseMessage("users").retrieved });
-    },
-
-    { detail: docs(LABEL).me },
-  )
   .post(
     "/change-password",
     async ({ accessJwt, body, headers, set }) => {

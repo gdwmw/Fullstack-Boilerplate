@@ -1,4 +1,5 @@
-import { IFilesModel, IMAGE_FORMATS, TFormats } from "@repo/types";
+import { ALLOWED_TYPES, IMAGE_FORMATS } from "@repo/constants";
+import { IFilesModel, TFormats } from "@repo/types";
 import { randomUUID } from "crypto";
 import { mkdir, unlink, writeFile } from "fs/promises";
 import { extname, join } from "path";
@@ -13,8 +14,6 @@ import { createPaginationMeta } from "@/src/utils/pagination";
 import { TQuerySchema } from "./type";
 
 const UPLOAD_DIR = join(process.cwd(), "uploads");
-
-const IMAGE_MIME_TYPES = new Set(["image/avif", "image/gif", "image/jpeg", "image/png", "image/tiff", "image/webp"]);
 
 const processImage = async (buffer: Buffer, originalWidth: number): Promise<TFormats> => {
   const processedFormats = await Promise.all(
@@ -112,7 +111,7 @@ export const service = {
     let placeholder: null | string = null;
     let formats: null | TFormats = null;
 
-    if (IMAGE_MIME_TYPES.has(file.type)) {
+    if (ALLOWED_TYPES.includes(file.type as (typeof ALLOWED_TYPES)[number])) {
       const metadata = await sharp(buffer).metadata();
       width = metadata.width ?? null;
       height = metadata.height ?? null;

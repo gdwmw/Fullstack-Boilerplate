@@ -1,9 +1,7 @@
-import { schemaMessage } from "@repo/constants";
+import { MAX_FILE_SIZE, schemaMessage } from "@repo/constants";
 import { z } from "zod";
 
 import { paginationQuerySchema } from "@/src/utils/pagination";
-
-const FILE_MAX_SIZE = 10 * 1024 * 1024;
 
 export const uploadSchema = z.object({
   file: z
@@ -11,8 +9,8 @@ export const uploadSchema = z.object({
     .refine((file) => file.size > 0, {
       message: schemaMessage.file.notEmpty("file"),
     })
-    .refine((file) => file.size <= FILE_MAX_SIZE, {
-      message: schemaMessage.file.maxSize("file", "10 MB"),
+    .refine((file) => file.size <= MAX_FILE_SIZE, {
+      message: schemaMessage.file.maxSize("file", `"${(MAX_FILE_SIZE / (1024 * 1024)).toFixed(0)} MB"`),
     }),
 });
 
