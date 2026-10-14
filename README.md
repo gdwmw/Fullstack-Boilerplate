@@ -1,8 +1,8 @@
 ![Next.js - Home](public/project/1.png)
 ![Next.js - Login](public/project/2.png)
 ![Next.js - Register](public/project/3.png)
-![Elysia.js - Register](public/project/6.png)
-![Elysia.js - Response](public/project/7.png)
+![Elysia.js - Login](public/project/4.png)
+![Elysia.js - Response](public/project/5.png)
 
 # 🚀 Fullstack Boilerplate (Turborepo + Next.js + Elysia.js)
 
@@ -48,44 +48,44 @@ git clone https://github.com/gdwmw/Fullstack-Boilerplate.git
 cd Fullstack-Boilerplate
 ```
 
-2. **Install dependencies**
+1. **Install dependencies**
 
 ```bash
 pnpm install
 ```
 
-3. **Setup environment variables**
+1. **Setup environment variables**
 
 ```bash
 pnpm cpenv
 ```
 
-4. **Configure `.env`**
+1. **Configure `.env`**
 
 Update at least:
 
 - `apps/elysia/.env`
 - `apps/next/.env`
 
-5. **Ensure services are running**
+1. **Ensure services are running**
 
 - 🐘 PostgreSQL must be active (`DATABASE_URL`)
 - 🔴 Redis must be active (`REDIS_URL`)
 
-6. **Generate Prisma Client and run migrations**
+1. **Generate Prisma Client and run migrations**
 
 ```bash
 pnpm generate
 pnpm migrate
 ```
 
-7. **Run development mode**
+1. **Run development mode**
 
 ```bash
 pnpm dev
 ```
 
-8. **Access the application**
+1. **Access the application**
 
 - 🌐 Frontend: [http://localhost:3000](http://localhost:3000)
 - 🔗 API: [http://localhost:1337](http://localhost:1337)
@@ -131,7 +131,7 @@ For production, use Turborepo for build orchestration, then run each app directl
 pnpm build
 ```
 
-2. **Run each app process directly**
+1. **Run each app process directly**
 
 ```bash
 pnpm prod:start:next

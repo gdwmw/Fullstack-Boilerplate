@@ -1,90 +1,19 @@
 import { DocumentDecoration } from "elysia";
 
-import { responseMessage } from "@/src/constants/responseMessage";
-
 export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "upload", DocumentDecoration> => {
-  const unauthorizedMessage = `${responseMessage("access token").required} or ${responseMessage("access token").invalid} or ${
-    responseMessage("access token").expired
-  }`;
-
-  const successResponseSchema = ({ data, message, meta }: { data: Record<string, unknown>; message: string; meta?: Record<string, unknown> }) =>
-    ({
-      properties: {
-        data,
-        message: { example: message, nullable: true, type: "string" },
-        meta: meta ?? { nullable: true, type: "object" },
-        success: { example: true, type: "boolean" },
-      },
-      type: "object",
-    }) as const;
-
-  const errorResponseSchema = ({ code = null, message }: { code?: null | string; message: string }) =>
-    ({
-      properties: {
-        code: { example: code, nullable: true, type: "string" },
-        message: { example: message, nullable: true, type: "string" },
-        success: { example: false, type: "boolean" },
-      },
-      type: "object",
-    }) as const;
-
-  const paginationMetaSchema = {
-    properties: {
-      page: { example: 1, type: "integer" },
-      pageSize: { example: 50, type: "integer" },
-      totalData: { example: 42, type: "integer" },
-      totalPage: { example: 1, type: "integer" },
-    },
-    type: "object",
+  const idParameter = {
+    in: "path",
+    name: "id",
+    required: true,
+    schema: { example: "550e8400-e29b-41d4-a716-446655440000", format: "uuid", type: "string" },
   } as const;
 
   return {
     delete: {
-      description: "delete an uploaded file",
-      parameters: [
-        {
-          in: "path",
-          name: "id",
-          required: true,
-          schema: { example: "550e8400-e29b-41d4-a716-446655440000", format: "uuid", type: "string" },
-        },
-      ],
+      description: "delete an uploaded file by ID",
+      parameters: [idParameter],
       responses: {
-        200: {
-          content: {
-            "application/json": {
-              schema: successResponseSchema({
-                data: {},
-                message: responseMessage(label).deleted,
-              }),
-            },
-          },
-          description: "file deleted successfully",
-        },
-        400: {
-          content: {
-            "application/json": {
-              schema: errorResponseSchema({ message: responseMessage("id").invalid }),
-            },
-          },
-          description: "invalid ID parameter",
-        },
-        401: {
-          content: {
-            "application/json": {
-              schema: errorResponseSchema({ message: unauthorizedMessage }),
-            },
-          },
-          description: "unauthorized",
-        },
-        404: {
-          content: {
-            "application/json": {
-              schema: errorResponseSchema({ code: "P2025", message: responseMessage(label).notFound }),
-            },
-          },
-          description: "file not found",
-        },
+        200: { description: "file deleted successfully" },
       },
       security: [{ bearerAuth: [] }],
       summary: "delete file",
@@ -108,34 +37,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
         },
       ],
       responses: {
-        200: {
-          content: {
-            "application/json": {
-              schema: successResponseSchema({
-                data: { items: { type: "object" }, type: "array" },
-                message: responseMessage(label).retrieved,
-                meta: paginationMetaSchema,
-              }),
-            },
-          },
-          description: "files retrieved successfully",
-        },
-        400: {
-          content: {
-            "application/json": {
-              schema: errorResponseSchema({ message: responseMessage("request query").invalid }),
-            },
-          },
-          description: "invalid request query",
-        },
-        401: {
-          content: {
-            "application/json": {
-              schema: errorResponseSchema({ message: unauthorizedMessage }),
-            },
-          },
-          description: "unauthorized",
-        },
+        200: { description: "files retrieved successfully" },
       },
       security: [{ bearerAuth: [] }],
       summary: "get all files",
@@ -143,43 +45,10 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
     },
 
     getById: {
-      description: "get a file by ID",
-      parameters: [
-        {
-          in: "path",
-          name: "id",
-          required: true,
-          schema: { example: "550e8400-e29b-41d4-a716-446655440000", format: "uuid", type: "string" },
-        },
-      ],
+      description: "get an uploaded file by ID",
+      parameters: [idParameter],
       responses: {
-        200: {
-          content: {
-            "application/json": {
-              schema: successResponseSchema({
-                data: {},
-                message: responseMessage(label).retrieved,
-              }),
-            },
-          },
-          description: "file retrieved successfully",
-        },
-        400: {
-          content: {
-            "application/json": {
-              schema: errorResponseSchema({ message: responseMessage("id").invalid }),
-            },
-          },
-          description: "invalid ID parameter",
-        },
-        401: {
-          content: {
-            "application/json": {
-              schema: errorResponseSchema({ message: unauthorizedMessage }),
-            },
-          },
-          description: "unauthorized",
-        },
+        200: { description: "file retrieved successfully" },
       },
       security: [{ bearerAuth: [] }],
       summary: "get file by ID",
@@ -187,14 +56,16 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
     },
 
     upload: {
-      description: "upload a file",
+      description: "upload a file. Files must be non-empty and no larger than 10 MB.",
       requestBody: {
         content: {
           "multipart/form-data": {
             schema: {
               properties: {
                 file: {
+                  description: "File to upload (maximum size: 10 MB).",
                   format: "binary",
+                  maxLength: 10485760,
                   type: "string",
                 },
               },
@@ -206,33 +77,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "u
         required: true,
       },
       responses: {
-        200: {
-          content: {
-            "application/json": {
-              schema: successResponseSchema({
-                data: {},
-                message: responseMessage(label).created,
-              }),
-            },
-          },
-          description: "file uploaded successfully",
-        },
-        400: {
-          content: {
-            "application/json": {
-              schema: errorResponseSchema({ message: responseMessage("request payload").invalid }),
-            },
-          },
-          description: "invalid request payload",
-        },
-        401: {
-          content: {
-            "application/json": {
-              schema: errorResponseSchema({ message: unauthorizedMessage }),
-            },
-          },
-          description: "unauthorized",
-        },
+        200: { description: "file uploaded successfully" },
       },
       security: [{ bearerAuth: [] }],
       summary: "upload file",
