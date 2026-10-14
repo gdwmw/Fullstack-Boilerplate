@@ -1,8 +1,6 @@
 ![Next.js - Home](public/project/1.png)
 ![Next.js - Login](public/project/2.png)
 ![Next.js - Register](public/project/3.png)
-![Next.js - Audit Logs](public/project/4.png)
-![Next.js - Audit Detail](public/project/5.png)
 ![Elysia.js - Register](public/project/6.png)
 ![Elysia.js - Response](public/project/7.png)
 
@@ -18,8 +16,6 @@ Boilerplate by [Gede Dewo Wahyu M.W](https://github.com/gdwmw)
 ![Redis](https://img.shields.io/badge/Cache-Redis-red)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-[![Quality gate](https://sonarqube.zettara.com/api/project_badges/quality_gate?project=turborepo&token=sqb_961e918314d7b8d25e2a76e45e79928eaf3a331b)](https://sonarqube.zettara.com/dashboard?id=turborepo)
-
 ---
 
 ## 📖 Description
@@ -29,46 +25,17 @@ This monorepo is a fullstack starter kit based on Turborepo, consisting of:
 - 🖥️ `apps/next`: frontend application using Next.js
 - ⚙️ `apps/elysia`: REST API using Elysia.js + Prisma
 
-This boilerplate provides common foundations often needed in production projects such as JWT authentication, form validation, state management, theme management, file uploads, and Storybook for UI development.
-
-This project also supports request/audit log compression using `zstd` on the Elysia.js backend.
-
----
-
-## ✨ Main Features
-
-- 🏗️ Monorepo architecture with Turborepo + pnpm workspace
-- 🎨 Frontend with Next.js + Tailwind CSS
-- 🔧 Backend with Elysia.js + Prisma + PostgreSQL
-- ⚡ Redis for token blocklist/session support
-- 🗜️ `zstd` compression for archived request/audit logs and database backups
-- 🔐 JWT authentication
-- 📝 Form handling (`react-hook-form` + `zod`)
-- 📚 Storybook for UI components
-- 🧹 Linting, formatting, and type-checking
-
----
-
-## 🧰 Tech Stack
-
-- **Monorepo**: Turborepo, pnpm
-- **Frontend**: Next.js, Tailwind CSS, Jotai, React Hook Form, Zod
-- **Backend**: Elysia.js, Prisma, PostgreSQL, JWT, zstd (log and DB backup compression)
-- **Tooling**: ESLint, Prettier, Husky, Commitizen
-
 ---
 
 ## ⚙️ Prerequisites
 
 Make sure the following are installed:
 
-- 🟢 Node.js `>= 22.22.1`
-- 📦 pnpm `>= 11`
-- ⚡ Bun `>= 1.3.6` (for running the Elysia API)
+- 🟢 Node.js
+- 📦 pnpm
+- ⚡ Bun
 - 🐘 PostgreSQL
-- 🧰 PostgreSQL client tools (`pg_dump`, `pg_restore`)
 - 🔴 Redis
-- 🗜️ zstd (required for compression/decompression)
 
 ---
 
@@ -97,8 +64,8 @@ pnpm cpenv
 
 Update at least:
 
-- `apps/elysia/.env`: database connection, JWT secret, and API configuration
-- `apps/next/.env`: API/backend URL and other frontend configurations
+- `apps/elysia/.env`
+- `apps/next/.env`
 
 5. **Ensure services are running**
 
@@ -170,10 +137,6 @@ pnpm build
 pnpm prod:start:next
 pnpm prod:start:elysia
 ```
-
-3. **Use a process manager/container in production**
-
-Use PM2, systemd, Docker, Kubernetes, or tmux for process supervision, monitoring, and scaling.
 
 ---
 

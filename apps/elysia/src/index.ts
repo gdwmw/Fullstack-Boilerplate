@@ -1,18 +1,13 @@
 import { Elysia } from "elysia";
 import { normalize, resolve, sep } from "path";
 
-import { auditRoutes } from "./api/audit/route";
 import { authRoutes } from "./api/auth/route";
 import { uploadRoutes } from "./api/upload/route";
 import { usersRoutes } from "./api/users/route";
 import { env } from "./environment";
 import { logger } from "./libs/pino";
-import { checkZstdAvailability } from "./utils/logCompression";
 import { corsPlugin } from "./utils/plugins/corsPlugin";
-import { requestLoggerPlugin } from "./utils/plugins/requestLoggerPlugin";
 import { swaggerPlugin } from "./utils/plugins/swaggerPlugin";
-import { cleanupLogsWorker } from "./utils/worker/cleanupLogsWorker";
-import { databaseBackupWorker } from "./utils/worker/databaseBackupWorker";
 
 const UPLOAD_DIR = resolve(process.cwd(), "uploads");
 
@@ -36,19 +31,9 @@ const resolveUploadPath = (relative: string | undefined) => {
   return absolute;
 };
 
-checkZstdAvailability().then((isAvailable) => {
-  if (isAvailable) {
-    logger.info("zstd binary detected. audit log compression is enabled.");
-    return;
-  }
-
-  logger.error("zstd binary is not available in PATH. audit log compression/decompression may fail.");
-});
-
 const app = new Elysia()
   .use(corsPlugin)
   .use(swaggerPlugin)
-  .use(requestLoggerPlugin)
 
   .get("/", () => "Hello Elysia")
   .get("/uploads/*", ({ params, set }) => {
@@ -62,7 +47,6 @@ const app = new Elysia()
     return Bun.file(safePath);
   })
 
-  .use(auditRoutes)
   .use(authRoutes)
   .use(uploadRoutes)
   .use(usersRoutes)
@@ -76,11 +60,3 @@ logger.info(
   },
   "elysia server started",
 );
-
-Bun.cron("0 9,12,15,18 * * *", async () => {
-  await databaseBackupWorker();
-});
-
-Bun.cron("0 1 * * *", async () => {
-  await cleanupLogsWorker();
-});

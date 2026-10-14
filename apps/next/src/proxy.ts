@@ -19,5 +19,5 @@ export default withAuth((request: NextRequestWithAuth) => {
 });
 
 export const config = {
-  matcher: ["/user-example/:path*", "/admin-example/:path*", "/audit/:path*", "/profile/:path*", "/password/:path*"],
+  matcher: ["/user-example/:path*", "/admin-example/:path*", "/profile/:path*", "/password/:path*"],
 };
