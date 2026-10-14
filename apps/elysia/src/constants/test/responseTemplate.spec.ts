@@ -13,7 +13,6 @@ vi.mock("@/src/generated/prisma/client", () => ({
 }));
 
 import { ERROR_RESPONSE, SUCCESS_RESPONSE } from "@/src/constants/responseTemplate";
-import { Prisma } from "@/src/generated/prisma/client";
 
 describe("SUCCESS_RESPONSE", () => {
   describe("with valid data", () => {
@@ -145,68 +144,11 @@ describe("ERROR_RESPONSE", () => {
     });
   });
 
-  describe("with Prisma errors", () => {
-    it("should extract code when error is PrismaClientKnownRequestError", () => {
-      const prismaError = new Prisma.PrismaClientKnownRequestError("Unique constraint failed", {
-        clientVersion: "",
-        code: "P2002",
-      });
-      const result = ERROR_RESPONSE({ error: prismaError, message: "conflict" });
-      expect(result.code).toBe("P2002");
-      expect(result.success).toBe(false);
-      expect(result.message).toBe("conflict");
-    });
-
-    it("should handle different Prisma error codes", () => {
-      const errorCodes = ["P2000", "P2001", "P2002", "P2025"];
-      errorCodes.forEach((code) => {
-        const prismaError = new Prisma.PrismaClientKnownRequestError("Error", {
-          clientVersion: "",
-          code,
-        });
-        const result = ERROR_RESPONSE({ error: prismaError, message: "error" });
-        expect(result.code).toBe(code);
-      });
-    });
-  });
-
-  describe("with non-Prisma errors", () => {
-    it("should omit code for generic Error", () => {
-      const result = ERROR_RESPONSE({ error: new Error("generic"), message: "error" });
-      expect(result).not.toHaveProperty("code");
-      expect(result.success).toBe(false);
-    });
-
-    it("should omit code for TypeError", () => {
-      const result = ERROR_RESPONSE({ error: new TypeError("type error"), message: "error" });
-      expect(result).not.toHaveProperty("code");
-    });
-
-    it("should omit code for plain object error", () => {
-      const result = ERROR_RESPONSE({ error: { message: "custom" }, message: "error" });
-      expect(result).not.toHaveProperty("code");
-    });
-  });
-
   describe("response structure", () => {
     it("should always have required properties", () => {
       const result = ERROR_RESPONSE({ message: "error" });
       expect(result).toHaveProperty("message");
       expect(result).toHaveProperty("success");
-    });
-
-    it("should have exactly 2 properties without Prisma code", () => {
-      const result = ERROR_RESPONSE({ message: "error" });
-      expect(Object.keys(result).length).toBe(2);
-    });
-
-    it("should have exactly 3 properties with Prisma code", () => {
-      const prismaError = new Prisma.PrismaClientKnownRequestError("Unique constraint failed", {
-        clientVersion: "",
-        code: "P2002",
-      });
-      const result = ERROR_RESPONSE({ error: prismaError, message: "conflict" });
-      expect(Object.keys(result).length).toBe(3);
     });
   });
 });

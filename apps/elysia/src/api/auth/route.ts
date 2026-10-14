@@ -5,7 +5,7 @@ import Elysia, { HTTPHeaders, StatusMap } from "elysia";
 import { responseMessage } from "@/src/constants/responseMessage";
 import { ERROR_RESPONSE, SUCCESS_RESPONSE } from "@/src/constants/responseTemplate";
 import { env } from "@/src/environment";
-import { handlePrismaError } from "@/src/utils/handle-prisma-error/handlePrismaError";
+import { Prisma } from "@/src/generated/prisma/client";
 import { accessJwtPlugin, refreshJwtPlugin } from "@/src/utils/plugins/jwtPlugin";
 import { getBearerToken, verifyAccessToken } from "@/src/utils/verifyAccessToken";
 
@@ -107,7 +107,6 @@ const getAuthenticatedUserId = async ({
 export const authRoutes = new Elysia({ prefix: "/auth" })
   .use(accessJwtPlugin)
   .use(refreshJwtPlugin)
-  .onError(({ error, set }) => handlePrismaError(LABEL, error, set))
 
   .get(
     "/me",
@@ -135,16 +134,42 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
     "/register",
     async ({ accessJwt, body, refreshJwt, set }) => {
       const payload = registerSchema.parse(body);
-      const res = await service.register(payload);
 
-      const tokens = await issueAccessAndRefreshTokens({ accessJwt, refreshJwt, userId: res.id });
+      try {
+        const res = await service.register(payload);
 
-      set.status = 201;
+        const tokens = await issueAccessAndRefreshTokens({ accessJwt, refreshJwt, userId: res.id });
 
-      return SUCCESS_RESPONSE({
-        data: { ...res, accessToken: tokens.accessToken, refreshToken: tokens.encryptedRefreshToken },
-        message: responseMessage("register").success,
-      });
+        set.status = 201;
+
+        return SUCCESS_RESPONSE({
+          data: { ...res, accessToken: tokens.accessToken, refreshToken: tokens.encryptedRefreshToken },
+          message: responseMessage("register").success,
+        });
+      } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+          if (error.code === "P2002") {
+            set.status = 409;
+
+            const extractFieldName = (message: string): string => {
+              const split = message.split("\n");
+              const lastLine = split.at(-1);
+              const field = lastLine?.match(/`([^`]+)`/)?.[1];
+              return (
+                field
+                  ?.replaceAll("_", " ")
+                  .split(" ")
+                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                  .join(" ") || "[failed to extract field name from error message]"
+              );
+            };
+
+            return ERROR_RESPONSE({
+              message: `${responseMessage(extractFieldName(error.message)).alreadyExists}`,
+            });
+          }
+        }
+      }
     },
 
     { detail: docs(LABEL).register },

@@ -11,7 +11,7 @@ import { docs } from "./swagger";
 const LABEL = "upload";
 
 export const uploadRoutes = new Elysia({ prefix: "/upload" })
-  .use(protectedRoutePlugin(LABEL))
+  .use(protectedRoutePlugin)
 
   .get(
     "/",

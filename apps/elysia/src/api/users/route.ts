@@ -11,7 +11,7 @@ import { docs } from "./swagger";
 const LABEL = "users";
 
 export const usersRoutes = new Elysia({ prefix: "/users" })
-  .use(protectedRoutePlugin(LABEL))
+  .use(protectedRoutePlugin)
 
   .get(
     "/",

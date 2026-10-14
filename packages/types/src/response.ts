@@ -13,7 +13,6 @@ export interface ISuccessResponse<T> {
 }
 
 export interface IErrorResponse {
-  code?: null | string;
   message: null | string;
   success: false;
 }

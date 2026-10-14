@@ -7,6 +7,7 @@ import { usersRoutes } from "./api/users/route";
 import { env } from "./environment";
 import { logger } from "./libs/pino";
 import { corsPlugin } from "./utils/plugins/corsPlugin";
+import { requestLoggerPlugin } from "./utils/plugins/requestLoggerPlugin";
 import { swaggerPlugin } from "./utils/plugins/swaggerPlugin";
 
 const UPLOAD_DIR = resolve(process.cwd(), "uploads");
@@ -33,6 +34,7 @@ const resolveUploadPath = (relative: string | undefined) => {
 
 const app = new Elysia()
   .use(corsPlugin)
+  .use(requestLoggerPlugin)
   .use(swaggerPlugin)
 
   .get("/", () => "Hello Elysia")
