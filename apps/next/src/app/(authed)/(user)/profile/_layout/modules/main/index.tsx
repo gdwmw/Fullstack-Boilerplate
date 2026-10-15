@@ -126,6 +126,7 @@ export const Main: FC = (): ReactElement => {
   const updateProfileMutation = useMutation({
     mutationFn: async (dt: TProfileSchema) => {
       const currentUser = meQuery.data;
+
       if (!currentUser) {
         throw new Error("failed to load current user");
       }

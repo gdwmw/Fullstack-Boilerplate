@@ -8,53 +8,53 @@ import { ExampleA } from "@/src/components/elements/example/A/ExampleA";
 import { clientEnv } from "@/src/environments/env.client";
 import { useModal } from "@/src/hooks/useModal";
 
+// ----------------------------------------
 const ENVIRONMENT_DATA_VARIABLES = ["NEXT_PUBLIC_BASE_API_URL"];
 const ENVIRONMENT_DATA_VALUES = [clientEnv.NEXT_PUBLIC_BASE_API_URL];
+// ----------------------------------------
 
 export const APIConnectionChecker: FC = (): ReactElement => {
   const { close, isOpen, open } = useModal();
   const [connection, setConnection] = useState<boolean[]>(() => ENVIRONMENT_DATA_VALUES.map(() => false));
 
-  const handleOpen = () => open();
-
-  const handleClose = () => close();
-
   useEffect(() => {
-    const handleSetArray = (value: boolean, index: number) => {
-      setConnection((prev) => {
-        const next = [...prev];
-        next[index] = value;
-        return next;
+    const setConnectionStatus = (isConnected: boolean, connectionIndex: number) => {
+      setConnection((currentStatuses) => {
+        const updatedStatuses = [...currentStatuses];
+        updatedStatuses[connectionIndex] = isConnected;
+        return updatedStatuses;
       });
     };
 
-    const checkConnection = async (url: string, index: number) => {
+    const checkConnection = async (url: string, connectionIndex: number) => {
       try {
-        await axios(url, {
-          method: "HEAD",
-        });
-        handleSetArray(true, index);
+        await axios(url, { method: "HEAD" });
+        setConnectionStatus(true, connectionIndex);
       } catch {
-        handleSetArray(false, index);
+        setConnectionStatus(false, connectionIndex);
       }
     };
 
-    const handleCheckConnection = () => {
+    const checkConfiguredConnections = () => {
       if (!isOpen) {
         return;
       }
-      const tasks = ENVIRONMENT_DATA_VALUES.map((url, i) => {
+
+      const connectionChecks = ENVIRONMENT_DATA_VALUES.map((url, connectionIndex) => {
         if (!url) {
-          handleSetArray(false, i);
+          setConnectionStatus(false, connectionIndex);
           return Promise.resolve();
         }
-        return checkConnection(url, i);
+
+        return checkConnection(url, connectionIndex);
       });
-      Promise.allSettled(tasks);
+
+      Promise.allSettled(connectionChecks);
     };
 
-    handleCheckConnection();
-    const interval = setInterval(handleCheckConnection, 30000);
+    checkConfiguredConnections();
+
+    const interval = setInterval(checkConfiguredConnections, 30000);
     return () => clearInterval(interval);
   }, [isOpen]);
 
@@ -65,7 +65,7 @@ export const APIConnectionChecker: FC = (): ReactElement => {
           <div className="flex max-h-[70vh] w-full flex-col gap-2 overflow-y-auto rounded-lg border border-gray-200 bg-white p-4 shadow-xs shadow-black/50 sm:w-auto sm:p-5 dark:border-gray-600 dark:bg-gray-800 dark:shadow-white/70">
             <div className="flex items-center justify-between gap-3 sm:gap-5">
               <h1 className="truncate text-base font-semibold sm:text-lg dark:text-white">API Connection Checker</h1>
-              <ExampleA className="-mb-0.5" color="blue" onClick={handleClose} size="sm" variant="ghost">
+              <ExampleA className="-mb-0.5" color="blue" onClick={close} size="sm" variant="ghost">
                 <X size={20} />
               </ExampleA>
             </div>
@@ -95,7 +95,7 @@ export const APIConnectionChecker: FC = (): ReactElement => {
         )}
 
         {!isOpen && (
-          <ExampleA className="min-w-10" color="blue" onClick={handleOpen} size="sm" variant="solid">
+          <ExampleA className="min-w-10" color="blue" onClick={open} size="sm" variant="solid">
             <Server size={18} />
           </ExampleA>
         )}
