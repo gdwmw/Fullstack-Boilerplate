@@ -4,17 +4,35 @@ import { responseMessage } from "@/src/constants/responseMessage";
 import { ERROR_RESPONSE } from "@/src/constants/responseTemplate";
 import { redis } from "@/src/libs/redis";
 
-export const getBearerToken = (authorization?: string) => (authorization?.startsWith("Bearer ") ? authorization.slice(7) : null);
+type TJwtVerifier = {
+  verify(token: string): Promise<unknown>;
+};
+
+export const getBearerToken = (authorization?: string) => {
+  if (!authorization || !authorization.startsWith("Bearer ")) {
+    return null;
+  }
+
+  return authorization.slice("Bearer ".length);
+};
 
 const accessTokenInvalidOrExpiredMessage = `${responseMessage("access token").invalid} or ${responseMessage("access token").expired}`;
 
-export const verifyResponse = async ({
-  accessJwt,
-  authorization,
-}: {
-  accessJwt: { verify(token: string): Promise<unknown> };
-  authorization?: string;
-}) => {
+const isRevokedToken = async (decoded: unknown) => {
+  if (!decoded || typeof decoded !== "object") {
+    return false;
+  }
+
+  const { jti } = decoded as { jti?: unknown };
+
+  if (typeof jti !== "string") {
+    return false;
+  }
+
+  return (await redis.exists(`blocklist:${jti}`)) === 1;
+};
+
+export const verifyResponse = async ({ accessJwt, authorization }: { accessJwt: TJwtVerifier; authorization?: string }) => {
   const token = getBearerToken(authorization);
 
   if (!token) {
@@ -31,8 +49,9 @@ export const verifyResponse = async ({
     });
   }
 
-  const jti = (decoded as { jti?: unknown }).jti;
-  if (typeof jti === "string" && (await redis.exists(`blocklist:${jti}`)) === 1) {
+  const revoked = await isRevokedToken(decoded);
+
+  if (revoked) {
     return ERROR_RESPONSE({
       message: accessTokenInvalidOrExpiredMessage,
     });
@@ -46,7 +65,7 @@ export const verifyAccessToken = async ({
   headers,
   set,
 }: {
-  accessJwt: { verify(token: string): Promise<unknown> };
+  accessJwt: TJwtVerifier;
   headers: { authorization?: string };
   set: {
     cookie?: Record<string, unknown>;
@@ -60,7 +79,9 @@ export const verifyAccessToken = async ({
     authorization: headers.authorization,
   });
 
-  if (!res) return null;
+  if (!res) {
+    return null;
+  }
 
   set.status = 401;
   return res;

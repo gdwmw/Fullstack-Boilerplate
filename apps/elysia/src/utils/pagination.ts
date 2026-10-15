@@ -26,11 +26,12 @@ export const createPaginationMeta = ({ page, pageSize, totalData }: Omit<IMeta, 
 });
 
 export const paginateArray = <T>({ items, page, pageSize }: { items: T[] } & IQueryParams) => {
-  const totalData = items.length;
-  const skip = (page - 1) * pageSize;
+  const totalItems = items.length;
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
 
   return {
-    data: items.slice(skip, skip + pageSize),
-    meta: createPaginationMeta({ page, pageSize, totalData }),
+    data: items.slice(startIndex, endIndex),
+    meta: createPaginationMeta({ page, pageSize, totalData: totalItems }),
   };
 };

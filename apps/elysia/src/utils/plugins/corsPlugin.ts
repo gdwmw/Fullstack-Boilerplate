@@ -9,12 +9,12 @@ export const corsPlugin = cors({
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   origin: (request) => {
-    const origin = request.headers.get("origin");
+    const requestOrigin = request.headers.get("origin");
 
-    if (!origin) {
+    if (!requestOrigin) {
       return true;
     }
 
-    return ALLOWED_ORIGINS.has(origin);
+    return ALLOWED_ORIGINS.has(requestOrigin);
   },
 });

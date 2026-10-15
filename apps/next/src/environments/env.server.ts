@@ -11,8 +11,8 @@ const serverEnvSchema = z.object({
 const parsed = serverEnvSchema.safeParse(process.env);
 
 if (!parsed.success) {
-  const issues = parsed.error.issues.map((issue) => `  - ${issue.path.join(".") || "(root)"}: ${issue.message}`).join("\n");
-  throw new Error(`invalid server environment variables:\n${issues}`);
+  const validationIssues = parsed.error.issues.map((issue) => `  - ${issue.path.join(".") || "(root)"}: ${issue.message}`).join("\n");
+  throw new Error(`invalid server environment variables:\n${validationIssues}`);
 }
 
 export const serverEnv = parsed.data;

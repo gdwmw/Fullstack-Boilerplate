@@ -21,8 +21,9 @@ const rawClientEnv = {
 const parsed = clientEnvSchema.safeParse(rawClientEnv);
 
 if (!parsed.success) {
-  const issues = parsed.error.issues.map((issue) => `  - ${issue.path.join(".") || "(root)"}: ${issue.message}`).join("\n");
-  throw new Error(`invalid client environment variables:\n${issues}`);
+  const validationIssues = parsed.error.issues.map((issue) => `  - ${issue.path.join(".") || "(root)"}: ${issue.message}`).join("\n");
+
+  throw new Error(`invalid client environment variables:\n${validationIssues}`);
 }
 
 export const clientEnv = parsed.data;

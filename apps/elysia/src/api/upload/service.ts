@@ -16,20 +16,22 @@ import { TQuerySchema } from "./type";
 const UPLOAD_DIR = join(process.cwd(), "uploads");
 
 const processImage = async (buffer: Buffer, originalWidth: number): Promise<TFormats> => {
+  const formatsToGenerate = IMAGE_FORMATS.filter((format) => originalWidth > format.width);
+
   const processedFormats = await Promise.all(
-    IMAGE_FORMATS.filter((format) => originalWidth > format.width).map(async (format) => {
+    formatsToGenerate.map(async ({ name, width: targetWidth }) => {
       const filename = `${randomUUID()}.webp`;
-      const filePath = join(UPLOAD_DIR, filename);
       const relativePath = `uploads/${filename}`;
+      const filePath = join(UPLOAD_DIR, filename);
       const { data, info } = await sharp(buffer)
-        .resize({ width: format.width, withoutEnlargement: true })
+        .resize({ width: targetWidth, withoutEnlargement: true })
         .webp({ quality: 80 })
         .toBuffer({ resolveWithObject: true });
 
       await writeFile(filePath, data);
 
       return [
-        format.name,
+        name,
         {
           filename,
           height: info.height,
@@ -47,13 +49,16 @@ const processImage = async (buffer: Buffer, originalWidth: number): Promise<TFor
 };
 
 const removeUploadedFile = async (filename: string) => {
+  const filePath = join(UPLOAD_DIR, filename);
+
   try {
-    await unlink(join(UPLOAD_DIR, filename));
+    await unlink(filePath);
   } catch (error) {
     logger.warn(
       {
         error,
         filename,
+        filePath,
         scope: "upload",
       },
       "failed to delete uploaded file from disk",
@@ -67,27 +72,31 @@ export const service = {
 
     await removeUploadedFile(fileRecord.filename);
 
-    if (fileRecord.formats) {
-      await Promise.all(Object.values(fileRecord.formats as TFormats).map((file) => removeUploadedFile(file.filename)));
+    const generatedFormats = fileRecord.formats as null | TFormats;
+
+    if (generatedFormats) {
+      const generatedFiles = Object.values(generatedFormats);
+      await Promise.all(generatedFiles.map(({ filename }) => removeUploadedFile(filename)));
     }
 
     return fileRecord;
   },
 
   async getAll({ page, pageSize }: TQuerySchema) {
-    const skip = (page - 1) * pageSize;
-    const [data, total] = await prisma.$transaction([
+    const recordsToSkip = (page - 1) * pageSize;
+
+    const [files, totalFiles] = await prisma.$transaction([
       prisma.files.findMany({
         orderBy: { createdAt: "desc" },
-        skip,
+        skip: recordsToSkip,
         take: pageSize,
       }),
       prisma.files.count(),
     ]);
 
     return {
-      data,
-      meta: createPaginationMeta({ page, pageSize, totalData: total }),
+      data: files,
+      meta: createPaginationMeta({ page, pageSize, totalData: totalFiles }),
     };
   },
 
@@ -97,29 +106,34 @@ export const service = {
 
   async upload(file: File): Promise<IFilesModel> {
     await mkdir(UPLOAD_DIR, { recursive: true });
+
     const originalFilename = file.name;
     const extension = extname(originalFilename);
     const filename = `${randomUUID()}${extension}`;
-    const filePath = join(UPLOAD_DIR, filename);
     const relativePath = `uploads/${filename}`;
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(filePath, buffer);
+    const absolutePath = join(UPLOAD_DIR, filename);
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
+
+    await writeFile(absolutePath, fileBuffer);
 
     let width: null | number = null;
     let height: null | number = null;
     let dominantColor: null | string = null;
     let placeholder: null | string = null;
     let formats: null | TFormats = null;
+    const isAllowedImageType = ALLOWED_TYPES.includes(file.type as (typeof ALLOWED_TYPES)[number]);
 
-    if (ALLOWED_TYPES.includes(file.type as (typeof ALLOWED_TYPES)[number])) {
-      const metadata = await sharp(buffer).metadata();
-      width = metadata.width ?? null;
-      height = metadata.height ?? null;
+    if (isAllowedImageType) {
+      const imageMetadata = await sharp(fileBuffer).metadata();
+      width = imageMetadata.width ?? null;
+      height = imageMetadata.height ?? null;
+
       if (width && height) {
-        const [{ base64, color }, processedFormats] = await Promise.all([getPlaiceholder(buffer, { size: 32 }), processImage(buffer, width)]);
-        placeholder = base64;
-        dominantColor = color.hex;
-        formats = processedFormats;
+        const [placeholderData, generatedFormats] = await Promise.all([getPlaiceholder(fileBuffer, { size: 32 }), processImage(fileBuffer, width)]);
+
+        placeholder = placeholderData.base64;
+        dominantColor = placeholderData.color.hex;
+        formats = generatedFormats;
       }
     }
 

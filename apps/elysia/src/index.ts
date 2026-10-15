@@ -12,24 +12,33 @@ import { swaggerPlugin } from "./utils/plugins/swaggerPlugin";
 
 const UPLOAD_DIR = resolve(process.cwd(), "uploads");
 
-const resolveUploadPath = (relative: string | undefined) => {
-  if (!relative) return null;
-
-  if (relative.includes("\0") || relative.startsWith("/") || relative.startsWith("\\")) {
+const resolveUploadPath = (relativePath: string | undefined) => {
+  if (!relativePath) {
     return null;
   }
 
-  const normalized = normalize(relative);
-  if (normalized.startsWith("..") || normalized.includes(`..${sep}`)) {
+  const isNullBytePath = relativePath.includes("\0");
+  const isAbsolutePath = relativePath.startsWith("/") || relativePath.startsWith("\\");
+
+  if (isNullBytePath || isAbsolutePath) {
     return null;
   }
 
-  const absolute = resolve(UPLOAD_DIR, normalized);
-  if (absolute !== UPLOAD_DIR && !absolute.startsWith(`${UPLOAD_DIR}${sep}`)) {
+  const normalizedPath = normalize(relativePath);
+  const hasParentDirectoryTraversal = normalizedPath.startsWith("..") || normalizedPath.includes(`..${sep}`);
+
+  if (hasParentDirectoryTraversal) {
     return null;
   }
 
-  return absolute;
+  const absolutePath = resolve(UPLOAD_DIR, normalizedPath);
+  const isOutsideUploadDirectory = absolutePath !== UPLOAD_DIR && !absolutePath.startsWith(`${UPLOAD_DIR}${sep}`);
+
+  if (isOutsideUploadDirectory) {
+    return null;
+  }
+
+  return absolutePath;
 };
 
 const app = new Elysia()
@@ -38,15 +47,16 @@ const app = new Elysia()
   .use(swaggerPlugin)
 
   .get("/", () => "Hello Elysia")
-  .get("/uploads/*", ({ params, set }) => {
-    const safePath = resolveUploadPath(params["*"]);
 
-    if (!safePath) {
+  .get("/uploads/*", ({ params, set }) => {
+    const uploadFilePath = resolveUploadPath(params["*"]);
+
+    if (!uploadFilePath) {
       set.status = 400;
       return "invalid upload path";
     }
 
-    return Bun.file(safePath);
+    return Bun.file(uploadFilePath);
   })
 
   .use(authRoutes)

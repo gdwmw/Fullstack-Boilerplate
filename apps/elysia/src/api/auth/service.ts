@@ -7,30 +7,38 @@ import { TChangePasswordSchema, TLoginSchema, TRegisterSchema } from "./type";
 
 export const service = {
   async addToBlocklist(jti: string, expiresAt: Date) {
-    const ttlSeconds = Math.floor((expiresAt.getTime() - Date.now()) / 1000);
-    if (ttlSeconds > 0) {
-      await redis.set(`blocklist:${jti}`, "1", "EX", ttlSeconds);
+    const remainingTtlSeconds = Math.floor((expiresAt.getTime() - Date.now()) / 1000);
+
+    if (remainingTtlSeconds <= 0) {
+      return;
     }
+
+    await redis.set(`blocklist:${jti}`, "1", "EX", remainingTtlSeconds);
   },
 
-  async changePassword(id: string, data: TChangePasswordSchema) {
-    const res = await prisma.users.findUnique({
-      where: { id },
+  async changePassword(userId: string, data: TChangePasswordSchema) {
+    const user = await prisma.users.findUnique({
+      where: { id: userId },
     });
 
-    if (!res?.password) return null;
+    if (!user?.password) {
+      return null;
+    }
 
-    const isValidPassword = await Bun.password.verify(data.oldPassword, res.password);
-    if (!isValidPassword) return null;
+    const isCurrentPasswordValid = await Bun.password.verify(data.oldPassword, user.password);
+
+    if (!isCurrentPasswordValid) {
+      return null;
+    }
 
     const hashedNewPassword = await Bun.password.hash(data.newPassword);
 
-    return await prisma.users.update({
+    return prisma.users.update({
       data: {
         password: hashedNewPassword,
       },
       omit: { ...USER_OMIT_FIELDS, imageId: true },
-      where: { id },
+      where: { id: userId },
     });
   },
 
@@ -48,19 +56,24 @@ export const service = {
   },
 
   async login(data: TLoginSchema) {
-    const res = await prisma.users.findUnique({
+    const user = await prisma.users.findUnique({
       include: { image: true },
       where: data.method === "email" ? { email: data.identifier } : { username: data.identifier },
     });
 
-    if (!res?.password) return null;
+    if (!user?.password) {
+      return null;
+    }
 
-    const isValidPassword = await Bun.password.verify(data.password, res.password);
-    if (!isValidPassword) return null;
+    const isPasswordValid = await Bun.password.verify(data.password, user.password);
 
-    const { password: _password, ...user } = res;
+    if (!isPasswordValid) {
+      return null;
+    }
 
-    return user;
+    const { password: _password, ...userWithoutPassword } = user;
+
+    return userWithoutPassword;
   },
 
   async register(data: TRegisterSchema) {

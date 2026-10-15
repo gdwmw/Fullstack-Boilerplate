@@ -15,21 +15,22 @@ export const service = {
   },
 
   async getAll({ page, pageSize }: TQuerySchema) {
-    const skip = (page - 1) * pageSize;
-    const [data, total] = await prisma.$transaction([
+    const recordsToSkip = (page - 1) * pageSize;
+
+    const [users, totalUsers] = await prisma.$transaction([
       prisma.users.findMany({
         include: { image: true },
         omit: USER_OMIT_FIELDS,
         orderBy: { id: "asc" },
-        skip,
+        skip: recordsToSkip,
         take: pageSize,
       }),
       prisma.users.count(),
     ]);
 
     return {
-      data,
-      meta: createPaginationMeta({ page, pageSize, totalData: total }),
+      data: users,
+      meta: createPaginationMeta({ page, pageSize, totalData: totalUsers }),
     };
   },
 
@@ -41,16 +42,17 @@ export const service = {
     });
   },
 
-  async put(id: string, data: TPayloadSchema) {
-    const { imageId, ...rest } = data;
-    return await prisma.users.update({
+  async put(userId: string, payload: TPayloadSchema) {
+    const { imageId, ...userFields } = payload;
+
+    return prisma.users.update({
       data: {
-        ...rest,
+        ...userFields,
         imageId: imageId ?? null,
       },
       include: { image: true },
       omit: USER_OMIT_FIELDS,
-      where: { id },
+      where: { id: userId },
     });
   },
 };
