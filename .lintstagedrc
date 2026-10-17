@@ -1,0 +1,31 @@
+{
+  "apps/next/**/*.{js,jsx,ts,tsx,mjs,cjs}": [
+    "eslint --fix --max-warnings 0 --config apps/next/eslint.config.mjs",
+    "prettier --write"
+  ],
+  "apps/elysia/**/*.{js,ts,mjs,cjs}": [
+    "eslint --fix --max-warnings 0 --config apps/elysia/eslint.config.mjs",
+    "prettier --write"
+  ],
+  "packages/constants/**/*.{js,jsx,ts,tsx,mjs,cjs}": [
+    "eslint --fix --max-warnings 0 --config packages/constants/eslint.config.mjs",
+    "prettier --write"
+  ],
+  "packages/eslint-config/**/*.{js,jsx,ts,tsx,mjs,cjs}": [
+    "eslint --fix --max-warnings 0 --config packages/eslint-config/eslint.config.mjs",
+    "prettier --write"
+  ],
+  "packages/schemas/**/*.{js,jsx,ts,tsx,mjs,cjs}": [
+    "eslint --fix --max-warnings 0 --config packages/schemas/eslint.config.mjs",
+    "prettier --write"
+  ],
+  "packages/types/**/*.{js,jsx,ts,tsx,mjs,cjs}": [
+    "eslint --fix --max-warnings 0 --config packages/types/eslint.config.mjs",
+    "prettier --write"
+  ],
+  "packages/utils/**/*.{js,jsx,ts,tsx,mjs,cjs}": [
+    "eslint --fix --max-warnings 0 --config packages/utils/eslint.config.mjs",
+    "prettier --write"
+  ],
+  "*.{json,css,md}": ["prettier --write"]
+}

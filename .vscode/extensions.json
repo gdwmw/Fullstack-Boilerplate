@@ -1,0 +1,29 @@
+{
+  "recommendations": [
+    "formulahendry.auto-close-tag",
+    "formulahendry.auto-rename-tag",
+    "mikestead.dotenv",
+    "usernamehw.errorlens",
+    "dbaeumer.vscode-eslint",
+    "github.vscode-pull-request-github",
+    "vincaslt.highlight-matching-tag",
+    "mguellsegarra.highlight-on-copy",
+    "sirtori.indenticator",
+    "pkief.material-icon-theme",
+    "christian-kohler.npm-intellisense",
+    "christian-kohler.path-intellisense",
+    "csstools.postcss",
+    "esbenp.prettier-vscode",
+    "yoavbls.pretty-ts-errors",
+    "bradlc.vscode-tailwindcss",
+    "gruntfuggly.todo-tree",
+    "pedrohenrique-ql.regex-match",
+    "rangav.vscode-thunder-client",
+    "prisma.prisma",
+    "cweijan.vscode-postgresql-client2",
+    "ms-vscode.vscode-chat-customizations-evaluations",
+    "github.vscode-github-actions",
+    "pflannery.vscode-versionlens",
+    "wware.snippet-creator"
+  ]
+}

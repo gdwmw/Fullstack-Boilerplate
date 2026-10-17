@@ -1,0 +1,53 @@
+{
+  "name": "turborepo",
+  "version": "0.1.0",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "prod:start:next": "pnpm --filter nextjs start",
+    "prod:start:elysia": "pnpm --filter elysiajs start",
+    "generate": "turbo run generate",
+    "migrate": "turbo run migrate",
+    "format": "turbo run format",
+    "storybook:build": "turbo run storybook:build",
+    "vitest:run": "turbo run vitest:run",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "prettier": "turbo run prettier",
+    "check-types": "turbo run check-types",
+    "cpenv": "turbo run cpenv",
+    "commit": "git-cz",
+    "prepare": "husky"
+  },
+  "config": {
+    "commitizen": {
+      "path": "node_modules/cz-git"
+    }
+  },
+  "dependencies": {
+    "date-fns": "^4.4.0",
+    "plaiceholder": "^3.0.0",
+    "sharp": "^0.35.5",
+    "vitest": "^4.1.11",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "commitizen": "^4.3.2",
+    "cz-git": "^1.14.0",
+    "eslint": "^9.39.5",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "prettier": "^3.9.10",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "turbo": "^2.11.8",
+    "typescript": "5.9.3"
+  },
+  "packageManager": "pnpm@12.11.2",
+  "engines": {
+    "node": ">=22.22.1"
+  }
+}

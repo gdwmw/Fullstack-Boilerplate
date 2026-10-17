@@ -1,0 +1,33 @@
+{
+  "name": "@repo/eslint-config",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "lint": "eslint --max-warnings 0",
+    "lint:fix": "eslint --fix",
+    "prettier": "prettier --write ."
+  },
+  "exports": {
+    "./base": "./src/base.js",
+    "./elysia": "./src/elysia.js",
+    "./next": "./src/next.js",
+    "./utils": "./src/utils.js"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@next/eslint-plugin-next": "^16.4.2",
+    "@tanstack/eslint-plugin-query": "^5.104.3",
+    "eslint-config-next": "^16.4.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-better-tailwindcss": "^4.9.1",
+    "eslint-plugin-only-warn": "^1.2.1",
+    "eslint-plugin-perfectionist": "^5.12.1",
+    "eslint-plugin-prettier": "^5.5.7",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-storybook": "^10.6.2",
+    "eslint-plugin-turbo": "^2.11.8",
+    "globals": "^16.5.0",
+    "typescript-eslint": "^8.71.2"
+  }
+}
