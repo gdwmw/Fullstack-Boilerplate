@@ -6,10 +6,6 @@ export default withAuth((request: NextRequestWithAuth) => {
     return NextResponse.rewrite(new URL("/denied", request.url));
   }
 
-  if (request.nextUrl.pathname.startsWith("/audit") && request.nextauth.token?.role !== "admin") {
-    return NextResponse.rewrite(new URL("/denied", request.url));
-  }
-
   if (request.nextUrl.pathname.startsWith("/example/")) {
     const path = request.nextUrl.pathname.split("/").filter(Boolean);
     if (path[1] !== request.nextauth.token?.username) {

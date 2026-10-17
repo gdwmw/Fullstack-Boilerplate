@@ -8,10 +8,10 @@ import { ExampleA } from "@/src/components/elements/example/A/ExampleA";
 import { clientEnv } from "@/src/environments/env.client";
 import { useModal } from "@/src/hooks/useModal";
 
-// ----------------------------------------
+// ------------------------------------------------------------------
 const ENVIRONMENT_DATA_VARIABLES = ["NEXT_PUBLIC_BASE_API_URL"];
 const ENVIRONMENT_DATA_VALUES = [clientEnv.NEXT_PUBLIC_BASE_API_URL];
-// ----------------------------------------
+// ------------------------------------------------------------------
 
 export const APIConnectionChecker: FC = (): ReactElement => {
   const { close, isOpen, open } = useModal();
