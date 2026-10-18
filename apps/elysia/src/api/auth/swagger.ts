@@ -130,7 +130,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
         required: true,
       },
       responses: {
-        201: { description: "registration successful" },
+        200: { description: "registration successful" },
       },
       summary: "register",
       tags: [label.toLowerCase()],

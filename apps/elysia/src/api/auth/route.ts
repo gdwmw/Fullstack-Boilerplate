@@ -150,8 +150,6 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
 
         const tokens = await generateAccessAndRefreshTokens({ accessJwt, refreshJwt, userId: res.id });
 
-        set.status = 201;
-
         return SUCCESS_RESPONSE({
           data: { ...res, accessToken: tokens.accessToken, refreshToken: tokens.encryptedRefreshToken },
           message: responseMessage("register").success,
