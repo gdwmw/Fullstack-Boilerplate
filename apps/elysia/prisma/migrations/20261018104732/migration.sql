@@ -2,6 +2,17 @@
 CREATE TYPE "UserRole" AS ENUM ('user', 'admin');
 
 -- CreateTable
+CREATE TABLE "examples" (
+    "id" UUID NOT NULL,
+    "label" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "examples_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "files" (
     "id" UUID NOT NULL,
     "filename" TEXT NOT NULL,
