@@ -5233,8 +5233,8 @@ packages:
     resolution: {integrity: sha512-1tB5mhVo7U+ETBKNf92xT4hrQa3pm0MZ0PQvuDnWgAAGHDsfp4lPSpiS6psrSiet87wyGPh9ft6wmhOMQ0hDiw==}
     engines: {node: '>=14.16'}
 
-  strtok3@10.5.0:
-    resolution: {integrity: sha512-PgAsgIuizbZN/r4+g4UNvbVCTpJWdoIdI71kIWwKmdIH0vJ0q7ylMVGU8PWj2s9O98y4MtFWiDTIrtNukZMMgQ==}
+  strtok3@10.6.0:
+    resolution: {integrity: sha512-wzZwWwcjIN0X97z2kzH2S10ShIW4hmByIHbqo5h3tn9lK0AlHMpI04wWtkzeczFFSu95xfe1cEEW5fri/TOa0Q==}
     engines: {node: '>=18'}
 
   styled-jsx@5.1.6:
@@ -8674,7 +8674,7 @@ snapshots:
   file-type@22.2.0(supports-color@7.2.0):
     dependencies:
       '@tokenizer/inflate': 0.5.1(supports-color@7.2.0)
-      strtok3: 10.5.0
+      strtok3: 10.6.0
       token-types: 6.1.2
       uint8array-extras: 1.6.0
     transitivePeerDependencies:
@@ -10454,7 +10454,7 @@ snapshots:
 
   strip-json-comments@5.0.3: {}
 
-  strtok3@10.5.0:
+  strtok3@10.6.0:
     dependencies:
       '@tokenizer/token': 0.3.0
 
