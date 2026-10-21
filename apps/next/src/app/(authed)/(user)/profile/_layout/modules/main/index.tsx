@@ -20,8 +20,8 @@ import { clientEnv } from "@/src/environments/env.client";
 import { GETMe } from "@/src/utils/api/authentication/me";
 import { DELETEUpload, POSTUpload } from "@/src/utils/api/upload";
 import { PUTUsers } from "@/src/utils/api/users";
+import { inputValidations } from "@/src/utils/inputValidations";
 import { isAccessTokenFresh } from "@/src/utils/isAccessTokenFresh";
-import { inputValidations } from "@/src/utils/validations";
 
 import { profileSchema, TProfileSchema } from "../schema";
 

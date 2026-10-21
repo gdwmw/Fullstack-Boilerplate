@@ -17,7 +17,7 @@ import { ExampleInput } from "@/src/components/elements/example/C/ExampleInput";
 import { Container } from "@/src/components/templates/Container";
 import { SubmitButton } from "@/src/components/templates/SubmitButton";
 import { POSTRegister } from "@/src/utils/api/authentication/register";
-import { inputValidations } from "@/src/utils/validations";
+import { inputValidations } from "@/src/utils/inputValidations";
 
 interface IFormField {
   isPassword?: boolean;

@@ -1,6 +1,6 @@
 import { vi } from "vitest";
 
-import { inputValidations } from "../validations";
+import { inputValidations } from "../inputValidations";
 
 type KeyEventMock = {
   key: string;
