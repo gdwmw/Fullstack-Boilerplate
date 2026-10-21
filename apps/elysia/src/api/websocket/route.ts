@@ -8,6 +8,11 @@ export const websocketRoutes = new Elysia().ws("/websocket", {
     logger.info({ channel: channel }, "websocket disconnected");
   },
 
+  message(ws, message) {
+    const { channel } = ws.data.query;
+    ws.publish(channel, message);
+  },
+
   open(ws) {
     const { channel } = ws.data.query;
     logger.info({ channel: channel }, "websocket connected");
