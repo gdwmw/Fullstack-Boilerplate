@@ -7,7 +7,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { FC, HTMLInputTypeAttribute, KeyboardEvent, ReactElement, useEffect, useState } from "react";
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 
@@ -71,7 +70,6 @@ const FORM_FIELDS_DATA: IFormField[] = [
 
 export const Main: FC = (): ReactElement => {
   const session = useSession();
-  const router = useRouter();
   const queryClient = useQueryClient();
   const [errorMessage, setErrorMessage] = useState<string | undefined>("");
   const [previewImage, setPreviewImage] = useState<null | string>(null);
@@ -190,7 +188,7 @@ export const Main: FC = (): ReactElement => {
 
       await queryClient.invalidateQueries({ queryKey: ["me"] });
       logTemplate.SUCCESS("update profile success!", "auth/profile");
-      router.refresh();
+      window.location.reload();
     },
   });
 
