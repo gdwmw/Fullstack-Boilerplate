@@ -65,6 +65,7 @@ export const docs = (label: string): Record<"changePassword" | "login" | "logout
       responses: {
         200: { description: "logout successful" },
       },
+      security: bearerSecurity,
       summary: "logout",
       tags: [label.toLowerCase()],
     },
