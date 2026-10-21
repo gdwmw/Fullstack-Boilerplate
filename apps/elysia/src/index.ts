@@ -4,6 +4,8 @@ import { normalize, resolve, sep } from "path";
 import { authRoutes } from "./api/auth/route";
 import { uploadRoutes } from "./api/upload/route";
 import { usersRoutes } from "./api/users/route";
+import { setWebsocketContext } from "./api/websocket/publisher";
+import { websocketRoutes } from "./api/websocket/route";
 import { env } from "./environment";
 import { logger } from "./libs/pino";
 import { corsPlugin } from "./utils/plugins/corsPlugin";
@@ -59,11 +61,14 @@ const app = new Elysia()
     return Bun.file(uploadFilePath);
   })
 
+  .use(websocketRoutes)
   .use(authRoutes)
   .use(uploadRoutes)
   .use(usersRoutes)
 
   .listen(env.ELYSIA_PORT);
+
+setWebsocketContext(app.server);
 
 logger.info(
   {

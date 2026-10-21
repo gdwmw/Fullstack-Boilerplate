@@ -13,5 +13,5 @@ redis.on("error", (err) => {
 });
 
 redis.on("connect", () => {
-  logger.info("redis connected");
+  logger.info({ serverUrl: env.REDIS_URL }, "redis connected");
 });
