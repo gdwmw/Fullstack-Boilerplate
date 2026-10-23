@@ -12,6 +12,6 @@ export const setWebsocketContext = (server: Context["server"]) => {
 
 // ------------------------------------------------------------------
 
-export const exampleWebsocketPublisher = (resource: TExampleWebsocketResource, type: TExampleWebsocketType) => {
-  ws?.publish(EXAMPLE_WEBSOCKET_CHANNEL, exampleWebsocketMessage(resource, type));
+export const exampleWebsocketPublisher = (resource: TExampleWebsocketResource, type: TExampleWebsocketType, id: string) => {
+  ws?.publish(EXAMPLE_WEBSOCKET_CHANNEL, exampleWebsocketMessage(resource, type, id));
 };
