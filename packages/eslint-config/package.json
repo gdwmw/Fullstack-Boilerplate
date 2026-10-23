@@ -22,11 +22,11 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-better-tailwindcss": "^4.10.0",
     "eslint-plugin-only-warn": "^1.2.1",
-    "eslint-plugin-perfectionist": "^5.12.1",
+    "eslint-plugin-perfectionist": "^5.13.0",
     "eslint-plugin-prettier": "^5.5.7",
     "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-storybook": "^10.6.2",
-    "eslint-plugin-turbo": "^2.11.9",
+    "eslint-plugin-storybook": "^10.6.3",
+    "eslint-plugin-turbo": "^2.11.10",
     "globals": "^16.5.0",
     "typescript-eslint": "^8.72.0"
   }
