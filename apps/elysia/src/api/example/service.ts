@@ -1,10 +1,10 @@
 import { prisma } from "@/src/libs/prisma";
 import { createPaginationMeta } from "@/src/utils/pagination";
 
-import { TPayloadSchema, TQuerySchema } from "./type";
+import { TCreatePayloadSchema, TQuerySchema, TUpdatePayloadSchema } from "./type";
 
 export const service = {
-  async create(payload: TPayloadSchema) {
+  async create(payload: TCreatePayloadSchema) {
     return prisma.examples.create({
       data: payload,
     });
@@ -40,7 +40,7 @@ export const service = {
     });
   },
 
-  async update(id: string, payload: TPayloadSchema) {
+  async update(id: string, payload: TUpdatePayloadSchema) {
     return prisma.examples.update({
       data: payload,
       where: { id },

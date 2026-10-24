@@ -3,7 +3,7 @@ import { USER_OMIT_FIELDS } from "@repo/types";
 import { prisma } from "@/src/libs/prisma";
 import { createPaginationMeta } from "@/src/utils/pagination";
 
-import { TPayloadSchema, TQuerySchema } from "./type";
+import { TQuerySchema, TUpdatePayloadSchema } from "./type";
 
 export const service = {
   async delete(id: string) {
@@ -42,7 +42,7 @@ export const service = {
     });
   },
 
-  async update(userId: string, payload: TPayloadSchema) {
+  async update(userId: string, payload: TUpdatePayloadSchema) {
     const { imageId, ...userFields } = payload;
 
     return prisma.users.update({

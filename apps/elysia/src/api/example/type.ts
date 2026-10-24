@@ -1,6 +1,7 @@
 import { z } from "zod";
 
-import { payloadSchema, querySchema } from "./schema";
+import { createPayloadSchema, querySchema, updatePayloadSchema } from "./schema";
 
 export type TQuerySchema = z.infer<typeof querySchema>;
-export type TPayloadSchema = z.infer<typeof payloadSchema>;
+export type TCreatePayloadSchema = z.infer<typeof createPayloadSchema>;
+export type TUpdatePayloadSchema = z.infer<typeof updatePayloadSchema>;

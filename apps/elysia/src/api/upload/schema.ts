@@ -3,7 +3,8 @@ import { z } from "zod";
 
 import { paginationQuerySchema } from "@/src/utils/pagination";
 
-export const uploadSchema = z.object({
+const commonSchema = z.object({
+  id: z.uuid({ message: schemaMessage.string.uuid("id") }),
   file: z
     .instanceof(File)
     .refine((file) => file.size > 0, {
@@ -14,8 +15,8 @@ export const uploadSchema = z.object({
     }),
 });
 
-export const paramSchema = z.object({
-  id: z.uuid({ message: schemaMessage.string.uuid("id") }),
-});
+export const uploadSchema = commonSchema.pick({ file: true });
+
+export const paramSchema = commonSchema.pick({ id: true });
 
 export const querySchema = paginationQuerySchema;

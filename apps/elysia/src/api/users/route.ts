@@ -4,7 +4,7 @@ import { responseMessage } from "@/src/constants/responseMessage";
 import { SUCCESS_RESPONSE } from "@/src/constants/responseTemplate";
 import { protectedRoutePlugin } from "@/src/utils/plugins/protectedRoutePlugin";
 
-import { paramSchema, payloadSchema, querySchema } from "./schema";
+import { paramSchema, querySchema, updatePayloadSchema } from "./schema";
 import { service } from "./service";
 import { docs } from "./swagger";
 
@@ -37,7 +37,7 @@ export const usersRoutes = new Elysia({ prefix: "/users" })
     "/:id",
     async ({ body, params }) => {
       const { id } = paramSchema.parse(params);
-      const payload = payloadSchema.parse(body);
+      const payload = updatePayloadSchema.parse(body);
       const res = await service.update(id, payload);
       return SUCCESS_RESPONSE({ data: res, message: responseMessage(LABEL).updated });
     },

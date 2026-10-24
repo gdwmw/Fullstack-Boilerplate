@@ -2,7 +2,7 @@ import { ISuccessResponse, IUsersModel } from "@repo/types";
 
 import { deleteApi, getApi, putApi, TQueryParams } from "./base";
 
-export interface IUserPayload extends Omit<IUsersModel, "createdAt" | "id" | "image" | "imageId" | "role" | "updatedAt"> {
+export interface IUserUpdatePayload extends Omit<IUsersModel, "createdAt" | "id" | "image" | "imageId" | "role" | "updatedAt"> {
   imageId?: IUsersModel["imageId"];
   role?: IUsersModel["role"];
 }
@@ -22,7 +22,7 @@ export const GETUsersById = async (id: string): Promise<ISuccessResponse<IUsersM
     label: label,
   });
 
-export const PUTUsers = async (id: string, payload: IUserPayload): Promise<ISuccessResponse<IUsersModel>> =>
+export const PUTUsers = async (id: string, payload: IUserUpdatePayload): Promise<ISuccessResponse<IUsersModel>> =>
   putApi<IUsersModel>({
     data: payload,
     endpoint: `/users/${id}`,

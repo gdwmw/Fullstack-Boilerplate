@@ -1,24 +1,21 @@
-import { atom, useAtom } from "jotai";
+import { atom, SetStateAction, useAtom } from "jotai";
+import { Dispatch } from "react";
 
 interface ILocalState {
-  isOpen: boolean;
+  example: string;
 }
 
 interface ILocalActions {
-  close: () => void;
-  open: () => void;
-  toggle: () => void;
+  setExample: Dispatch<SetStateAction<string>>;
 }
 
-const isOpenAtom = atom<ILocalState["isOpen"]>(false);
+const exampleAtom = atom<ILocalState["example"]>("");
 
 export const useLocalContext = (): ILocalActions & ILocalState => {
-  const [isOpen, setIsOpen] = useAtom(isOpenAtom);
+  const [example, setExample] = useAtom(exampleAtom);
 
   return {
-    close: () => setIsOpen(false),
-    isOpen,
-    open: () => setIsOpen(true),
-    toggle: () => setIsOpen((prev) => !prev),
+    example,
+    setExample,
   };
 };

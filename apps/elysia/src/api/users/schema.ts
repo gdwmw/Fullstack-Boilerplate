@@ -3,7 +3,8 @@ import { z } from "zod";
 
 import { paginationQuerySchema } from "@/src/utils/pagination";
 
-export const payloadSchema = z.object({
+const commonSchema = z.object({
+  id: z.uuid({ message: schemaMessage.string.uuid("id") }),
   email: z.email({ message: schemaMessage.string.email("email") }),
   imageId: z
     .uuid({ message: schemaMessage.string.uuid("image id") })
@@ -15,8 +16,8 @@ export const payloadSchema = z.object({
   username: z.string().min(4, { message: schemaMessage.string.min("username", 4) }),
 });
 
-export const paramSchema = z.object({
-  id: z.uuid({ message: schemaMessage.string.uuid("id") }),
-});
+export const updatePayloadSchema = commonSchema.pick({ email: true, imageId: true, name: true, phone: true, role: true, username: true });
+
+export const paramSchema = commonSchema.pick({ id: true });
 
 export const querySchema = paginationQuerySchema;

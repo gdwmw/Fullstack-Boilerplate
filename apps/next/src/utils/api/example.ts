@@ -2,16 +2,21 @@ import { ISuccessResponse } from "@repo/types";
 
 import { deleteApi, getApi, patchApi, postApi, putApi, TQueryParams } from "./base";
 
-interface IExampleCommon {
+export interface IExampleCreatePayload {
   email: string;
   name: string;
   phoneNumber: string;
   username: string;
 }
 
-export interface IExamplePayload extends IExampleCommon {}
+export interface IExampleUpdatePayload {
+  name: string;
+  username: string;
+}
 
-export interface IExampleResponse extends IExampleCommon {}
+export interface IExamplePatchPayload extends Partial<IExampleCreatePayload> {}
+
+export interface IExampleResponse extends IExampleCreatePayload {}
 
 const label = "example";
 
@@ -28,21 +33,21 @@ export const GETExampleById = async (id: string): Promise<ISuccessResponse<IExam
     label,
   });
 
-export const POSTExample = async (payload: IExamplePayload): Promise<ISuccessResponse<IExampleResponse>> =>
+export const POSTExample = async (payload: IExampleCreatePayload): Promise<ISuccessResponse<IExampleResponse>> =>
   postApi<IExampleResponse>({
     data: payload,
     endpoint: "/example",
     label,
   });
 
-export const PUTExample = async (id: string, payload: IExamplePayload): Promise<ISuccessResponse<IExampleResponse>> =>
+export const PUTExample = async (id: string, payload: IExampleUpdatePayload): Promise<ISuccessResponse<IExampleResponse>> =>
   putApi<IExampleResponse>({
     data: payload,
     endpoint: `/example/${id}`,
     label,
   });
 
-export const PATCHExample = async (id: string, payload: IExamplePayload): Promise<ISuccessResponse<IExampleResponse>> =>
+export const PATCHExample = async (id: string, payload: IExamplePatchPayload): Promise<ISuccessResponse<IExampleResponse>> =>
   patchApi<IExampleResponse>({
     data: payload,
     endpoint: `/example/${id}`,
