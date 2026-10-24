@@ -38,10 +38,10 @@ export const usersRoutes = new Elysia({ prefix: "/users" })
     async ({ body, params }) => {
       const { id } = paramSchema.parse(params);
       const payload = payloadSchema.parse(body);
-      const res = await service.put(id, payload);
+      const res = await service.update(id, payload);
       return SUCCESS_RESPONSE({ data: res, message: responseMessage(LABEL).updated });
     },
-    { detail: docs(LABEL).put },
+    { detail: docs(LABEL).update },
   )
 
   .delete(

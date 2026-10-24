@@ -40,7 +40,7 @@ export const service = {
     });
   },
 
-  async put(id: string, payload: TPayloadSchema) {
+  async update(id: string, payload: TPayloadSchema) {
     return prisma.examples.update({
       data: payload,
       where: { id },

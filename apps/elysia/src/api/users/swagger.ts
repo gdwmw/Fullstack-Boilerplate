@@ -1,6 +1,6 @@
 import { DocumentDecoration } from "elysia";
 
-export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "put", DocumentDecoration> => {
+export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "update", DocumentDecoration> => {
   const idParameter = {
     in: "path",
     name: "id",
@@ -55,7 +55,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
       tags: [label.toLowerCase()],
     },
 
-    put: {
+    update: {
       description: "update a user by ID",
       parameters: [idParameter],
       requestBody: {

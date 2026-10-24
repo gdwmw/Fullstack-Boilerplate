@@ -42,7 +42,7 @@ export const service = {
     });
   },
 
-  async put(userId: string, payload: TPayloadSchema) {
+  async update(userId: string, payload: TPayloadSchema) {
     const { imageId, ...userFields } = payload;
 
     return prisma.users.update({

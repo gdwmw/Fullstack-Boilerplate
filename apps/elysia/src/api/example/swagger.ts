@@ -1,6 +1,6 @@
 import { DocumentDecoration } from "elysia";
 
-export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "post" | "put", DocumentDecoration> => {
+export const docs = (label: string): Record<"create" | "delete" | "getAll" | "getById" | "update", DocumentDecoration> => {
   const idParameter = {
     in: "path",
     name: "id",
@@ -18,6 +18,24 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
   } as const;
 
   return {
+    create: {
+      description: "create an example",
+      requestBody: {
+        content: {
+          "application/json": {
+            schema: { ...payload, required: [...payload.required] },
+          },
+        },
+        required: true,
+      },
+      responses: {
+        200: { description: "example created successfully" },
+      },
+      security: [{ bearerAuth: [] }],
+      summary: "create example",
+      tags: [label.toLowerCase()],
+    },
+
     delete: {
       description: "delete an example by ID",
       parameters: [idParameter],
@@ -64,25 +82,7 @@ export const docs = (label: string): Record<"delete" | "getAll" | "getById" | "p
       tags: [label.toLowerCase()],
     },
 
-    post: {
-      description: "create an example",
-      requestBody: {
-        content: {
-          "application/json": {
-            schema: { ...payload, required: [...payload.required] },
-          },
-        },
-        required: true,
-      },
-      responses: {
-        200: { description: "example created successfully" },
-      },
-      security: [{ bearerAuth: [] }],
-      summary: "create example",
-      tags: [label.toLowerCase()],
-    },
-
-    put: {
+    update: {
       description: "update an example by ID",
       parameters: [idParameter],
       requestBody: {
