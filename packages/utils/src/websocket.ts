@@ -1,4 +1,3 @@
-import { TExampleWebsocketResource, TExampleWebsocketType } from "../../types/src";
+import { IWebsocketMessage } from "../../types/src";
 
-export const exampleWebsocketMessage = (resource: TExampleWebsocketResource, type: TExampleWebsocketType, id: string) =>
-  JSON.stringify({ id, resource, type });
+export const exampleWebsocketMessage = <T>(props: IWebsocketMessage<T>) => JSON.stringify(props);

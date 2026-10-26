@@ -5,7 +5,12 @@ import { createContext, FC, PropsWithChildren, ReactElement, useContext, useEffe
 import { clientEnv } from "@/src/environments/env.client";
 import { websocket } from "@/src/utils/server/websocket";
 
-const WebsocketContext = createContext<null | WebSocket>(null);
+interface IWebsocketContext {
+  clientId: string;
+  ws: null | WebSocket;
+}
+
+const WebsocketContext = createContext<IWebsocketContext>({ clientId: "", ws: null });
 
 interface I extends PropsWithChildren {
   channel: string;
@@ -13,6 +18,7 @@ interface I extends PropsWithChildren {
 
 export const WebsocketProvider: FC<I> = (props): ReactElement => {
   const [ws, setWs] = useState<null | WebSocket>(null);
+  const [clientId] = useState(() => crypto.randomUUID());
 
   useEffect(() => {
     const connection = websocket(clientEnv.NEXT_PUBLIC_BASE_API_URL, props.channel);
@@ -31,7 +37,7 @@ export const WebsocketProvider: FC<I> = (props): ReactElement => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return <WebsocketContext.Provider value={ws}>{props.children}</WebsocketContext.Provider>;
+  return <WebsocketContext.Provider value={{ clientId, ws }}>{props.children}</WebsocketContext.Provider>;
 };
 
-export const useWebsocket = (): null | WebSocket => useContext(WebsocketContext);
+export const useWebsocket = (): IWebsocketContext => useContext(WebsocketContext);
