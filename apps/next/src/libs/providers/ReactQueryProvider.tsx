@@ -4,7 +4,9 @@ import { parseDurationToMs } from "@repo/utils";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FC, PropsWithChildren, useState } from "react";
 
-export const ReactQueryProvider: FC<Readonly<PropsWithChildren>> = ({ children }) => {
+type T = Readonly<PropsWithChildren>;
+
+export const ReactQueryProvider: FC<T> = ({ children }) => {
   const [queryClient] = useState(
     () =>
       new QueryClient({
