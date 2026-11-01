@@ -8,8 +8,6 @@ import { FC, PropsWithChildren, ReactElement, useEffect } from "react";
 import { clientEnv } from "@/src/environments/env.client";
 import { POSTRefresh } from "@/src/utils/api/authentication/refresh";
 
-type T = Readonly<PropsWithChildren>;
-
 const ACCESS_TOKEN_EXPIRES_IN = clientEnv.NEXT_PUBLIC_ACCESS_TOKEN_EXPIRES_IN;
 const REFRESH_BUFFER_MS = clientEnv.NEXT_PUBLIC_REFRESH_BUFFER_MS;
 
@@ -125,6 +123,8 @@ const AccessTokenRefreshGuard: FC = (): null | ReactElement => {
 
   return null;
 };
+
+type T = Readonly<PropsWithChildren>;
 
 export const NextAuthProvider: FC<T> = (props): ReactElement => (
   <SessionProvider>

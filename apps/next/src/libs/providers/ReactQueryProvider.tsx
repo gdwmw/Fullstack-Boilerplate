@@ -6,7 +6,7 @@ import { FC, PropsWithChildren, useState } from "react";
 
 type T = Readonly<PropsWithChildren>;
 
-export const ReactQueryProvider: FC<T> = ({ children }) => {
+export const ReactQueryProvider: FC<T> = (props) => {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -22,5 +22,5 @@ export const ReactQueryProvider: FC<T> = ({ children }) => {
         },
       }),
   );
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  return <QueryClientProvider client={queryClient}>{props.children}</QueryClientProvider>;
 };
