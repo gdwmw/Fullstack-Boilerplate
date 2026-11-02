@@ -1,5 +1,5 @@
-export type TExampleWebsocketResource = "boards" | "cards" | "columns" | "workspaces";
-export type TExampleWebsocketType = "create" | "delete" | "move" | "rebalance" | "update";
+export type TExampleWebsocketResource = "W" | "X" | "Y" | "Z";
+export type TExampleWebsocketType = "create" | "delete" | "update";
 export interface IWebsocketMessage<T> {
   id: string;
   options?: {

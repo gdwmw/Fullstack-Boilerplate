@@ -13,5 +13,20 @@ export const setWebsocketContext = (server: Context["server"]) => {
 // ------------------------------------------------------------------
 
 export const dndWebsocketPublisher = <T>(props: IWebsocketMessage<T>) => {
-  ws?.publish(EXAMPLE_WEBSOCKET_CHANNEL, exampleWebsocketMessage(props));
+  let channel: string;
+
+  switch (props.resource) {
+    case "W":
+      channel = EXAMPLE_WEBSOCKET_CHANNEL.A(props.id);
+      break;
+    case "X":
+      channel = EXAMPLE_WEBSOCKET_CHANNEL.B(props.id);
+      break;
+    case "Y":
+    case "Z":
+      channel = EXAMPLE_WEBSOCKET_CHANNEL.C(props.id);
+      break;
+  }
+
+  ws?.publish(channel, exampleWebsocketMessage(props));
 };

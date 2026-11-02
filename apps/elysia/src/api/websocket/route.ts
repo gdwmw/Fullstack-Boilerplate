@@ -1,23 +1,25 @@
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
 
 import { logger } from "@/src/libs/pino";
 
 export const websocketRoutes = new Elysia().ws("/websocket", {
-  close(ws) {
-    const { channel } = ws.data.query;
-    logger.info({ channel: channel }, "websocket disconnected");
+  close() {
+    logger.info("websocket disconnected");
   },
 
   message(ws, message) {
-    const { channel } = ws.data.query;
-    ws.publish(channel, message);
+    const { action, channel } = message as { action: "subscribe" | "unsubscribe"; channel: string };
+
+    if (action === "subscribe") {
+      ws.subscribe(channel);
+      logger.info({ channel }, "websocket subscribe");
+    } else if (action === "unsubscribe") {
+      ws.unsubscribe(channel);
+      logger.info({ channel }, "websocket unsubscribe");
+    }
   },
 
-  open(ws) {
-    const { channel } = ws.data.query;
-    logger.info({ channel: channel }, "websocket connected");
-    ws.subscribe(channel);
+  open() {
+    logger.info("websocket connected");
   },
-
-  query: t.Object({ channel: t.String() }),
 });
