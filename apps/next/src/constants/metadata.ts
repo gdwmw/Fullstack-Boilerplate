@@ -1,4 +1,6 @@
-export const SITE_URL = "https://boilerplate.zettara.com";
+import { serverEnv } from "../environments/env.server";
+
+export const SITE_URL = serverEnv.NEXTAUTH_URL;
 export const SITE_NAME = "Next.js";
 export const SITE_DESCRIPTION = "Boilerplate by Gede Dewo Wahyu M.W";
 export const SITE_IMAGE = `${SITE_URL}/assets/images/logos/Vercel.png`;
