@@ -50,10 +50,10 @@ export const Main: FC = (): ReactElement => {
     },
     onError: (error) => {
       setErrorMessage(error instanceof Error ? error.message : "login failed. please try again.");
-      logTemplate.WARN("login failed!", "auth/login");
+      logTemplate.WARN("failed to log in!", "auth/login");
     },
     onSuccess: () => {
-      logTemplate.SUCCESS("login success!", "auth/login");
+      logTemplate.SUCCESS("logged in!", "auth/login");
       router.push("/");
       router.refresh();
       reset();

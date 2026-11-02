@@ -51,7 +51,7 @@ export const apiRequest = async <T>({ auth = true, ...props }: I): Promise<ISucc
     }
 
     logTemplate.ERROR(
-      `an error occurred while processing ${props.method} request for ${props.label} || status Code: ${statusCode} || message: ${errorMessage}`,
+      `an error occurred while processing ${props.method?.toLowerCase()} request for ${props.label} || status code: ${statusCode} || message: ${errorMessage}`,
       "api request",
     );
 

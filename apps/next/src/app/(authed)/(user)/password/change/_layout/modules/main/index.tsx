@@ -68,10 +68,10 @@ export const Main: FC = (): ReactElement => {
     onError: (error) => {
       const axiosError = error as AxiosError<IErrorResponse>;
       setErrorMessage(axiosError.response?.data?.message ?? "failed to change password");
-      logTemplate.WARN("change password failed!", "auth/change-password");
+      logTemplate.WARN("failed to change password!", "auth/change-password");
     },
     onSuccess: () => {
-      logTemplate.SUCCESS("change password success!", "auth/change-password");
+      logTemplate.SUCCESS("password changed!", "auth/change-password");
       reset();
     },
   });

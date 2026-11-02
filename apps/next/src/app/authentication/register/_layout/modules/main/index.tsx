@@ -94,10 +94,10 @@ export const Main: FC = (): ReactElement => {
     onError: (error) => {
       const axiosError = error as AxiosError<IErrorResponse>;
       setErrorMessage(axiosError.response?.data?.message ?? "registration failed. please try again.");
-      logTemplate.WARN("register failed!", "auth/register");
+      logTemplate.WARN("failed to register!", "auth/register");
     },
     onSuccess: () => {
-      logTemplate.SUCCESS("register success!", "auth/register");
+      logTemplate.SUCCESS("registered!", "auth/register");
       router.push("/authentication/login");
       reset();
     },

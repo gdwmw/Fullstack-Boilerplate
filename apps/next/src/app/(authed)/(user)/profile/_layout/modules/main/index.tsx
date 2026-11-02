@@ -147,7 +147,7 @@ export const Main: FC = (): ReactElement => {
         });
 
         if (!uploadResponse.data) {
-          logTemplate.WARN("upload image failed!", "upload");
+          logTemplate.WARN("failed to upload profile image!", "upload");
           throw new Error("failed to upload image");
         }
 
@@ -171,7 +171,7 @@ export const Main: FC = (): ReactElement => {
     onError: (error) => {
       const axiosError = error as AxiosError<IErrorResponse>;
       setErrorMessage(axiosError.response?.data?.message ?? "failed to update profile");
-      logTemplate.WARN("update profile failed!", "auth/profile");
+      logTemplate.WARN("failed to update profile!", "auth/profile");
     },
     onSuccess: async (res) => {
       await session.update({
@@ -187,7 +187,7 @@ export const Main: FC = (): ReactElement => {
       });
 
       await queryClient.invalidateQueries({ queryKey: ["me"] });
-      logTemplate.SUCCESS("update profile success!", "auth/profile");
+      logTemplate.SUCCESS("profile updated!", "auth/profile");
       window.location.reload();
     },
   });
