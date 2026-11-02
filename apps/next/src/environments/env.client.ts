@@ -27,4 +27,4 @@ if (!parsed.success) {
 }
 
 export const clientEnv = parsed.data;
-export type ClientEnv = typeof clientEnv;
+export type TClientEnv = typeof clientEnv;

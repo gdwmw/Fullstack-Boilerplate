@@ -16,4 +16,4 @@ if (!parsed.success) {
 }
 
 export const serverEnv = parsed.data;
-export type ServerEnv = typeof serverEnv;
+export type TServerEnv = typeof serverEnv;
