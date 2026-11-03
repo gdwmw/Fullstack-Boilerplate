@@ -43,7 +43,7 @@ const FORM_FIELDS_DATA: IFormField[] = [
   },
 ];
 
-export const Main: FC = (): ReactElement => {
+export const ChangePasswordModules: FC = (): ReactElement => {
   const [passwordVisibility, setPasswordVisibility] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>("");
 

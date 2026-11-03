@@ -10,7 +10,7 @@ import { LogoutButton } from "@/src/components/templates/LogoutButton";
 import { getCookie } from "@/src/utils/server/cookies";
 import { getSession } from "@/src/utils/server/session";
 
-export const Main: FC = async (): Promise<ReactElement> => {
+export const HomeModules: FC = async (): Promise<ReactElement> => {
   const session = await getSession("status");
   const themeCookie = await getCookie("theme");
 

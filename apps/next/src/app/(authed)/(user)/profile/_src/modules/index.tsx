@@ -5,9 +5,9 @@ import { GETMe } from "@/src/utils/api/authentication/me";
 import { isAccessTokenFresh } from "@/src/utils/isAccessTokenFresh";
 import { getAllSession } from "@/src/utils/server/session";
 
-import { Main } from "./modules/main";
+import { Main } from "./main";
 
-const ProfileLayout = async (): Promise<ReactElement> => {
+export const ProfileModules = async (): Promise<ReactElement> => {
   const queryClient = new QueryClient();
   const session = await getAllSession();
 
@@ -27,5 +27,3 @@ const ProfileLayout = async (): Promise<ReactElement> => {
     </HydrationBoundary>
   );
 };
-
-export default ProfileLayout;

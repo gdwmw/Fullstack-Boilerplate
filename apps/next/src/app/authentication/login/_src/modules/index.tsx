@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation";
-import { FC, ReactElement } from "react";
+import { ReactElement } from "react";
 
 import { getAllSession } from "@/src/utils/server/session";
 
-import { Main } from "./modules/main";
+import { Main } from "./main";
 
-const LoginLayout: FC = async (): Promise<ReactElement> => {
+export const LoginModules = async (): Promise<ReactElement> => {
   const session = await getAllSession();
 
   if (session?.user?.status) {
@@ -14,5 +14,3 @@ const LoginLayout: FC = async (): Promise<ReactElement> => {
 
   return <Main />;
 };
-
-export default LoginLayout;

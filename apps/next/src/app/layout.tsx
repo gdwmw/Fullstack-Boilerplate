@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 
 type T = Readonly<PropsWithChildren>;
 
-const RootLayout: FC<T> = (props): ReactElement => (
+const HomeLayout: FC<T> = (props): ReactElement => (
   <html lang="en" suppressHydrationWarning>
     <body
       className={[
@@ -52,4 +52,4 @@ const RootLayout: FC<T> = (props): ReactElement => (
   </html>
 );
 
-export default RootLayout;
+export default HomeLayout;

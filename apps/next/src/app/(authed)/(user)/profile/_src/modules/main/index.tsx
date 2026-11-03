@@ -22,7 +22,7 @@ import { PUTUsers } from "@/src/utils/api/users";
 import { inputValidations } from "@/src/utils/inputValidations";
 import { isAccessTokenFresh } from "@/src/utils/isAccessTokenFresh";
 
-import { profileSchema, TProfileSchema } from "../schema";
+import { profileSchema, TProfileSchema } from "../../schemas";
 
 const API_URL = clientEnv.NEXT_PUBLIC_BASE_API_URL;
 

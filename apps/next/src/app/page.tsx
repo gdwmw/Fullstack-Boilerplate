@@ -3,7 +3,7 @@ import { FC, ReactElement } from "react";
 
 import { DEFAULT_ROBOTS, SITE_CREATOR, SITE_DESCRIPTION, SITE_IMAGE, SITE_NAME, SITE_URL } from "@/src/constants/metadata";
 
-import { Main } from "./_layout/modules/main/index-example";
+import { HomeModules } from "./(example)/home-example/_modules";
 
 export const metadata: Metadata = {
   description: SITE_DESCRIPTION,
@@ -27,6 +27,6 @@ export const metadata: Metadata = {
   },
 };
 
-const HomePage: FC = (): ReactElement => <Main />;
+const HomePage: FC = (): ReactElement => <HomeModules />;
 
 export default HomePage;

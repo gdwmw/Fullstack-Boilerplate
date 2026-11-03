@@ -1,12 +1,12 @@
 import { Metadata } from "next";
 import { FC, ReactElement } from "react";
 
-import RegisterLayout from "./_layout";
+import { RegisterModules } from "./_src/modules";
 
 export const metadata: Metadata = {
   title: "Register",
 };
 
-const RegisterPage: FC = (): ReactElement => <RegisterLayout />;
+const RegisterPage: FC = (): ReactElement => <RegisterModules />;
 
 export default RegisterPage;

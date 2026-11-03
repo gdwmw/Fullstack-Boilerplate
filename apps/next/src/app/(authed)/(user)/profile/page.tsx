@@ -1,12 +1,12 @@
 import { Metadata } from "next";
 import { FC, ReactElement } from "react";
 
-import ProfileLayout from "./_layout";
+import { ProfileModules } from "./_src/modules";
 
 export const metadata: Metadata = {
   title: "Profile",
 };
 
-const ProfilePage: FC = (): ReactElement => <ProfileLayout />;
+const ProfilePage: FC = (): ReactElement => <ProfileModules />;
 
 export default ProfilePage;
