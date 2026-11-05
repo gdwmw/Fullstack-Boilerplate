@@ -40,7 +40,7 @@ const envSchema = z.object({
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   REDIS_URL: z.string().min(1, "REDIS_URL is required"),
-  REFRESH_TOKEN_COOKIE_SECRET: z.string().min(32, "REFRESH_TOKEN_COOKIE_SECRET must be at least 32 characters"),
+  REFRESH_TOKEN_SECRET: z.string().min(32, "REFRESH_TOKEN_SECRET must be at least 32 characters"),
 });
 
 const parsed = envSchema.safeParse(process.env);

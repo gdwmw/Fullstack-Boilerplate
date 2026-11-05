@@ -2,14 +2,14 @@ import { jwt } from "@elysiajs/jwt";
 
 import { env } from "@/src/environment";
 
-export const accessJwtPlugin = jwt({
+export const accessJWTPlugin = jwt({
   exp: env.JWT_ACCESS_EXPIRES_IN,
-  name: "accessJwt",
+  name: "accessJWT",
   secret: env.JWT_ACCESS_SECRET,
 });
 
-export const refreshJwtPlugin = jwt({
+export const refreshJWTPlugin = jwt({
   exp: env.JWT_REFRESH_EXPIRES_IN,
-  name: "refreshJwt",
+  name: "refreshJWT",
   secret: env.JWT_REFRESH_SECRET,
 });

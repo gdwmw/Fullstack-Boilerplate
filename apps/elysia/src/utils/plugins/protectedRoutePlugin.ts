@@ -1,11 +1,10 @@
 import Elysia from "elysia";
 
-import { verifyAccessToken } from "@/src/utils/verifyAccessToken";
-
-import { accessJwtPlugin } from "./jwtPlugin";
+import { getAuthenticatedJWT } from "../auth";
+import { accessJWTPlugin } from "./jwtPlugin";
 
 export const protectedRoutePlugin = (app: Elysia) =>
-  app.use(accessJwtPlugin).onBeforeHandle(async ({ accessJwt, headers, set }) => {
-    const res = await verifyAccessToken({ accessJwt, headers, set });
-    return res ?? undefined;
+  app.use(accessJWTPlugin).onBeforeHandle(async ({ accessJWT, headers, set }) => {
+    const { error } = await getAuthenticatedJWT({ accessJWT, headers, set });
+    return error ?? undefined;
   });

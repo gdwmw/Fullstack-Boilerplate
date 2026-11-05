@@ -1,133 +1,31 @@
 import { changePasswordSchema, loginSchema, registerSchema } from "@repo/schemas";
-import { encryptToken } from "@repo/utils";
-import Elysia, { HTTPHeaders, StatusMap } from "elysia";
+import Elysia from "elysia";
 
 import { responseMessage } from "@/src/constants/responseMessage";
 import { ERROR_RESPONSE, SUCCESS_RESPONSE } from "@/src/constants/responseTemplate";
-import { env } from "@/src/environment";
 import { Prisma } from "@/src/generated/prisma/client";
-import { accessJwtPlugin, refreshJwtPlugin } from "@/src/utils/plugins/jwtPlugin";
-import { getBearerToken, verifyAccessToken } from "@/src/utils/verifyAccessToken";
+import { errorResponseMessage, generateAccessAndRefreshTokens, getAuthenticatedJWT } from "@/src/utils/auth";
+import { accessJWTPlugin, refreshJWTPlugin } from "@/src/utils/plugins/jwtPlugin";
 
 import { service } from "./service";
 import { docs } from "./swagger";
 
 const LABEL = "authentication";
 
-const REFRESH_TOKEN_COOKIE_SECRET = env.REFRESH_TOKEN_COOKIE_SECRET;
-
-interface IResponseSet {
-  cookie?: Record<string, unknown>;
-  headers: HTTPHeaders;
-  redirect?: string;
-  status?: keyof StatusMap | number;
-}
-
-const parseSubjectToUserId = (sub: unknown) => {
-  if (typeof sub !== "string" || sub.length === 0) {
-    return null;
-  }
-
-  return sub;
-};
-
-const generateAccessAndRefreshTokens = async ({
-  accessJwt,
-  refreshJwt,
-  userId,
-}: {
-  accessJwt: { sign(payload: { jti: string; sub: string }): Promise<string> };
-  refreshJwt: {
-    sign(payload: { jti: string; sub: string }): Promise<string>;
-    verify(token: string): Promise<unknown>;
-  };
-  userId: string;
-}) => {
-  const subject = String(userId);
-  const accessJti = crypto.randomUUID();
-  const refreshJti = crypto.randomUUID();
-
-  const accessToken = await accessJwt.sign({
-    jti: accessJti,
-    sub: subject,
-  });
-
-  const refreshToken = await refreshJwt.sign({
-    jti: refreshJti,
-    sub: subject,
-  });
-
-  const encryptedRefreshToken = await encryptToken(refreshToken, REFRESH_TOKEN_COOKIE_SECRET);
-
-  return {
-    accessToken,
-    encryptedRefreshToken,
-  };
-};
-
-const getUserIdFromAccessToken = async ({
-  accessJwt,
-  headers,
-  set,
-}: {
-  accessJwt: { verify(token: string): Promise<unknown> };
-  headers: { authorization?: string };
-  set: IResponseSet;
-}) => {
-  const verificationError = await verifyAccessToken({ accessJwt, headers, set });
-
-  if (verificationError) {
-    return {
-      error: verificationError,
-      userId: null,
-    };
-  }
-
-  const bearerToken = getBearerToken(headers.authorization);
-
-  if (!bearerToken) {
-    set.status = 401;
-
-    return {
-      error: ERROR_RESPONSE({ message: responseMessage("access token").required }),
-      userId: null,
-    };
-  }
-
-  const decodedPayload = await accessJwt.verify(bearerToken);
-  const subject = decodedPayload && typeof decodedPayload === "object" && "sub" in decodedPayload ? decodedPayload.sub : undefined;
-  const userId = parseSubjectToUserId(subject);
-
-  if (!userId) {
-    return {
-      error: ERROR_RESPONSE({
-        message: responseMessage("access token").invalid,
-      }),
-      userId: null,
-    };
-  }
-
-  return {
-    error: null,
-    userId,
-  };
-};
-
 export const authRoutes = new Elysia({ prefix: "/auth" })
-  .use(accessJwtPlugin)
-  .use(refreshJwtPlugin)
+  .use(accessJWTPlugin)
+  .use(refreshJWTPlugin)
 
   .get(
     "/me",
-    async ({ accessJwt, headers, set }) => {
-      const auth = await getUserIdFromAccessToken({ accessJwt, headers, set });
+    async ({ accessJWT, headers, set }) => {
+      const { error, jwt } = await getAuthenticatedJWT({ accessJWT, headers, set });
 
-      if (auth.error) {
-        set.status = 401;
-        return auth.error;
+      if (error) {
+        return error;
       }
 
-      const res = await service.getUserById(auth.userId);
+      const res = await service.getUserById(jwt.sub);
 
       if (!res) {
         set.status = 404;
@@ -142,13 +40,13 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
 
   .post(
     "/register",
-    async ({ accessJwt, body, refreshJwt, set }) => {
+    async ({ accessJWT, body, refreshJWT, set }) => {
       const payload = registerSchema.parse(body);
 
       try {
         const res = await service.register(payload);
 
-        const tokens = await generateAccessAndRefreshTokens({ accessJwt, refreshJwt, userId: res.id });
+        const tokens = await generateAccessAndRefreshTokens({ accessJWT, refreshJWT, userId: res.id });
 
         return SUCCESS_RESPONSE({
           data: { ...res, accessToken: tokens.accessToken, refreshToken: tokens.encryptedRefreshToken },
@@ -185,16 +83,10 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
 
   .post(
     "/login",
-    async ({ accessJwt, body, refreshJwt, set }) => {
-      const parseLoginMethod = (body: unknown): "email" | "username" => {
-        if (!body || typeof body !== "object" || !("method" in body)) {
-          return "username";
-        }
+    async ({ accessJWT, body, refreshJWT, set }) => {
+      const prePayload = body as { method: "email" | "username" };
 
-        return body.method === "email" ? "email" : "username";
-      };
-
-      const payload = loginSchema(parseLoginMethod(body)).parse(body);
+      const payload = loginSchema(prePayload.method).parse(body);
 
       const res = await service.login(payload);
 
@@ -205,7 +97,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
         });
       }
 
-      const tokens = await generateAccessAndRefreshTokens({ accessJwt, refreshJwt, userId: res.id });
+      const tokens = await generateAccessAndRefreshTokens({ accessJWT, refreshJWT, userId: res.id });
 
       return SUCCESS_RESPONSE({
         data: { ...res, accessToken: tokens.accessToken, refreshToken: tokens.encryptedRefreshToken },
@@ -218,69 +110,52 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
 
   .post(
     "/refresh",
-    async ({ accessJwt, body, refreshJwt, set }) => {
-      const bodyRefreshToken = (body as { refreshToken?: unknown } | null)?.refreshToken;
-      const refreshToken = typeof bodyRefreshToken === "string" && bodyRefreshToken.length > 0 ? bodyRefreshToken : null;
+    async ({ accessJWT, body, refreshJWT, set }) => {
+      const payload = body as { refreshToken: string };
 
-      if (!refreshToken) {
+      if (!payload.refreshToken) {
         set.status = 401;
         return ERROR_RESPONSE({
           message: responseMessage("refresh token").required,
         });
       }
 
-      const decodedPayload = await refreshJwt.verify(refreshToken);
-      const tokenClaims = decodedPayload && typeof decodedPayload === "object" ? (decodedPayload as Record<string, unknown>) : null;
+      const decoded = await refreshJWT.verify(payload.refreshToken);
 
-      const userId = parseSubjectToUserId(tokenClaims?.sub);
-
-      const parseJwtStringField = (value: unknown) => {
-        if (typeof value !== "string" || value.length === 0) {
-          return null;
-        }
-
-        return value;
-      };
-
-      const refreshJti = parseJwtStringField(tokenClaims?.jti);
-
-      const parseJwtExp = (value: unknown) => {
-        if (typeof value !== "number") {
-          return null;
-        }
-
-        return value;
-      };
-
-      const refreshExp = parseJwtExp(tokenClaims?.exp);
-
-      if (!tokenClaims || !userId || !refreshJti || !refreshExp) {
+      if (
+        !decoded ||
+        typeof decoded !== "object" ||
+        typeof decoded.sub !== "string" ||
+        typeof decoded.jti !== "string" ||
+        typeof decoded.exp !== "number" ||
+        !Number.isFinite(decoded.exp)
+      ) {
         set.status = 401;
         return ERROR_RESPONSE({
-          message: `${responseMessage("refresh token").invalid} or ${responseMessage("refresh token").expired}`,
+          message: errorResponseMessage,
         });
       }
 
-      const isRefreshTokenBlocklisted = await service.isBlocklisted(refreshJti);
+      const isRefreshTokenBlocked = await service.isRefreshTokenBlocked(decoded.jti);
 
-      if (isRefreshTokenBlocklisted) {
+      if (isRefreshTokenBlocked) {
         set.status = 401;
         return ERROR_RESPONSE({
           message: responseMessage("refresh token").invalid,
         });
       }
 
-      const tokens = await generateAccessAndRefreshTokens({ accessJwt, refreshJwt, userId });
+      const tokens = await generateAccessAndRefreshTokens({ accessJWT, refreshJWT, userId: decoded.sub });
 
-      const user = await service.getUserById(userId);
+      const user = await service.getUserById(decoded.sub);
 
       if (!user) {
         set.status = 404;
         return ERROR_RESPONSE({ message: responseMessage("users").notFound });
       }
 
-      const refreshExpiresAt = new Date(refreshExp * 1000);
-      await service.addToBlocklist(refreshJti, refreshExpiresAt);
+      const refreshExpiresAt = new Date(decoded.exp * 1000);
+      await service.addToBlocklist(decoded.jti, refreshExpiresAt);
 
       return SUCCESS_RESPONSE({
         data: { ...user, accessToken: tokens.accessToken, refreshToken: tokens.encryptedRefreshToken },
@@ -293,20 +168,15 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
 
   .post(
     "/logout",
-    async ({ accessJwt, headers }) => {
-      const accessToken = getBearerToken(headers.authorization);
+    async ({ accessJWT, headers, set }) => {
+      const { error, jwt } = await getAuthenticatedJWT({ accessJWT, headers, set });
 
-      if (accessToken) {
-        const decodedPayload = await accessJwt.verify(accessToken);
-        const tokenClaims = decodedPayload && typeof decodedPayload === "object" ? (decodedPayload as Record<string, unknown>) : null;
-        const tokenId = tokenClaims?.jti;
-        const expirationTime = tokenClaims?.exp;
-
-        if (typeof tokenId === "string" && typeof expirationTime === "number") {
-          const expiresAt = new Date(expirationTime * 1000);
-          await service.addToBlocklist(tokenId, expiresAt);
-        }
+      if (error) {
+        return error;
       }
+
+      const expiresAt = new Date(jwt.exp * 1000);
+      await service.addToBlocklist(jwt.jti, expiresAt);
 
       return SUCCESS_RESPONSE({ data: null, message: responseMessage("logout").success });
     },
@@ -316,16 +186,16 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
 
   .post(
     "/change-password",
-    async ({ accessJwt, body, headers, set }) => {
-      const auth = await getUserIdFromAccessToken({ accessJwt, headers, set });
-      if (auth.error) {
-        set.status = 401;
-        return auth.error;
+    async ({ accessJWT, body, headers, set }) => {
+      const { error, jwt } = await getAuthenticatedJWT({ accessJWT, headers, set });
+
+      if (error) {
+        return error;
       }
 
       const payload = changePasswordSchema.parse(body);
 
-      const res = await service.changePassword(auth.userId, payload);
+      const res = await service.changePassword(jwt.sub, payload);
 
       if (!res) {
         set.status = 401;

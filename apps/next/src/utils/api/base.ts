@@ -67,5 +67,4 @@ export const putApi = <T>(props: Omit<I, "method" | "params">): Promise<ISuccess
 
 export const patchApi = <T>(props: Omit<I, "method" | "params">): Promise<ISuccessResponse<T>> => apiRequest<T>({ ...props, method: "PATCH" });
 
-export const deleteApi = <T>(props: Omit<I, "data" | "method" | "params">): Promise<ISuccessResponse<T>> =>
-  apiRequest<T>({ ...props, method: "DELETE" });
+export const deleteApi = <T>(props: Omit<I, "data" | "method">): Promise<ISuccessResponse<T>> => apiRequest<T>({ ...props, method: "DELETE" });

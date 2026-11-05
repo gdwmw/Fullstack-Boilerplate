@@ -5,7 +5,7 @@ const serverEnvSchema = z.object({
   NEXTAUTH_SECRET: z.string().min(32, "NEXTAUTH_SECRET must be at least 32 characters"),
   NEXTAUTH_SESSION_EXPIRES_IN: z.string().min(1).default("7d"),
   NEXTAUTH_URL: z.url(),
-  REFRESH_TOKEN_COOKIE_SECRET: z.string().min(32, "REFRESH_TOKEN_COOKIE_SECRET must be at least 32 characters"),
+  REFRESH_TOKEN_SECRET: z.string().min(32, "REFRESH_TOKEN_SECRET must be at least 32 characters"),
 });
 
 const parsed = serverEnvSchema.safeParse(process.env);

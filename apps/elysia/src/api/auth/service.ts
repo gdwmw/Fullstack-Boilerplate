@@ -50,9 +50,8 @@ export const service = {
     });
   },
 
-  async isBlocklisted(jti: string) {
-    const exists = await redis.exists(`blocklist:${jti}`);
-    return exists === 1;
+  async isRefreshTokenBlocked(jti: string) {
+    return (await redis.exists(`blocklist:${jti}`)) === 1;
   },
 
   async login(data: TLoginSchema) {

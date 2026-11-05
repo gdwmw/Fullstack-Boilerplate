@@ -1,4 +1,4 @@
-import { decryptToken } from "@repo/utils";
+import { ironDecrypt } from "@repo/utils";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -12,15 +12,16 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     return NextResponse.json({ message: "unauthorized", success: false }, { status: 401 });
   }
 
-  const requestBody = (await request.json()) as { refreshToken?: unknown };
-  const encryptedRefreshToken = requestBody?.refreshToken;
+  const requestBody = (await request.json()) as { refreshToken: string };
 
-  if (!encryptedRefreshToken || typeof encryptedRefreshToken !== "string") {
+  const encryptedRefreshToken = requestBody.refreshToken;
+
+  if (!encryptedRefreshToken) {
     return NextResponse.json({ message: "refresh token is required", success: false }, { status: 400 });
   }
 
   try {
-    const decryptedRefreshToken = await decryptToken(encryptedRefreshToken, serverEnv.REFRESH_TOKEN_COOKIE_SECRET);
+    const decryptedRefreshToken = await ironDecrypt(encryptedRefreshToken, serverEnv.REFRESH_TOKEN_SECRET);
 
     return NextResponse.json({
       data: { refreshToken: decryptedRefreshToken },

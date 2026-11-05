@@ -27,6 +27,7 @@
     }
   },
   "dependencies": {
+    "@hapi/iron": "7.0.1",
     "date-fns": "^4.4.0",
     "plaiceholder": "^3.0.0",
     "sharp": "^0.35.5",
