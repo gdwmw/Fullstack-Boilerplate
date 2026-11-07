@@ -1,5 +1,5 @@
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
-import { ReactElement } from "react";
+import { FC, ReactElement } from "react";
 
 import { GETMe } from "@/src/utils/api/authentication/me";
 import { isAccessTokenFresh } from "@/src/utils/isAccessTokenFresh";
@@ -7,7 +7,7 @@ import { getAllSession } from "@/src/utils/server/session";
 
 import { Main } from "./main";
 
-export const ProfileModules = async (): Promise<ReactElement> => {
+export const ProfileModules: FC = async (): Promise<ReactElement> => {
   const queryClient = new QueryClient();
   const session = await getAllSession();
 

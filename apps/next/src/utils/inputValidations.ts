@@ -1,11 +1,11 @@
 import { KeyboardEvent } from "react";
 
-const ALLOWED_KEYS = ["ArrowLeft", "ArrowRight", "Backspace", "Delete", "Tab"];
+const ALLOWED_KEYS_DATA = ["ArrowLeft", "ArrowRight", "Backspace", "Delete", "Tab"];
 
 const createValidation =
   (regex: RegExp, additionalKeys: string[] = []) =>
   (e: KeyboardEvent) => {
-    const allowedKeys = [...ALLOWED_KEYS, ...additionalKeys];
+    const allowedKeys = [...ALLOWED_KEYS_DATA, ...additionalKeys];
     if (!regex.test(e.key) && !allowedKeys.includes(e.key)) {
       e.preventDefault();
     }

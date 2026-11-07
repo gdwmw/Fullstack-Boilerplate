@@ -48,7 +48,7 @@ const processImage = async (buffer: Buffer, originalWidth: number): Promise<TFor
   return Object.fromEntries(processedFormats) as TFormats;
 };
 
-const removeUploadedFile = async (filename: string) => {
+const deleteUploadedFile = async (filename: string) => {
   const filePath = join(UPLOAD_DIR, filename);
 
   try {
@@ -70,13 +70,13 @@ export const service = {
   async delete(fileId: string) {
     const fileRecord = await prisma.files.delete({ where: { id: fileId } });
 
-    await removeUploadedFile(fileRecord.filename);
+    await deleteUploadedFile(fileRecord.filename);
 
     const generatedFormats = fileRecord.formats as null | TFormats;
 
     if (generatedFormats) {
       const generatedFiles = Object.values(generatedFormats);
-      await Promise.all(generatedFiles.map(({ filename }) => removeUploadedFile(filename)));
+      await Promise.all(generatedFiles.map(({ filename }) => deleteUploadedFile(filename)));
     }
 
     return fileRecord;

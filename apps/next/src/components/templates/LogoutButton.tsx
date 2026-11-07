@@ -11,7 +11,7 @@ import loadingWhite from "@/public/assets/animations/loadings/Loading-W.svg";
 import { ExampleA, IExampleA } from "@/src/components/elements/example/A/ExampleA";
 import { POSTLogout } from "@/src/utils/api/authentication/logout";
 
-export const LogoutButton: FC<IExampleA> = ({ ...props }): ReactElement => {
+export const LogoutButton: FC<IExampleA> = (props): ReactElement => {
   const { systemTheme } = useTheme();
   const [loading, setLoading] = useState(false);
 

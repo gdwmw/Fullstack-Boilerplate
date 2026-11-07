@@ -17,7 +17,7 @@ export interface IExampleA extends DetailedHTMLProps<ButtonHTMLAttributes<HTMLBu
 }
 
 // ⭐ COLOR MAP
-const colorMap: Record<TExampleAVariant, Partial<Record<TExampleAColor, string>>> = {
+const COLOR_MAP: Record<TExampleAVariant, Partial<Record<TExampleAColor, string>>> = {
   ghost: {
     black: "text-black dark:text-white",
     blue: "text-blue-500",
@@ -47,14 +47,14 @@ const colorMap: Record<TExampleAVariant, Partial<Record<TExampleAColor, string>>
 };
 
 // ⭐ DISABLED MAP
-const disabledMap: Record<TExampleAVariant, string> = {
+const DISABLED_MAP: Record<TExampleAVariant, string> = {
   ghost: "text-gray-400",
   outline: "bg-transparent text-gray-400 ring-1 ring-gray-400 ring-inset",
   solid: "bg-gray-400 text-white",
 };
 
 // ⭐ SIZE MAP
-const sizeMap: Record<TExampleAVariant, Record<TExampleASize, string>> = {
+const SIZE_MAP: Record<TExampleAVariant, Record<TExampleASize, string>> = {
   ghost: { lg: "text-xl", md: "text-lg", sm: "text-base" },
   outline: { lg: "h-12 min-h-12 min-w-36 px-5 text-xl", md: "h-11 min-h-11 min-w-32 px-4 text-lg", sm: "h-10 min-h-10 min-w-28 px-3 text-base" },
   solid: { lg: "h-12 min-h-12 min-w-36 px-5 text-xl", md: "h-11 min-h-11 min-w-32 px-4 text-lg", sm: "h-10 min-h-10 min-w-28 px-3 text-base" },
@@ -65,9 +65,9 @@ export const ExampleATWM = ({ className, color, disabled, size, variant }: IExam
     "flex items-center gap-2 font-semibold",
     variant !== "ghost" && "justify-center rounded-md",
     disabled ? "cursor-not-allowed" : "cursor-pointer active:scale-95",
-    !disabled && colorMap[variant]?.[color],
-    disabled && disabledMap[variant],
-    sizeMap[variant]?.[size],
+    !disabled && COLOR_MAP[variant]?.[color],
+    disabled && DISABLED_MAP[variant],
+    SIZE_MAP[variant]?.[size],
     className,
   );
 

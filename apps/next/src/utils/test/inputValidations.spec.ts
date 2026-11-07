@@ -2,16 +2,16 @@ import { vi } from "vitest";
 
 import { inputValidations } from "../inputValidations";
 
-type KeyEventMock = {
+type TKeyEventMock = {
   key: string;
   preventDefault: ReturnType<typeof vi.fn>;
 };
 
-const createKeyEventMock = (key: string): KeyEventMock =>
+const createKeyEventMock = (key: string): TKeyEventMock =>
   ({
     key,
     preventDefault: vi.fn(),
-  }) as KeyEventMock;
+  }) as TKeyEventMock;
 
 describe("inputValidations", () => {
   it("allows valid email key", () => {

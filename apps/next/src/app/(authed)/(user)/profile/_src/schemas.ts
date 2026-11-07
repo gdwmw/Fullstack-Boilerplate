@@ -1,7 +1,7 @@
 import { schemaMessage } from "@repo/constants";
 import { z } from "zod";
 
-export const profileSchema = z.object({
+const commonSchema = z.object({
   email: z.email({ message: schemaMessage.string.email("email") }),
   image: z
     .any()
@@ -13,5 +13,7 @@ export const profileSchema = z.object({
   phone: z.string().min(10, { message: schemaMessage.string.min("phone", 10) }),
   username: z.string().min(4, { message: schemaMessage.string.min("username", 4) }),
 });
+
+export const profileSchema = commonSchema;
 
 export type TProfileSchema = z.infer<typeof profileSchema>;
