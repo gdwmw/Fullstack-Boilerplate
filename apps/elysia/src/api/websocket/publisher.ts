@@ -17,14 +17,14 @@ export const dndWebsocketPublisher = <T>(props: IWebsocketMessage<T>) => {
 
   switch (props.resource) {
     case "W":
-      channel = EXAMPLE_WEBSOCKET_CHANNEL.A(props.id);
+      channel = EXAMPLE_WEBSOCKET_CHANNEL.A(props.targetId);
       break;
     case "X":
-      channel = EXAMPLE_WEBSOCKET_CHANNEL.B(props.id);
+      channel = EXAMPLE_WEBSOCKET_CHANNEL.B(props.targetId);
       break;
     case "Y":
     case "Z":
-      channel = EXAMPLE_WEBSOCKET_CHANNEL.C(props.id);
+      channel = EXAMPLE_WEBSOCKET_CHANNEL.C(props.targetId);
       break;
   }
 
