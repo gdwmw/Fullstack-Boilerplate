@@ -106,6 +106,7 @@
   ```
 
 - Name every `interface` with an `I` prefix and every `type` alias with a `T` prefix, followed by a PascalCase name. This applies to exported and non-exported declarations alike.
+- Name component files in `PascalCase` matching the exported component name (for example `ResultGrid.tsx` exporting `ResultGrid`). This applies everywhere, including files inside `batches/` folders. Do not use kebab-case for component files.
 
   ```ts
   export interface IDNDWorkspaceCreatePayload {
