@@ -11,12 +11,12 @@ export type TQueryParams = AxiosRequestConfig["params"] & Partial<IQueryParams>;
 
 interface I {
   auth?: boolean;
-  data?: unknown;
   endpoint: string;
   headers?: AxiosRequestHeaders;
   label: string;
   method?: Method;
-  params?: TQueryParams;
+  payload?: unknown;
+  query?: TQueryParams;
 }
 
 export const apiRequest = async <T>({ auth = true, ...props }: I): Promise<ISuccessResponse<T>> => {
@@ -24,13 +24,13 @@ export const apiRequest = async <T>({ auth = true, ...props }: I): Promise<ISucc
 
   try {
     const res: AxiosResponse<ISuccessResponse<T>> = await axios({
-      data: props.data,
+      data: props.payload,
       headers: {
         ...(accessToken && { Authorization: `Bearer ${accessToken as string}` }),
         ...props.headers,
       },
       method: props.method,
-      params: props.params ?? {},
+      params: props.query ?? {},
       url: `${API_URL}${props.endpoint}`,
       withCredentials: true,
     });
@@ -59,12 +59,12 @@ export const apiRequest = async <T>({ auth = true, ...props }: I): Promise<ISucc
   }
 };
 
-export const getApi = <T>(props: Omit<I, "data" | "method">): Promise<ISuccessResponse<T>> => apiRequest<T>({ ...props, method: "GET" });
+export const getApi = <T>(props: Omit<I, "method" | "payload">): Promise<ISuccessResponse<T>> => apiRequest<T>({ ...props, method: "GET" });
 
-export const postApi = <T>(props: Omit<I, "method" | "params">): Promise<ISuccessResponse<T>> => apiRequest<T>({ ...props, method: "POST" });
+export const postApi = <T>(props: Omit<I, "method" | "query">): Promise<ISuccessResponse<T>> => apiRequest<T>({ ...props, method: "POST" });
 
-export const putApi = <T>(props: Omit<I, "method" | "params">): Promise<ISuccessResponse<T>> => apiRequest<T>({ ...props, method: "PUT" });
+export const putApi = <T>(props: Omit<I, "method" | "query">): Promise<ISuccessResponse<T>> => apiRequest<T>({ ...props, method: "PUT" });
 
-export const patchApi = <T>(props: Omit<I, "method" | "params">): Promise<ISuccessResponse<T>> => apiRequest<T>({ ...props, method: "PATCH" });
+export const patchApi = <T>(props: Omit<I, "method" | "query">): Promise<ISuccessResponse<T>> => apiRequest<T>({ ...props, method: "PATCH" });
 
-export const deleteApi = <T>(props: Omit<I, "data" | "method">): Promise<ISuccessResponse<T>> => apiRequest<T>({ ...props, method: "DELETE" });
+export const deleteApi = <T>(props: Omit<I, "method" | "payload">): Promise<ISuccessResponse<T>> => apiRequest<T>({ ...props, method: "DELETE" });

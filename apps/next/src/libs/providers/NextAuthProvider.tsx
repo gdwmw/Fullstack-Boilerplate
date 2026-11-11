@@ -48,7 +48,7 @@ const AccessTokenRefreshGuard: FC = (): null | ReactElement => {
   const queryClient = useQueryClient();
 
   const refreshTokenMutation = useMutation({
-    mutationFn: (refreshToken: string) => POSTRefresh(refreshToken),
+    mutationFn: (refreshToken: string) => POSTRefresh({ payload: { encryptedRefreshToken: refreshToken } }),
     onError: () => {
       signOut();
     },

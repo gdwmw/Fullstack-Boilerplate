@@ -9,28 +9,28 @@ export interface IUserUpdatePayload extends Omit<IUsersModel, "createdAt" | "id"
 
 const label = "users";
 
-export const GETUsers = async (params?: TQueryParams): Promise<ISuccessResponse<IUsersModel[]>> =>
+export const GETUsers = async ({ query }: { query?: TQueryParams }): Promise<ISuccessResponse<IUsersModel[]>> =>
   getApi<IUsersModel[]>({
     endpoint: "/users",
-    label: label,
-    params: params,
+    label,
+    query,
   });
 
-export const GETUsersById = async (id: string): Promise<ISuccessResponse<IUsersModel>> =>
+export const GETUsersById = async ({ param }: { param: { id: string } }): Promise<ISuccessResponse<IUsersModel>> =>
   getApi<IUsersModel>({
-    endpoint: `/users/${id}`,
-    label: label,
+    endpoint: `/users/${param.id}`,
+    label,
   });
 
-export const PUTUsers = async (id: string, payload: IUserUpdatePayload): Promise<ISuccessResponse<IUsersModel>> =>
+export const PUTUsers = async ({ param, payload }: { param: { id: string }; payload: IUserUpdatePayload }): Promise<ISuccessResponse<IUsersModel>> =>
   putApi<IUsersModel>({
-    data: payload,
-    endpoint: `/users/${id}`,
-    label: label,
+    endpoint: `/users/${param.id}`,
+    label,
+    payload,
   });
 
-export const DELETEUsers = async (id: string): Promise<ISuccessResponse<IUsersModel>> =>
+export const DELETEUsers = async ({ param }: { param: { id: string } }): Promise<ISuccessResponse<IUsersModel>> =>
   deleteApi<IUsersModel>({
-    endpoint: `/users/${id}`,
-    label: label,
+    endpoint: `/users/${param.id}`,
+    label,
   });

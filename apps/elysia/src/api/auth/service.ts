@@ -16,7 +16,7 @@ export const service = {
     await redis.set(`blocklist:${jti}`, "1", "EX", remainingTtlSeconds);
   },
 
-  async changePassword(userId: string, data: TChangePasswordSchema) {
+  async changePassword({ payload, userId }: { payload: TChangePasswordSchema; userId: string }) {
     const user = await prisma.users.findUnique({
       where: { id: userId },
     });
@@ -25,13 +25,13 @@ export const service = {
       return null;
     }
 
-    const isCurrentPasswordValid = await Bun.password.verify(data.oldPassword, user.password);
+    const isCurrentPasswordValid = await Bun.password.verify(payload.oldPassword, user.password);
 
     if (!isCurrentPasswordValid) {
       return null;
     }
 
-    const hashedNewPassword = await Bun.password.hash(data.newPassword);
+    const hashedNewPassword = await Bun.password.hash(payload.newPassword);
 
     return prisma.users.update({
       data: {
@@ -42,11 +42,11 @@ export const service = {
     });
   },
 
-  async getUserById(id: string) {
+  async getUserById({ userId }: { userId: string }) {
     return await prisma.users.findUnique({
       include: { image: true },
       omit: { ...USER_OMIT_FIELDS },
-      where: { id },
+      where: { id: userId },
     });
   },
 
@@ -54,17 +54,17 @@ export const service = {
     return (await redis.exists(`blocklist:${jti}`)) === 1;
   },
 
-  async login(data: TLoginSchema) {
+  async login({ payload }: { payload: TLoginSchema }) {
     const user = await prisma.users.findUnique({
       include: { image: true },
-      where: data.method === "email" ? { email: data.identifier } : { username: data.identifier },
+      where: payload.method === "email" ? { email: payload.identifier } : { username: payload.identifier },
     });
 
     if (!user?.password) {
       return null;
     }
 
-    const isPasswordValid = await Bun.password.verify(data.password, user.password);
+    const isPasswordValid = await Bun.password.verify(payload.password, user.password);
 
     if (!isPasswordValid) {
       return null;
@@ -75,17 +75,17 @@ export const service = {
     return userWithoutPassword;
   },
 
-  async register(data: TRegisterSchema) {
-    const hashedPassword = await Bun.password.hash(data.password);
+  async register({ payload }: { payload: TRegisterSchema }) {
+    const hashedPassword = await Bun.password.hash(payload.password);
 
     return await prisma.users.create({
       data: {
-        email: data.email,
-        name: data.name,
+        email: payload.email,
+        name: payload.name,
         password: hashedPassword,
-        phone: data.phone,
-        role: data.role ?? "user",
-        username: data.username,
+        phone: payload.phone,
+        role: payload.role ?? "user",
+        username: payload.username,
       },
       omit: { ...USER_OMIT_FIELDS, imageId: true },
     });

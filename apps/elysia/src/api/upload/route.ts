@@ -15,9 +15,9 @@ export const uploadRoutes = new Elysia({ prefix: "/upload" })
 
   .get(
     "/",
-    async ({ query }) => {
-      const params = querySchema.parse(query);
-      const res = await service.getAll(params);
+    async ({ query: rawQuery }) => {
+      const query = querySchema.parse(rawQuery);
+      const res = await service.getAll({ query });
       return SUCCESS_RESPONSE({ data: res.data, message: responseMessage(LABEL).retrieved, meta: res.meta });
     },
     { detail: docs(LABEL).getAll },
@@ -26,8 +26,8 @@ export const uploadRoutes = new Elysia({ prefix: "/upload" })
   .get(
     "/:id",
     async ({ params }) => {
-      const { id } = paramSchema.parse(params);
-      const res = await service.getById(id);
+      const param = paramSchema.parse(params);
+      const res = await service.getById({ param });
       return SUCCESS_RESPONSE({ data: res, message: responseMessage(LABEL).retrieved });
     },
     { detail: docs(LABEL).getById },
@@ -36,8 +36,8 @@ export const uploadRoutes = new Elysia({ prefix: "/upload" })
   .post(
     "/",
     async ({ body }) => {
-      const { file } = uploadSchema.parse(body);
-      const res = await service.upload(file);
+      const payload = uploadSchema.parse(body);
+      const res = await service.upload({ payload });
       return SUCCESS_RESPONSE({ data: res, message: responseMessage(LABEL).created });
     },
     { detail: docs(LABEL).upload },
@@ -46,8 +46,8 @@ export const uploadRoutes = new Elysia({ prefix: "/upload" })
   .delete(
     "/:id",
     async ({ params }) => {
-      const { id } = paramSchema.parse(params);
-      const res = await service.delete(id);
+      const param = paramSchema.parse(params);
+      const res = await service.delete({ param });
       return SUCCESS_RESPONSE({ data: res, message: responseMessage(LABEL).deleted });
     },
     { detail: docs(LABEL).delete },

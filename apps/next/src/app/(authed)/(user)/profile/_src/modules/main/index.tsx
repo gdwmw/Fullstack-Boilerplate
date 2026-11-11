@@ -139,11 +139,13 @@ export const Main: FC = (): ReactElement => {
 
       if (dt.image && dt.image.length > 0) {
         if (currentUser.imageId) {
-          await DELETEUpload(currentUser.imageId);
+          await DELETEUpload({ param: { id: currentUser.imageId } });
         }
 
         const uploadResponse = await POSTUpload({
-          file: dt.image[0],
+          payload: {
+            file: dt.image[0],
+          },
         });
 
         if (!uploadResponse.data) {
@@ -154,12 +156,15 @@ export const Main: FC = (): ReactElement => {
         imageId = uploadResponse.data.id;
       }
 
-      const userResponse = await PUTUsers(currentUser.id, {
-        email: dt.email,
-        imageId: imageId,
-        name: dt.name,
-        phone: dt.phone,
-        username: dt.username,
+      const userResponse = await PUTUsers({
+        param: { id: currentUser.id },
+        payload: {
+          email: dt.email,
+          imageId: imageId,
+          name: dt.name,
+          phone: dt.phone,
+          username: dt.username,
+        },
       });
 
       if (!userResponse.data) {

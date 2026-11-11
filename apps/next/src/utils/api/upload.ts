@@ -8,32 +8,32 @@ export interface IUploadPayload {
 
 const label = "upload";
 
-export const GETUpload = async (params?: TQueryParams): Promise<ISuccessResponse<IFilesModel[]>> =>
+export const GETUpload = async ({ query }: { query?: TQueryParams }): Promise<ISuccessResponse<IFilesModel[]>> =>
   getApi<IFilesModel[]>({
     endpoint: "/upload",
-    label: label,
-    params: params,
+    label,
+    query,
   });
 
-export const GETUploadById = async (id: string): Promise<ISuccessResponse<IFilesModel>> =>
+export const GETUploadById = async ({ param }: { param: { id: string } }): Promise<ISuccessResponse<IFilesModel>> =>
   getApi<IFilesModel>({
-    endpoint: `/upload/${id}`,
-    label: label,
+    endpoint: `/upload/${param.id}`,
+    label,
   });
 
-export const POSTUpload = async (payload: IUploadPayload): Promise<ISuccessResponse<IFilesModel>> => {
+export const POSTUpload = async ({ payload }: { payload: IUploadPayload }): Promise<ISuccessResponse<IFilesModel>> => {
   const formData = new FormData();
   formData.append("file", payload.file);
 
   return postApi<IFilesModel>({
-    data: formData,
     endpoint: "/upload",
-    label: label,
+    label,
+    payload: formData,
   });
 };
 
-export const DELETEUpload = async (id: string): Promise<ISuccessResponse<IFilesModel>> =>
+export const DELETEUpload = async ({ param }: { param: { id: string } }): Promise<ISuccessResponse<IFilesModel>> =>
   deleteApi<IFilesModel>({
-    endpoint: `/upload/${id}`,
-    label: label,
+    endpoint: `/upload/${param.id}`,
+    label,
   });

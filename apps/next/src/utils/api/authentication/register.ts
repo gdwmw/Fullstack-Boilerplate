@@ -13,12 +13,12 @@ export interface IRegisterPayload {
 
 const label = "register";
 
-export const POSTRegister = async (payload: IRegisterPayload): Promise<ISuccessResponse<IAuthResponse>> => {
+export const POSTRegister = async ({ payload }: { payload: IRegisterPayload }): Promise<ISuccessResponse<IAuthResponse>> => {
   const res = await postApi<IAuthResponse>({
     auth: false,
-    data: payload,
     endpoint: "/auth/register",
     label,
+    payload,
   });
 
   return {

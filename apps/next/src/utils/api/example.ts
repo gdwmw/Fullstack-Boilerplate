@@ -20,42 +20,54 @@ export interface IExampleResponse extends IExampleCreatePayload {}
 
 const label = "example";
 
-export const GETExample = async (params?: TQueryParams): Promise<ISuccessResponse<IExampleResponse[]>> =>
+export const GETExample = async ({ query }: { query?: TQueryParams }): Promise<ISuccessResponse<IExampleResponse[]>> =>
   getApi<IExampleResponse[]>({
-    endpoint: "/example",
+    endpoint: "/examples",
     label,
-    params,
+    query,
   });
 
-export const GETExampleById = async (id: string): Promise<ISuccessResponse<IExampleResponse>> =>
+export const GETExampleById = async ({ param }: { param: { id: string } }): Promise<ISuccessResponse<IExampleResponse>> =>
   getApi<IExampleResponse>({
-    endpoint: `/example/${id}`,
+    endpoint: `/examples/${param.id}`,
     label,
   });
 
-export const POSTExample = async (payload: IExampleCreatePayload): Promise<ISuccessResponse<IExampleResponse>> =>
+export const POSTExample = async ({ payload }: { payload: IExampleCreatePayload }): Promise<ISuccessResponse<IExampleResponse>> =>
   postApi<IExampleResponse>({
-    data: payload,
-    endpoint: "/example",
+    endpoint: "/examples",
     label,
+    payload,
   });
 
-export const PUTExample = async (id: string, payload: IExampleUpdatePayload): Promise<ISuccessResponse<IExampleResponse>> =>
+export const PUTExample = async ({
+  param,
+  payload,
+}: {
+  param: { id: string };
+  payload: IExampleUpdatePayload;
+}): Promise<ISuccessResponse<IExampleResponse>> =>
   putApi<IExampleResponse>({
-    data: payload,
-    endpoint: `/example/${id}`,
+    endpoint: `/examples/${param.id}`,
     label,
+    payload,
   });
 
-export const PATCHExample = async (id: string, payload: IExamplePatchPayload): Promise<ISuccessResponse<IExampleResponse>> =>
+export const PATCHExample = async ({
+  param,
+  payload,
+}: {
+  param: { id: string };
+  payload: IExamplePatchPayload;
+}): Promise<ISuccessResponse<IExampleResponse>> =>
   patchApi<IExampleResponse>({
-    data: payload,
-    endpoint: `/example/${id}`,
+    endpoint: `/examples/${param.id}`,
     label,
+    payload,
   });
 
-export const DELETEExample = async (id: string): Promise<ISuccessResponse<IExampleResponse>> =>
+export const DELETEExample = async ({ param }: { param: { id: string } }): Promise<ISuccessResponse<IExampleResponse>> =>
   deleteApi<IExampleResponse>({
-    endpoint: `/example/${id}`,
+    endpoint: `/examples/${param.id}`,
     label,
   });

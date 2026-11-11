@@ -77,7 +77,7 @@ export const options: NextAuthOptions = {
         const { identifier, method, password } = credentials as unknown as ILoginPayload;
 
         try {
-          const res = await POSTLogin({ identifier, method: method === "email" ? "email" : "username", password });
+          const res = await POSTLogin({ payload: { identifier, method: method === "email" ? "email" : "username", password } });
 
           return res.data as IAuthResponse & User;
         } catch (error) {

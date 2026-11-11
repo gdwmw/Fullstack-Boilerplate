@@ -1,49 +1,49 @@
 import { prisma } from "@/src/libs/prisma";
 import { createPaginationMeta } from "@/src/utils/pagination";
 
-import { TCreatePayloadSchema, TQuerySchema, TUpdatePayloadSchema } from "./type";
+import { TCreatePayloadSchema, TParamSchema, TQuerySchema, TUpdatePayloadSchema } from "./type";
 
 export const service = {
-  async create(payload: TCreatePayloadSchema) {
+  async create({ payload }: { payload: TCreatePayloadSchema }) {
     return prisma.examples.create({
       data: payload,
     });
   },
 
-  async delete(id: string) {
+  async delete({ param }: { param: TParamSchema }) {
     return prisma.examples.delete({
-      where: { id },
+      where: { id: param.id },
     });
   },
 
-  async getAll({ page, pageSize }: TQuerySchema) {
-    const recordsToSkip = (page - 1) * pageSize;
+  async getAll({ query }: { query: TQuerySchema }) {
+    const recordsToSkip = (query.page - 1) * query.pageSize;
 
     const [examples, totalExamples] = await prisma.$transaction([
       prisma.examples.findMany({
         orderBy: { id: "asc" },
         skip: recordsToSkip,
-        take: pageSize,
+        take: query.pageSize,
       }),
       prisma.examples.count(),
     ]);
 
     return {
       data: examples,
-      meta: createPaginationMeta({ page, pageSize, totalData: totalExamples }),
+      meta: createPaginationMeta({ page: query.page, pageSize: query.pageSize, totalData: totalExamples }),
     };
   },
 
-  async getById(id: string) {
+  async getById({ param }: { param: TParamSchema }) {
     return prisma.examples.findUnique({
-      where: { id },
+      where: { id: param.id },
     });
   },
 
-  async update(id: string, payload: TUpdatePayloadSchema) {
+  async update({ param, payload }: { param: TParamSchema; payload: TUpdatePayloadSchema }) {
     return prisma.examples.update({
       data: payload,
-      where: { id },
+      where: { id: param.id },
     });
   },
 };

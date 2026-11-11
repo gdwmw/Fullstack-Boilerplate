@@ -11,7 +11,7 @@ import { logger } from "@/src/libs/pino";
 import { prisma } from "@/src/libs/prisma";
 import { createPaginationMeta } from "@/src/utils/pagination";
 
-import { TQuerySchema } from "./type";
+import { TParamSchema, TQuerySchema, TUploadPayloadSchema } from "./type";
 
 const UPLOAD_DIR = join(process.cwd(), "uploads");
 
@@ -67,8 +67,8 @@ const deleteUploadedFile = async (filename: string) => {
 };
 
 export const service = {
-  async delete(fileId: string) {
-    const fileRecord = await prisma.files.delete({ where: { id: fileId } });
+  async delete({ param }: { param: TParamSchema }) {
+    const fileRecord = await prisma.files.delete({ where: { id: param.id } });
 
     await deleteUploadedFile(fileRecord.filename);
 
@@ -82,37 +82,37 @@ export const service = {
     return fileRecord;
   },
 
-  async getAll({ page, pageSize }: TQuerySchema) {
-    const recordsToSkip = (page - 1) * pageSize;
+  async getAll({ query }: { query: TQuerySchema }) {
+    const recordsToSkip = (query.page - 1) * query.pageSize;
 
     const [files, totalFiles] = await prisma.$transaction([
       prisma.files.findMany({
         orderBy: { createdAt: "desc" },
         skip: recordsToSkip,
-        take: pageSize,
+        take: query.pageSize,
       }),
       prisma.files.count(),
     ]);
 
     return {
       data: files,
-      meta: createPaginationMeta({ page, pageSize, totalData: totalFiles }),
+      meta: createPaginationMeta({ page: query.page, pageSize: query.pageSize, totalData: totalFiles }),
     };
   },
 
-  async getById(fileId: string) {
-    return await prisma.files.findUnique({ where: { id: fileId } });
+  async getById({ param }: { param: TParamSchema }) {
+    return await prisma.files.findUnique({ where: { id: param.id } });
   },
 
-  async upload(file: File): Promise<IFilesModel> {
+  async upload({ payload }: { payload: TUploadPayloadSchema }): Promise<IFilesModel> {
     await mkdir(UPLOAD_DIR, { recursive: true });
 
-    const originalFilename = file.name;
+    const originalFilename = payload.file.name;
     const extension = extname(originalFilename);
     const filename = `${randomUUID()}${extension}`;
     const relativePath = `uploads/${filename}`;
     const absolutePath = join(UPLOAD_DIR, filename);
-    const fileBuffer = Buffer.from(await file.arrayBuffer());
+    const fileBuffer = Buffer.from(await payload.file.arrayBuffer());
 
     await writeFile(absolutePath, fileBuffer);
 
@@ -121,7 +121,7 @@ export const service = {
     let dominantColor: null | string = null;
     let placeholder: null | string = null;
     let formats: null | TFormats = null;
-    const isAllowedImageType = ALLOWED_TYPES.includes(file.type as (typeof ALLOWED_TYPES)[number]);
+    const isAllowedImageType = ALLOWED_TYPES.includes(payload.file.type as (typeof ALLOWED_TYPES)[number]);
 
     if (isAllowedImageType) {
       const imageMetadata = await sharp(fileBuffer).metadata();
@@ -143,11 +143,11 @@ export const service = {
         filename,
         formats: formats ? (structuredClone(formats) as unknown as Prisma.InputJsonValue) : undefined,
         height,
-        mimetype: file.type || "application/octet-stream",
+        mimetype: payload.file.type || "application/octet-stream",
         originalFilename,
         path: relativePath,
         placeholder,
-        size: file.size,
+        size: payload.file.size,
         url: `/${relativePath}`,
         width,
       },

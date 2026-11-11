@@ -11,12 +11,12 @@ export interface ILoginPayload {
 
 const label = "login";
 
-export const POSTLogin = async (payload: ILoginPayload): Promise<ISuccessResponse<IAuthResponse>> => {
+export const POSTLogin = async ({ payload }: { payload: ILoginPayload }): Promise<ISuccessResponse<IAuthResponse>> => {
   const res = await postApi<IAuthResponse>({
     auth: false,
-    data: payload,
     endpoint: "/auth/login",
     label,
+    payload,
   });
 
   return {

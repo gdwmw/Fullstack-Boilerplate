@@ -88,7 +88,7 @@ export const Main: FC = (): ReactElement => {
   const registerMutation = useMutation({
     mutationFn: async (dt: TRegisterFormSchema) => {
       const { confirmPassword: _confirmPassword, ...registerPayload } = dt;
-      await POSTRegister(registerPayload);
+      await POSTRegister({ payload: registerPayload });
       return true;
     },
     onError: (error) => {

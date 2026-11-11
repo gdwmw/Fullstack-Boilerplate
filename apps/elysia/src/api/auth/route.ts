@@ -25,7 +25,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
         return error;
       }
 
-      const res = await service.getUserById(jwt.sub);
+      const res = await service.getUserById({ userId: jwt.sub });
 
       if (!res) {
         set.status = 404;
@@ -44,7 +44,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
       const payload = registerSchema.parse(body);
 
       try {
-        const res = await service.register(payload);
+        const res = await service.register({ payload });
 
         const tokens = await generateAccessAndRefreshTokens({ accessJWT, refreshJWT, userId: res.id });
 
@@ -88,7 +88,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
 
       const payload = loginSchema(prePayload.method).parse(body);
 
-      const res = await service.login(payload);
+      const res = await service.login({ payload });
 
       if (!res) {
         set.status = 401;
@@ -147,7 +147,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
 
       const tokens = await generateAccessAndRefreshTokens({ accessJWT, refreshJWT, userId: decoded.sub });
 
-      const user = await service.getUserById(decoded.sub);
+      const user = await service.getUserById({ userId: decoded.sub });
 
       if (!user) {
         set.status = 404;
@@ -195,7 +195,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
 
       const payload = changePasswordSchema.parse(body);
 
-      const res = await service.changePassword(jwt.sub, payload);
+      const res = await service.changePassword({ payload, userId: jwt.sub });
 
       if (!res) {
         set.status = 401;

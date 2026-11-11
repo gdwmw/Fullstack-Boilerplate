@@ -60,7 +60,7 @@ export const ChangePasswordModules: FC = (): ReactElement => {
   const changePasswordMutation = useMutation({
     mutationFn: async (dt: TChangePasswordFormSchema) => {
       const { confirmPassword: _confirmPassword, ...changePasswordPayload } = dt;
-      await POSTChangePassword(changePasswordPayload);
+      await POSTChangePassword({ payload: changePasswordPayload });
       await POSTLogout();
       signOut();
       return true;
