@@ -160,7 +160,7 @@ export const Main: FC = (): ReactElement => {
         param: { id: currentUser.id },
         payload: {
           email: dt.email,
-          imageId: imageId,
+          imageId,
           name: dt.name,
           phone: dt.phone,
           username: dt.username,

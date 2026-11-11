@@ -43,12 +43,10 @@ export const service = {
   },
 
   async update({ param, payload }: { param: TParamSchema; payload: TUpdatePayloadSchema }) {
-    const { imageId, ...userFields } = payload;
-
     return prisma.users.update({
       data: {
-        ...userFields,
-        imageId: imageId ?? null,
+        ...payload,
+        imageId: payload.imageId ?? null,
       },
       include: { image: true },
       omit: USER_OMIT_FIELDS,

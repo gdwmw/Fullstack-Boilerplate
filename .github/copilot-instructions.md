@@ -71,7 +71,7 @@
     ```
   - **Form Library Integration**: Form registration functions (such as `register` from `react-hook-form`) may be destructured in the parameter list alongside `...props` so they can be invoked directly (e.g. `{...register("field")}`) while the remaining component/form props are accessed via `props.name` or forwarded.
     ```tsx
-    const Form = <TData, TVariables>({ register, ...props }: I<TData, TVariables>): ReactElement => (
+    const Form: FC<I> = ({ register, ...props }): ReactElement => (
       <form onSubmit={props.onSubmit}>
         <input {...register("label")} />
       </form>
@@ -92,11 +92,46 @@
 ## Naming
 
 - In array callbacks such as `map`, `find`, `filter`, `some`, and `forEach`, name the current item `dt` and access its fields through `dt`. Do not destructure the item in the callback parameter.
-  - When an index is needed, use `i`: `.map((dt, i) => ...)`.
-  - In nested callbacks over child entities, use a clear domain name such as `card` or `column` instead of `dt`. The index is optional and may have a descriptive name such as `columnIndex`.
+  - Use `i` for the index when one is needed: `.map((dt, i) => ...)`.
+  - When a callback runs inside another array callback and iterates over a child collection of the outer item (for example `dt.cards`), name the inner item after its domain (such as `card` or `column`) instead of `dt`. The outer callback keeps `dt` and `i`.
+  - If the inner callback needs an index, give it a descriptive name such as `cardIndex` instead of `i`. Never reuse `dt` or `i` in a nested callback, because that shadows the outer variables.
+
+  ```tsx
+  // Correct: single level, use dt (and i when the index is needed)
+  const activeUsers = users.filter((dt) => dt.active);
+  const selectedUser = users.find((dt) => dt.id === id);
+
+  {
+    columns.map((dt, i) => <Column key={dt.id} index={i} title={dt.title} />);
+  }
+
+  // Correct: nested, the outer callback keeps dt and i, the inner one uses the domain name
+  {
+    columns.map((dt, i) => (
+      <section key={dt.id}>
+        <h2>
+          {i + 1}. {dt.title}
+        </h2>
+        {dt.cards.map((card, cardIndex) => (
+          <Card key={card.id} index={cardIndex} title={card.title} />
+        ))}
+      </section>
+    ));
+  }
+
+  // Incorrect: the inner callback reuses dt and i, which shadows the outer ones
+  {
+    columns.map((dt, i) => (
+      <section key={dt.id}>
+        {dt.cards.map((dt, i) => (
+          <Card key={dt.id} index={i} title={dt.title} />
+        ))}
+      </section>
+    ));
+  }
+  ```
+
 - In event handlers such as `onClick`, `onChange`, and `onKeyDown`, name the event parameter `e` when it is used. Omit it when it is not used.
-- In API mutation callbacks such as `onSuccess`, name the response `res` and assign its payload with `const data = res.data` before using it.
-- In WebSocket message handlers, when `message.options.data` is present, assign it with `const res = message.options.data` and use `res`.
 - Name local static data constants (arrays, lookup records, and configuration objects) in `UPPER_SNAKE_CASE`, with a descriptive suffix such as `_DATA`, `_COLOR`, or `_ORDER`. This does not apply to components, functions, hooks, or values derived from props, state, or hooks.
 
   ```tsx
@@ -144,11 +179,11 @@
 
 ## Safety and lint
 
-- Guard the results of lookups such as `find` before using them. Avoid non-null assertions (`!`) unless existence is guaranteed and the reason is clear.
-- Do not disable lint rules without a specific reason. Keep hook dependency arrays correct, and add a brief comment explaining any intentional lint exception.
+- Avoid non-null statements (`!`) unless their existence is guaranteed and the reason is clear.
+- Don't disable lint rules without a specific reason.
 
 ## Verification and final report
 
-- Run the relevant checks (lint, type-check, tests) for the files or behavior you changed. If a check cannot be run, say so.
+- Run the relevant checks (lint, type-check) for the files or behavior you changed. If a check cannot be run, say so.
 - Before finishing, compare the change against the closest existing examples you found at the start.
 - In the final response, report any relevant inconsistencies found in existing or changed code. Distinguish pre-existing issues from issues introduced by this change, and state whether each was fixed or left untouched.
