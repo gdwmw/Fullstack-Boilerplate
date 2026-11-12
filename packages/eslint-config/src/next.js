@@ -1,0 +1,78 @@
+import pluginQuery from "@tanstack/eslint-plugin-query";
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTs from "eslint-config-next/typescript";
+import eslintPluginBetterTailwindcss from "eslint-plugin-better-tailwindcss";
+import reactPlugin from "eslint-plugin-react";
+import storybook from "eslint-plugin-storybook";
+import { defineConfig, globalIgnores } from "eslint/config";
+
+import { baseConfig } from "./base.js";
+
+export const nextConfig = defineConfig([
+  ...nextVitals,
+  ...nextTs,
+  reactPlugin.configs.flat.recommended,
+  ...pluginQuery.configs["flat/recommended"],
+  ...storybook.configs["flat/recommended"],
+  ...baseConfig,
+  globalIgnores([
+    ".next/**",
+    "out/**",
+    "build/**",
+    "next-env.d.ts",
+    ".commitlintrc.cjs",
+    "node_modules/**",
+    "!.storybook",
+    "storybook-static/**",
+    "coverage/**",
+    "dist/**",
+  ]),
+  {
+    plugins: {
+      "better-tailwindcss": eslintPluginBetterTailwindcss,
+    },
+    rules: {
+      "@tanstack/query/mutation-property-order": "off",
+      "better-tailwindcss/enforce-consistent-important-position": ["warn", { position: "recommended" }],
+      "better-tailwindcss/enforce-consistent-variable-syntax": ["warn", { syntax: "shorthand" }],
+      "better-tailwindcss/enforce-shorthand-classes": ["warn"],
+      "better-tailwindcss/no-deprecated-classes": ["warn"],
+      "better-tailwindcss/no-duplicate-classes": ["warn"],
+      "better-tailwindcss/no-unknown-classes": [
+        "warn",
+        {
+          ignore: ["font-inter", "font-geistMono", "font-geistSans", "font-roboto"],
+        },
+      ],
+      "better-tailwindcss/no-unnecessary-whitespace": ["warn"],
+      curly: ["warn"],
+      "no-restricted-syntax": [
+        "warn",
+        {
+          message: 'avoid template literal for className; use twm(...) or className={[...].join(" ")}',
+          selector: 'JSXAttribute[name.name="className"] > JSXExpressionContainer > TemplateLiteral',
+        },
+        {
+          message: 'avoid template literal for className; use twm(...) or className={[...].join(" ")}',
+          selector: 'Property[key.name="className"] > TemplateLiteral',
+        },
+      ],
+      "react/display-name": "warn",
+      "react/jsx-fragments": "warn",
+      "react/jsx-no-undef": "warn",
+      "react/jsx-no-useless-fragment": "warn",
+      "react/no-children-prop": "warn",
+      "react/no-danger": "warn",
+      "react/no-unstable-nested-components": "warn",
+      "react/no-unused-prop-types": "warn",
+      "react/react-in-jsx-scope": "off",
+    },
+    settings: {
+      "better-tailwindcss": {
+        callees: ["twm"],
+        entryPoint: "src/app/global.css",
+        variables: [".*TWM"],
+      },
+    },
+  },
+]);

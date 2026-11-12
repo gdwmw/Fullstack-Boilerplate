@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ES2022",
+    "paths": {
+      "@/*": ["./*"],
+      "@/elysia/*": ["./*"],
+      "@repo/constants": ["../../packages/constants/src/index.ts"],
+      "@repo/eslint-config": ["../../packages/eslint-config/src/index.ts"],
+      "@repo/schemas": ["../../packages/schemas/src/index.ts"],
+      "@repo/types": ["../../packages/types/src/index.ts"],
+      "@repo/utils": ["../../packages/utils/src/index.ts"]
+    },
+    "types": ["bun-types", "vitest/globals"]
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}
