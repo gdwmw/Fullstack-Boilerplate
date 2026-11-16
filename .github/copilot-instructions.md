@@ -140,6 +140,19 @@
   const MEMBER_ROLE_ORDER = ["owner", "admin", "editor", "viewer"];
   ```
 
+- Name data retrieved from queries in `UPPER_SNAKE_CASE` when extracting it into a local variable, including when destructuring the `data` field. Keep the query result object itself in camelCase.
+
+  ```tsx
+  // Correct
+  const { data: WORKSPACE_DATA } = useKanbanWorkspaces();
+  const { data: BOARD_ROLE } = useKanbanBoardRole();
+
+  // Incorrect
+  const { data: workspaceData } = useKanbanWorkspaces();
+  const workspacesQuery = useKanbanWorkspaces();
+  const workspaceData = workspacesQuery.data;
+  ```
+
 - Name every `interface` with an `I` prefix and every `type` alias with a `T` prefix, followed by a PascalCase name. This applies to exported and non-exported declarations alike.
 - Name component files in `PascalCase` matching the exported component name (for example `ResultGrid.tsx` exporting `ResultGrid`). This applies everywhere, including files inside `batches/` folders. Do not use kebab-case for component files.
 
