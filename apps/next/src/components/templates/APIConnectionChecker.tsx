@@ -7,6 +7,7 @@ import { FC, ReactElement, useEffect, useState } from "react";
 import { ExampleA } from "@/src/components/elements/example/A/ExampleA";
 import { clientEnv } from "@/src/environments/env.client";
 import { useModal } from "@/src/hooks/useModal";
+import { twm } from "@/src/libs/twm";
 
 // ------------------------------------------------------------------
 const ENVIRONMENT_DATA_VARIABLES = ["NEXT_PUBLIC_BASE_API_URL"];
@@ -76,10 +77,10 @@ export const APIConnectionChecker: FC = (): ReactElement => {
                 key={dt}
               >
                 <div
-                  className={[
+                  className={twm(
                     "flex min-h-8 min-w-8 items-center justify-center rounded-full text-white",
                     connection[i] ? "bg-green-500" : "bg-red-500",
-                  ].join(" ")}
+                  )}
                 >
                   {connection[i] ? <Check size={18} /> : <X size={18} />}
                 </div>

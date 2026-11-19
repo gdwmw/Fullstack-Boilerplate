@@ -1,8 +1,7 @@
-import type { Context } from "elysia";
-
-import { EXAMPLE_WEBSOCKET_CHANNEL } from "@repo/constants";
-import { IWebsocketMessage } from "@repo/types";
+import { EXAMPLE_WEBSOCKET_CHANNELS } from "@repo/constants";
+import { IWebsocketMessage, IWebsocketMessageMeta } from "@repo/types";
 import { exampleWebsocketMessage } from "@repo/utils";
+import { Context } from "elysia";
 
 let ws: Context["server"] = null;
 
@@ -12,21 +11,28 @@ export const setWebsocketContext = (server: Context["server"]) => {
 
 // ------------------------------------------------------------------
 
-export const dndWebsocketPublisher = <T>(props: IWebsocketMessage<T>) => {
-  let channel: string;
-
-  switch (props.resource) {
-    case "W":
-      channel = EXAMPLE_WEBSOCKET_CHANNEL.A(props.targetId);
-      break;
-    case "X":
-      channel = EXAMPLE_WEBSOCKET_CHANNEL.B(props.targetId);
-      break;
-    case "Y":
-    case "Z":
-      channel = EXAMPLE_WEBSOCKET_CHANNEL.C(props.targetId);
-      break;
-  }
-
-  ws?.publish(channel, exampleWebsocketMessage(props));
+export const websocketPublisher = {
+  example: {
+    A: <T>(props: { resource: "W" } & Omit<IWebsocketMessage<T>, "resource">) => {
+      const channel = EXAMPLE_WEBSOCKET_CHANNELS.A(props.targetId);
+      ws?.publish(channel, exampleWebsocketMessage(props));
+    },
+    B: <T>(props: { resource: "X" } & Omit<IWebsocketMessage<T>, "resource">) => {
+      const channel = EXAMPLE_WEBSOCKET_CHANNELS.B(props.targetId);
+      ws?.publish(channel, exampleWebsocketMessage(props));
+    },
+    C: <T>(props: { resource: "Y" | "Z" } & Omit<IWebsocketMessage<T>, "resource">) => {
+      const channel = EXAMPLE_WEBSOCKET_CHANNELS.C(props.targetId);
+      ws?.publish(channel, exampleWebsocketMessage(props));
+    },
+    receiver: <T>(
+      props: { meta: { isReceiver: true; senderClientId: string | undefined } & Pick<IWebsocketMessageMeta, "optimisticId"> } & Omit<
+        IWebsocketMessage<T>,
+        "meta" | "targetId"
+      >,
+      channel: string,
+    ) => {
+      ws?.publish(channel, exampleWebsocketMessage(props as IWebsocketMessage<T>));
+    },
+  },
 };

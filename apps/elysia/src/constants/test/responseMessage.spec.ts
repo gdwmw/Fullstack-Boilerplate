@@ -24,6 +24,10 @@ describe("responseMessage", () => {
       expect(msg.expired).toBe("user is expired");
     });
 
+    it("should return correct forbidden message", () => {
+      expect(msg.forbidden).toBe("user access forbidden");
+    });
+
     it("should return correct invalid message", () => {
       expect(msg.invalid).toBe("user is invalid");
     });
@@ -97,7 +101,19 @@ describe("responseMessage", () => {
     const msg = responseMessage("Email");
 
     it("should return object with all expected keys", () => {
-      const expectedKeys = ["alreadyExists", "created", "deleted", "expired", "invalid", "notFound", "required", "retrieved", "success", "updated"];
+      const expectedKeys = [
+        "alreadyExists",
+        "created",
+        "deleted",
+        "expired",
+        "forbidden",
+        "invalid",
+        "notFound",
+        "required",
+        "retrieved",
+        "success",
+        "updated",
+      ];
       expect(Object.keys(msg).sort()).toEqual(expectedKeys.sort());
     });
 

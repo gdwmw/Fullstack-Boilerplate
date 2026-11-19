@@ -7,6 +7,7 @@ import "../environments/env.server";
 import { NextAuthProvider } from "../libs/providers/NextAuthProvider";
 import { NextThemesProvider } from "../libs/providers/NextThemesProvider";
 import { ReactQueryProvider } from "../libs/providers/ReactQueryProvider";
+import { twm } from "../libs/twm";
 import { geistMono, geistSans, inter, roboto } from "./fonts";
 import "./globals.css";
 
@@ -32,13 +33,7 @@ type T = Readonly<PropsWithChildren>;
 const HomeLayout: FC<T> = (props): ReactElement => (
   <html lang="en" suppressHydrationWarning>
     <body
-      className={[
-        geistSans.variable,
-        geistMono.variable,
-        inter.variable,
-        roboto.variable,
-        "font-inter bg-gray-100 antialiased dark:bg-gray-900",
-      ].join(" ")}
+      className={twm(geistSans.variable, geistMono.variable, inter.variable, roboto.variable, "font-inter bg-gray-100 antialiased dark:bg-gray-900")}
     >
       <NextThemesProvider>
         <ReactQueryProvider>

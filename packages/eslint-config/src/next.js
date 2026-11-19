@@ -49,12 +49,20 @@ export const nextConfig = defineConfig([
       "no-restricted-syntax": [
         "warn",
         {
-          message: 'avoid template literal for className; use twm(...) or className={[...].join(" ")}',
+          message: "avoid template literal for className; use twm(...)",
           selector: 'JSXAttribute[name.name="className"] > JSXExpressionContainer > TemplateLiteral',
         },
         {
-          message: 'avoid template literal for className; use twm(...) or className={[...].join(" ")}',
+          message: "avoid template literal for className; use twm(...)",
           selector: 'Property[key.name="className"] > TemplateLiteral',
+        },
+        {
+          message: 'avoid .join(" ") for className; use twm(...)',
+          selector: 'JSXAttribute[name.name="className"] > JSXExpressionContainer > CallExpression[callee.property.name="join"]',
+        },
+        {
+          message: 'avoid .join(" ") for className; use twm(...)',
+          selector: 'Property[key.name="className"] > CallExpression[callee.property.name="join"]',
         },
       ],
       "react/display-name": "warn",

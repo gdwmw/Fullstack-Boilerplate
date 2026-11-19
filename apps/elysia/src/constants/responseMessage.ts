@@ -7,6 +7,7 @@ export const responseMessage = (label: string) => {
     created: `${result} created successfully`,
     deleted: `${result} deleted successfully`,
     expired: `${result} is expired`,
+    forbidden: `${result} access forbidden`,
     invalid: `${result} is invalid`,
     notFound: `${result} not found`,
     required: `${result} is required`,

@@ -173,19 +173,20 @@
 
 - Text written directly as a JSX `title` attribute value must be in Title Case: the first letter of every word is uppercase (`title="Delete Item"`, not `title="Delete item"` or `title="delete item"`).
 - When creating or modifying UI with Tailwind CSS, style only the base appearance. Do not add `transition*` utilities or responsive variants such as `sm:`, `md:`, or `lg:`. Leave existing ones untouched unless asked.
-- When a `className` is composed from multiple parts or dynamic values, build it as an array and call `.join(" ")`. Do not use template literals with `${}` for `className`. A fully static class string stays a plain string.
+- When a `className` is composed from multiple parts or dynamic values, use `twm(...)` from `@/src/libs/twm` (clsx + tailwind-merge). Pass conditional classes with `&&` or ternaries; falsy values are dropped automatically and conflicting Tailwind classes are resolved by `twMerge`. Do not use template literals with `${}` or `[...].join(" ")` for `className`. A fully static class string stays a plain string.
 
   ```tsx
   // Correct
   <div
-    className={[
+    className={twm(
       "flex w-16 shrink-0 items-center justify-center rounded-full px-2 py-0.5 text-[10px] font-semibold text-white",
       MEMBER_ROLE_COLOR[dt.role.toLocaleLowerCase()],
-    ].join(" ")}
+    )}
   />
 
   // Incorrect
   <div className={`flex w-16 shrink-0 ${MEMBER_ROLE_COLOR[dt.role.toLocaleLowerCase()]}`} />
+  <div className={["flex w-16 shrink-0", MEMBER_ROLE_COLOR[dt.role]].join(" ")} />
   ```
 
 - Do not add `aria-*` attributes. Prefer appropriate semantic HTML elements and follow existing UI patterns.

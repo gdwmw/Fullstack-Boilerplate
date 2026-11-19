@@ -7,6 +7,7 @@ import { ChangeThemeButton } from "@/src/components/templates/ChangeThemeButton"
 import { Container } from "@/src/components/templates/Container";
 import { Header } from "@/src/components/templates/Header";
 import { LogoutButton } from "@/src/components/templates/LogoutButton";
+import { twm } from "@/src/libs/twm";
 import { getCookie } from "@/src/utils/server/cookies";
 import { getSession } from "@/src/utils/server/session";
 
@@ -23,7 +24,7 @@ export const HomeModules: FC = async (): Promise<ReactElement> => {
           label="Home Page"
         />
 
-        <nav className={["w-full", session ? "space-y-3" : "flex gap-3"].join(" ")}>
+        <nav className={twm("w-full", session ? "space-y-3" : "flex gap-3")}>
           {session ? (
             <div className="flex flex-wrap justify-center gap-3">
               <ChangeThemeButton className="min-w-16" color="blue" cookie={themeCookie?.value ?? ""} size="sm" variant="outline" />

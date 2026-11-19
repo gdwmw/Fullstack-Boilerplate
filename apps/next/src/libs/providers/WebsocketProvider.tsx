@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import { createContext, FC, PropsWithChildren, ReactElement, useCallback, useContext, useEffect, useRef, useState } from "react";
 
 import { clientEnv } from "@/src/environments/env.client";
@@ -17,8 +18,10 @@ const WebsocketContext = createContext<IWebsocketContext | null>(null);
 type T = Readonly<PropsWithChildren>;
 
 export const WebsocketProvider: FC<T> = (props): ReactElement => {
+  const session = useSession();
   const [ws, setWs] = useState<null | WebSocket>(null);
-  const [clientId] = useState(() => crypto.randomUUID());
+  const [uuid] = useState(() => crypto.randomUUID());
+  const clientId = [session.data?.user?.id, uuid].join("-");
   const connectionRef = useRef<null | WebSocket>(null);
   const subscriptionsRef = useRef(new Set<string>());
 

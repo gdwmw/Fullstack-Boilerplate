@@ -2,6 +2,7 @@ export type TExampleWebsocketResource = "W" | "X" | "Y" | "Z";
 export type TExampleWebsocketType = "create" | "delete" | "update";
 
 export interface IWebsocketMessageMeta {
+  isReceiver?: boolean;
   optimisticId?: string;
   senderClientId?: string;
 }

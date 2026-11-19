@@ -28,7 +28,7 @@ export const Container: FC<I> = ({ children, className, href, label, ...props })
       {href && (
         <Link
           className={ExampleATWM({
-            className: ["absolute top-5 left-5 font-semibold", className?.link ?? ""].join(" "),
+            className: twm("absolute top-5 left-5 font-semibold", className?.link),
             color: "black",
             size: "sm",
             variant: "ghost",
